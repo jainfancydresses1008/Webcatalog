@@ -1,45 +1,33 @@
-generator client {
-  provider = "prisma-client-js"
-}
-
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-}
-
+generator client { provider = "prisma-client-js" }
+datasource db { provider = "postgresql" url = env("DATABASE_URL") }
 model Dress {
-  id            Int          @id @default(autoincrement())
-  category      String
+  id Int @id @default(autoincrement())
+  category String
   characterName String
-  description   String
-  isActive      Boolean      @default(true)
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
-  sizes         DressSize[]
-  images        DressImage[]
-
+  description String
+  isActive Boolean @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  sizes DressSize[]
+  images DressImage[]
   @@index([category])
   @@index([characterName])
 }
-
 model DressSize {
-  id      Int   @id @default(autoincrement())
-  size    String
-  price   Int
+  id Int @id @default(autoincrement())
+  size String
+  price Int
   dressId Int
-  dress   Dress @relation(fields: [dressId], references: [id], onDelete: Cascade)
-
+  dress Dress @relation(fields: [dressId], references: [id], onDelete: Cascade)
   @@index([dressId])
 }
-
 model DressImage {
-  id       Int     @id @default(autoincrement())
-  url      String
-  altText  String?
-  isMain   Boolean @default(false)
-  sortOrder Int    @default(0)
-  dressId  Int
-  dress    Dress   @relation(fields: [dressId], references: [id], onDelete: Cascade)
-
+  id Int @id @default(autoincrement())
+  url String
+  altText String?
+  isMain Boolean @default(false)
+  sortOrder Int @default(0)
+  dressId Int
+  dress Dress @relation(fields: [dressId], references: [id], onDelete: Cascade)
   @@index([dressId])
 }

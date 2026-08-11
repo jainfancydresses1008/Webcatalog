@@ -1,5 +1,5 @@
 {
-  "name": "dress-catalog-next",
+  "name": "dress-catalog-next-redesigned",
   "version": "1.0.0",
   "private": true,
   "scripts": {
@@ -9,16 +9,15 @@
     "lint": "next lint",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
-    "prisma:studio": "prisma studio",
-    "prisma:seed": "tsx prisma/seed.ts"
+    "prisma:seed": "tsx prisma/seed.ts",
+    "prisma:studio": "prisma studio"
   },
   "dependencies": {
     "@prisma/client": "^6.14.0",
     "cloudinary": "^2.5.1",
     "next": "^15.5.0",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0",
-    "zod": "^3.24.1"
+    "react-dom": "^19.1.0"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
@@ -33,7 +32,5 @@
     "tsx": "^4.19.2",
     "typescript": "^5.7.2"
   },
-  "prisma": {
-    "seed": "tsx prisma/seed.ts"
-  }
+  "prisma": { "seed": "tsx prisma/seed.ts" }
 }
