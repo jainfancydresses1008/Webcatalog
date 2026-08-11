@@ -33,7 +33,7 @@ export default function DressCatalogClient({
     [dresses],
   );
 
-  const shopName = process.env.NEXT_PUBLIC_SHOP_NAME || "Akshaya Dress Studio";
+  const shopName = process.env.NEXT_PUBLIC_SHOP_NAME || "Jain Fancy Dresses";
 
   const tagline =
     process.env.NEXT_PUBLIC_SHOP_TAGLINE ||
