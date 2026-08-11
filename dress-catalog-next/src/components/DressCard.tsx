@@ -4,7 +4,7 @@ import Image from 'next/image';
 import type { DressDto } from '@/lib/dress-types';
 
 type DressCardProps = {
-  dress: DressDto[];
+  dress: DressDto;
   selectedSize: string;
   selectedPrice: number;
   onSizeChange: (size: string) => void;
