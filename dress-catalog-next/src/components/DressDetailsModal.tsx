@@ -120,7 +120,7 @@ export default function DressDetailsModal({
                 Contact Seller
               </h3>
               <p className="mt-1 text-sm text-slate-600">
-                Enter your contact number before sending inquiry.
+                Seller constct number is +91 8826163522.
               </p>
 
               <div className="mt-4 grid grid-cols-3 gap-3 text-center font-semibold">

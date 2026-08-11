@@ -360,7 +360,8 @@ Price: ₹${selected?.price ?? ''}`;
 
               <div className="mt-3 space-y-2 text-sm text-slate-500">
                 <p>
-                  Contact us directly using the buttons available on each dress.
+                  Contact us directly using the buttons available on each dress. 
+                  Alternatively you can call on + 918826163522.
                 </p>
 
                 <div className="space-y-1">
