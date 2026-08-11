@@ -8,29 +8,24 @@ cloudinary.config({
 });
 
 export async function uploadImageToCloudinary(file: File): Promise<string> {
-  const buffer = Buffer.from(await file.arrayBuffer());
+  const bytes = await file.arrayBuffer();
+  const buffer = Buffer.from(bytes);
 
   return new Promise((resolve, reject) => {
     const uploadStream = cloudinary.uploader.upload_stream(
-      {
-        folder: 'dress-catalog',
-        resource_type: 'image',
-      },
+      { folder: 'dress-catalog', resource_type: 'image' },
       (error, result) => {
         if (error) {
           reject(error);
           return;
         }
-
         if (!result?.secure_url) {
           reject(new Error('Cloudinary upload did not return a secure URL.'));
           return;
         }
-
         resolve(result.secure_url);
       }
     );
-
     uploadStream.end(buffer);
   });
 }
@@ -38,22 +33,11 @@ export async function uploadImageToCloudinary(file: File): Promise<string> {
 export function getCloudinaryPublicIdFromUrl(url: string): string | null {
   try {
     const parsed = new URL(url);
-
-    if (!parsed.hostname.includes('res.cloudinary.com')) {
-      return null;
-    }
-
+    if (!parsed.hostname.includes('res.cloudinary.com')) return null;
     const uploadIndex = parsed.pathname.indexOf('/upload/');
-    if (uploadIndex === -1) {
-      return null;
-    }
-
+    if (uploadIndex === -1) return null;
     let pathAfterUpload = parsed.pathname.slice(uploadIndex + '/upload/'.length);
-
-    // Remove version segment, for example v1234567890/
     pathAfterUpload = pathAfterUpload.replace(/^v\d+\//, '');
-
-    // Remove file extension. Cloudinary public ids do not include extension.
     return pathAfterUpload.replace(/\.[^/.]+$/, '');
   } catch {
     return null;
@@ -62,10 +46,6 @@ export function getCloudinaryPublicIdFromUrl(url: string): string | null {
 
 export async function deleteImageFromCloudinary(url: string): Promise<void> {
   const publicId = getCloudinaryPublicIdFromUrl(url);
-
-  if (!publicId) {
-    return;
-  }
-
+  if (!publicId) return;
   await cloudinary.uploader.destroy(publicId, { resource_type: 'image' });
 }
