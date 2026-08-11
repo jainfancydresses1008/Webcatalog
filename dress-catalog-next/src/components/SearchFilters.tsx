@@ -3,19 +3,15 @@ type Props = {
   categories: string[];
   searchText: string;
   selectedCategory: string;
-  senderContact: string;
   onSearchTextChange: (v: string) => void;
   onSelectedCategoryChange: (v: string) => void;
-  onSenderContactChange: (v: string) => void;
 };
 export default function SearchFilters({
   categories,
   searchText,
   selectedCategory,
-  senderContact,
   onSearchTextChange,
   onSelectedCategoryChange,
-  onSenderContactChange,
 }: Props) {
   return (
     <section className="mb-8 rounded-3xl bg-white p-4 shadow-sm md:p-5">

@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { useMemo, useState } from 'react';
-import type { DressDto } from '@/lib/dress-types';
+import { useMemo, useState } from "react";
+import type { DressDto } from "@/lib/dress-types";
 
-import DressCard from './DressCard';
-import DressDetailsModal from './DressDetailsModal';
-import SearchFilters from './SearchFilters';
+import DressCard from "./DressCard";
+import DressDetailsModal from "./DressDetailsModal";
+import SearchFilters from "./SearchFilters";
 
 type Props = {
   dresses: DressDto[];
@@ -18,50 +18,43 @@ export default function DressCatalogClient({
   sellerPhone,
   sellerEmail,
 }: Props) {
-  const [searchText, setSearchText] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('All');
-  const [senderContact, setSenderContact] = useState('');
+  const [searchText, setSearchText] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedDress, setSelectedDress] = useState<DressDto | null>(null);
 
   const [selectedSizes, setSelectedSizes] = useState<Record<number, string>>(
     Object.fromEntries(
-      dresses.map((dress) => [
-        dress.id,
-        dress.sizes[0]?.size ?? '',
-      ])
-    )
+      dresses.map((dress) => [dress.id, dress.sizes[0]?.size ?? ""]),
+    ),
   );
 
   const categories = useMemo(
-    () => ['All', ...new Set(dresses.map((dress) => dress.category))],
-    [dresses]
+    () => ["All", ...new Set(dresses.map((dress) => dress.category))],
+    [dresses],
   );
 
-  const shopName =
-    process.env.NEXT_PUBLIC_SHOP_NAME || 'Akshaya Dress Studio';
+  const shopName = process.env.NEXT_PUBLIC_SHOP_NAME || "Akshaya Dress Studio";
 
   const tagline =
     process.env.NEXT_PUBLIC_SHOP_TAGLINE ||
-    'Beautiful costumes for every special occasion';
+    "Beautiful costumes for every special occasion";
 
   const filteredDresses = useMemo(() => {
     const search = searchText.trim().toLowerCase();
 
     return dresses.filter(
       (dress) =>
-        (selectedCategory === 'All' ||
-          dress.category === selectedCategory) &&
+        (selectedCategory === "All" || dress.category === selectedCategory) &&
         (dress.category.toLowerCase().includes(search) ||
           dress.characterName.toLowerCase().includes(search) ||
-          dress.description.toLowerCase().includes(search))
+          dress.description.toLowerCase().includes(search)),
     );
   }, [dresses, searchText, selectedCategory]);
 
   function selectedSizeFor(dress: DressDto) {
     return (
-      dress.sizes.find(
-        (size) => size.size === selectedSizes[dress.id]
-      ) ?? dress.sizes[0]
+      dress.sizes.find((size) => size.size === selectedSizes[dress.id]) ??
+      dress.sizes[0]
     );
   }
 
@@ -72,33 +65,32 @@ export default function DressCatalogClient({
     }));
   }
 
-  function links(dress: DressDto) {
-    const selected = selectedSizeFor(dress);
+function links(dress: DressDto) {
+  const selected = selectedSizeFor(dress);
 
-    const msg = encodeURIComponent(
-      `Hello, I am interested in this dress.
+  const message = `Hello, I am interested in this dress.
 
 Category: ${dress.category}
 Character Name: ${dress.characterName}
 Selected Size: ${selected?.size ?? ''}
-Price: ₹${selected?.price ?? ''}
-Sender Contact Number: ${senderContact || 'Not provided'}`
-    );
+Price: ₹${selected?.price ?? ''}`;
 
-    return {
-      whatsapp: `https://wa.me/${sellerPhone}?text=${msg}`,
+  const msg = encodeURIComponent(message);
 
-      email: `mailto:${sellerEmail}?subject=${encodeURIComponent(
-        `Dress Inquiry - ${dress.characterName}`
-      )}&body=${msg}`,
+  return {
+    whatsapp: `https://wa.me/${sellerPhone}?text=${msg}`,
 
-      sms: `sms:+${sellerPhone}?body=${msg}`,
-    };
-  }
+    email: `mailto:${sellerEmail}?subject=${encodeURIComponent(
+      `Dress Inquiry - ${dress.characterName}`
+    )}&body=${msg}`,
+
+    sms: `sms:+${sellerPhone}?body=${msg}`,
+  };
+}
+  
 
   return (
     <main className="min-h-screen bg-[#fff9fc] text-slate-900">
-
       {/* ================= HERO ================= */}
 
       <section className="relative overflow-hidden">
@@ -110,7 +102,6 @@ Sender Contact Number: ${senderContact || 'Not provided'}`
 
         <div className="relative mx-auto max-w-7xl px-4 pb-12 pt-10 md:px-8 md:pb-16 md:pt-16">
           <div className="max-w-5xl">
-
             {/* Hero text */}
 
             <div>
@@ -127,15 +118,13 @@ Sender Contact Number: ${senderContact || 'Not provided'}`
               </h1>
 
               <p className="mt-5 max-w-2xl text-base leading-7 text-slate-600 md:text-lg">
-                {tagline}. Explore our collection of costumes for
-                school events, cultural programs, parties, celebrations
-                and special occasions.
+                {tagline}. Explore our collection of costumes for school events,
+                cultural programs, parties, celebrations and special occasions.
               </p>
 
               {/* Quick stats */}
 
               <div className="mt-7 flex flex-wrap gap-3">
-
                 <div className="rounded-2xl border border-white bg-white/80 px-5 py-3 shadow-sm backdrop-blur">
                   <p className="text-xl font-black text-pink-600">
                     {dresses.length}+
@@ -165,10 +154,8 @@ Sender Contact Number: ${senderContact || 'Not provided'}`
                     Available
                   </p>
                 </div>
-
               </div>
             </div>
-
           </div>
         </div>
       </section>
@@ -179,7 +166,6 @@ Sender Contact Number: ${senderContact || 'Not provided'}`
         id="catalog"
         className="mx-auto max-w-7xl px-4 py-10 md:px-8 md:py-14"
       >
-
         {/* Section heading */}
 
         <div className="mb-7 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
@@ -205,17 +191,13 @@ Sender Contact Number: ${senderContact || 'Not provided'}`
         {/* Search and filters */}
 
         <div className="mb-8 rounded-3xl border border-pink-100 bg-white p-4 shadow-sm md:p-5">
-
 <SearchFilters
   categories={categories}
   searchText={searchText}
   selectedCategory={selectedCategory}
-  senderContact={senderContact}
   onSearchTextChange={setSearchText}
   onSelectedCategoryChange={setSelectedCategory}
-  onSenderContactChange={setSenderContact}
 />
-
         </div>
 
         {/* Results */}
@@ -236,7 +218,6 @@ Sender Contact Number: ${senderContact || 'Not provided'}`
 
         {filteredDresses.length === 0 ? (
           <div className="rounded-[2rem] border border-dashed border-pink-200 bg-white px-6 py-16 text-center shadow-sm">
-
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-pink-50 text-3xl">
               🔍
             </div>
@@ -252,18 +233,16 @@ Sender Contact Number: ${senderContact || 'Not provided'}`
             <button
               type="button"
               onClick={() => {
-                setSearchText('');
-                setSelectedCategory('All');
+                setSearchText("");
+                setSelectedCategory("All");
               }}
               className="mt-5 rounded-full bg-pink-600 px-5 py-2.5 text-sm font-bold text-white shadow-md transition hover:bg-pink-700"
             >
               Clear Filters
             </button>
-
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
-
             {filteredDresses.map((dress) => {
               const selected = selectedSizeFor(dress);
 
@@ -274,18 +253,15 @@ Sender Contact Number: ${senderContact || 'Not provided'}`
                 >
                   <DressCard
                     dress={dress}
-                    selectedSize={selected?.size ?? ''}
+                    selectedSize={selected?.size ?? ""}
                     selectedPrice={selected?.price ?? 0}
-                    onSizeChange={(size) =>
-                      updateSize(dress.id, size)
-                    }
+                    onSizeChange={(size) => updateSize(dress.id, size)}
                     onView={() => setSelectedDress(dress)}
                     contactLinks={links(dress)}
                   />
                 </div>
               );
             })}
-
           </div>
         )}
       </section>
@@ -294,9 +270,7 @@ Sender Contact Number: ${senderContact || 'Not provided'}`
 
       <section className="px-4 pb-12 md:px-8">
         <div className="mx-auto max-w-7xl overflow-hidden rounded-[2rem] bg-gradient-to-r from-pink-600 via-fuchsia-600 to-purple-700 px-6 py-10 text-white shadow-xl md:px-12">
-
           <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-
             <div>
               <p className="text-sm font-bold uppercase tracking-[0.2em] text-pink-100">
                 Need help choosing?
@@ -307,8 +281,8 @@ Sender Contact Number: ${senderContact || 'Not provided'}`
               </h2>
 
               <p className="mt-2 max-w-2xl text-sm leading-6 text-pink-50 md:text-base">
-                Select a dress and contact us directly through WhatsApp,
-                email or SMS.
+                Select a dress and contact us directly through WhatsApp, email
+                or SMS.
               </p>
             </div>
 
@@ -318,57 +292,44 @@ Sender Contact Number: ${senderContact || 'Not provided'}`
             >
               Contact Us →
             </a>
-
           </div>
         </div>
       </section>
 
       {/* ================= FOOTER ================= */}
 
-      <footer
-        id="contact"
-        className="border-t border-pink-100 bg-white"
-      >
+      <footer id="contact" className="border-t border-pink-100 bg-white">
         <div className="mx-auto max-w-7xl px-4 py-10 md:px-8">
-
           <div className="grid gap-8 md:grid-cols-3">
-
             {/* Brand */}
 
             <div>
               <div className="flex items-center gap-3">
-
                 <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-pink-500 to-purple-600 text-xl shadow-md">
                   👗
                 </div>
 
                 <div>
-                  <p className="font-black text-slate-950">
-                    {shopName}
-                  </p>
+                  <p className="font-black text-slate-950">{shopName}</p>
 
                   <p className="text-xs text-slate-500">
                     Fancy Dress Collection
                   </p>
                 </div>
-
               </div>
 
               <p className="mt-4 max-w-sm text-sm leading-6 text-slate-500">
-                Beautiful costumes for school events, parties,
-                celebrations and special occasions.
+                Beautiful costumes for school events, parties, celebrations and
+                special occasions.
               </p>
             </div>
 
             {/* Browse */}
 
             <div>
-              <h3 className="font-black text-slate-900">
-                Browse
-              </h3>
+              <h3 className="font-black text-slate-900">Browse</h3>
 
               <div className="mt-3 space-y-2 text-sm text-slate-500">
-
                 <a
                   href="#catalog"
                   className="block transition hover:text-pink-600"
@@ -389,22 +350,17 @@ Sender Contact Number: ${senderContact || 'Not provided'}`
                 >
                   Contact Us
                 </a>
-
               </div>
             </div>
 
             {/* Contact */}
 
             <div>
-              <h3 className="font-black text-slate-900">
-                Contact
-              </h3>
+              <h3 className="font-black text-slate-900">Contact</h3>
 
               <div className="mt-3 space-y-2 text-sm text-slate-500">
-
                 <p>
-                  Contact us directly using the buttons
-                  available on each dress.
+                  Contact us directly using the buttons available on each dress.
                 </p>
 
                 <div className="space-y-1">
@@ -416,37 +372,29 @@ Sender Contact Number: ${senderContact || 'Not provided'}`
                 <p className="pt-2 text-xs text-slate-400">
                   Quick contact options available with every costume.
                 </p>
-
               </div>
             </div>
-
           </div>
 
           <div className="mt-8 border-t border-slate-100 pt-5 text-center text-xs text-slate-400">
             © {new Date().getFullYear()} {shopName}. All rights reserved.
           </div>
-
         </div>
       </footer>
 
       {/* ================= MODAL ================= */}
 
-{selectedDress && (
-  <DressDetailsModal
-    dress={selectedDress}
-    selectedSize={
-      selectedSizeFor(selectedDress)?.size ?? ''
-    }
-    senderContact={senderContact}
-    onSizeChange={(size) =>
-      updateSize(selectedDress.id, size)
-    }
-    onSenderContactChange={setSenderContact}
-    onClose={() => setSelectedDress(null)}
-    contactLinks={links(selectedDress)}
-  />
-)}
-
+      {selectedDress && (
+        <DressDetailsModal
+          dress={selectedDress}
+          selectedSize={selectedSizeFor(selectedDress)?.size ?? ""}
+          
+          onSizeChange={(size) => updateSize(selectedDress.id, size)}
+          
+          onClose={() => setSelectedDress(null)}
+          contactLinks={links(selectedDress)}
+        />
+      )}
     </main>
   );
 }
