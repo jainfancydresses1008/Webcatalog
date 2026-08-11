@@ -100,19 +100,17 @@ Sender Contact Number: ${senderContact || 'Not provided'}`
     <main className="min-h-screen bg-[#fff9fc] text-slate-900">
 
       {/* ================= HERO ================= */}
-
       <section className="relative overflow-hidden">
+        {/* Decorative background */}
         <div className="absolute inset-0 bg-gradient-to-br from-pink-100 via-white to-purple-100" />
 
         <div className="absolute -left-20 top-10 h-72 w-72 rounded-full bg-pink-300/20 blur-3xl" />
-
         <div className="absolute -right-20 bottom-0 h-80 w-80 rounded-full bg-purple-300/20 blur-3xl" />
 
         <div className="relative mx-auto max-w-7xl px-4 pb-12 pt-10 md:px-8 md:pb-16 md:pt-16">
-          <div className="max-w-5xl">
+          <div className="grid items-center gap-10 md:grid-cols-[1.3fr_0.7fr]">
 
             {/* Hero text */}
-
             <div>
               <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-pink-200 bg-white/80 px-4 py-2 text-sm font-bold text-pink-700 shadow-sm backdrop-blur">
                 <span>✨</span>
@@ -133,14 +131,11 @@ Sender Contact Number: ${senderContact || 'Not provided'}`
               </p>
 
               {/* Quick stats */}
-
               <div className="mt-7 flex flex-wrap gap-3">
-
                 <div className="rounded-2xl border border-white bg-white/80 px-5 py-3 shadow-sm backdrop-blur">
                   <p className="text-xl font-black text-pink-600">
                     {dresses.length}+
                   </p>
-
                   <p className="text-xs font-semibold text-slate-500">
                     Costumes
                   </p>
@@ -150,7 +145,6 @@ Sender Contact Number: ${senderContact || 'Not provided'}`
                   <p className="text-xl font-black text-purple-600">
                     {categories.length - 1}
                   </p>
-
                   <p className="text-xs font-semibold text-slate-500">
                     Categories
                   </p>
@@ -160,12 +154,37 @@ Sender Contact Number: ${senderContact || 'Not provided'}`
                   <p className="text-xl font-black text-fuchsia-600">
                     All Sizes
                   </p>
-
                   <p className="text-xs font-semibold text-slate-500">
                     Available
                   </p>
                 </div>
+              </div>
+            </div>
 
+            {/* Decorative card */}
+            <div className="hidden md:block">
+              <div className="relative mx-auto max-w-sm">
+                <div className="absolute inset-0 rotate-6 rounded-[2rem] bg-gradient-to-br from-pink-400 to-purple-500 opacity-20 blur-sm" />
+
+                <div className="relative overflow-hidden rounded-[2rem] border border-white bg-white p-6 shadow-2xl">
+                  <div className="rounded-[1.5rem] bg-gradient-to-br from-pink-50 via-white to-purple-50 p-8 text-center">
+                    <div className="mx-auto mb-5 flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-pink-500 to-purple-600 text-5xl shadow-lg">
+                      👗
+                    </div>
+
+                    <p className="text-xs font-bold uppercase tracking-[0.25em] text-pink-500">
+                      Dress Studio
+                    </p>
+
+                    <h2 className="mt-2 text-2xl font-black text-slate-900">
+                      {shopName}
+                    </h2>
+
+                    <p className="mt-2 text-sm leading-6 text-slate-500">
+                      Find a costume your child will love wearing.
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -174,14 +193,12 @@ Sender Contact Number: ${senderContact || 'Not provided'}`
       </section>
 
       {/* ================= CATALOG ================= */}
-
       <section
         id="catalog"
         className="mx-auto max-w-7xl px-4 py-10 md:px-8 md:py-14"
       >
 
         {/* Section heading */}
-
         <div className="mb-7 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="text-sm font-bold uppercase tracking-[0.2em] text-pink-600">
@@ -203,23 +220,43 @@ Sender Contact Number: ${senderContact || 'Not provided'}`
         </div>
 
         {/* Search and filters */}
-
         <div className="mb-8 rounded-3xl border border-pink-100 bg-white p-4 shadow-sm md:p-5">
+          <SearchFilters
+            categories={categories}
+            searchText={searchText}
+            selectedCategory={selectedCategory}
+            senderContact={senderContact}
+            onSearchTextChange={setSearchText}
+            onSelectedCategoryChange={setSelectedCategory}
+            onSenderContactChange={setSenderContact}
+          />
 
-<SearchFilters
-  categories={categories}
-  searchText={searchText}
-  selectedCategory={selectedCategory}
-  senderContact={senderContact}
-  onSearchTextChange={setSearchText}
-  onSelectedCategoryChange={setSelectedCategory}
-  onSenderContactChange={setSenderContact}
-/>
+          {/* Category pills */}
+          <div className="mt-5 overflow-x-auto pb-1">
+            <div className="flex min-w-max gap-2">
+              {categories.map((category) => {
+                const active = selectedCategory === category;
 
+                return (
+                  <button
+                    key={category}
+                    type="button"
+                    onClick={() => setSelectedCategory(category)}
+                    className={`rounded-full px-4 py-2 text-sm font-bold transition-all ${
+                      active
+                        ? 'bg-gradient-to-r from-pink-600 to-purple-600 text-white shadow-md'
+                        : 'bg-slate-50 text-slate-600 hover:bg-pink-50 hover:text-pink-600'
+                    }`}
+                  >
+                    {category}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         </div>
 
         {/* Results */}
-
         <div className="mb-5 flex items-center justify-between">
           <div>
             <h3 className="text-xl font-black text-slate-950">
@@ -233,10 +270,8 @@ Sender Contact Number: ${senderContact || 'Not provided'}`
         </div>
 
         {/* Empty state */}
-
         {filteredDresses.length === 0 ? (
           <div className="rounded-[2rem] border border-dashed border-pink-200 bg-white px-6 py-16 text-center shadow-sm">
-
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-pink-50 text-3xl">
               🔍
             </div>
@@ -259,11 +294,9 @@ Sender Contact Number: ${senderContact || 'Not provided'}`
             >
               Clear Filters
             </button>
-
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
-
             {filteredDresses.map((dress) => {
               const selected = selectedSizeFor(dress);
 
@@ -285,18 +318,14 @@ Sender Contact Number: ${senderContact || 'Not provided'}`
                 </div>
               );
             })}
-
           </div>
         )}
       </section>
 
       {/* ================= CONTACT CTA ================= */}
-
       <section className="px-4 pb-12 md:px-8">
         <div className="mx-auto max-w-7xl overflow-hidden rounded-[2rem] bg-gradient-to-r from-pink-600 via-fuchsia-600 to-purple-700 px-6 py-10 text-white shadow-xl md:px-12">
-
           <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-
             <div>
               <p className="text-sm font-bold uppercase tracking-[0.2em] text-pink-100">
                 Need help choosing?
@@ -318,26 +347,20 @@ Sender Contact Number: ${senderContact || 'Not provided'}`
             >
               Contact Us →
             </a>
-
           </div>
         </div>
       </section>
 
       {/* ================= FOOTER ================= */}
-
       <footer
         id="contact"
         className="border-t border-pink-100 bg-white"
       >
         <div className="mx-auto max-w-7xl px-4 py-10 md:px-8">
-
           <div className="grid gap-8 md:grid-cols-3">
-
-            {/* Brand */}
 
             <div>
               <div className="flex items-center gap-3">
-
                 <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-pink-500 to-purple-600 text-xl shadow-md">
                   👗
                 </div>
@@ -351,7 +374,6 @@ Sender Contact Number: ${senderContact || 'Not provided'}`
                     Fancy Dress Collection
                   </p>
                 </div>
-
               </div>
 
               <p className="mt-4 max-w-sm text-sm leading-6 text-slate-500">
@@ -360,15 +382,12 @@ Sender Contact Number: ${senderContact || 'Not provided'}`
               </p>
             </div>
 
-            {/* Browse */}
-
             <div>
               <h3 className="font-black text-slate-900">
                 Browse
               </h3>
 
               <div className="mt-3 space-y-2 text-sm text-slate-500">
-
                 <a
                   href="#catalog"
                   className="block transition hover:text-pink-600"
@@ -389,11 +408,8 @@ Sender Contact Number: ${senderContact || 'Not provided'}`
                 >
                   Contact Us
                 </a>
-
               </div>
             </div>
-
-            {/* Contact */}
 
             <div>
               <h3 className="font-black text-slate-900">
@@ -401,22 +417,17 @@ Sender Contact Number: ${senderContact || 'Not provided'}`
               </h3>
 
               <div className="mt-3 space-y-2 text-sm text-slate-500">
-
                 <p>
-                  Contact us directly using the buttons
-                  available on each dress.
+                  📞 +{sellerPhone}
                 </p>
 
-                <div className="space-y-1">
-                  <p>✅ WhatsApp</p>
-                  <p>✅ Email</p>
-                  <p>✅ SMS</p>
-                </div>
+                <p className="break-all">
+                  ✉️ {sellerEmail}
+                </p>
 
                 <p className="pt-2 text-xs text-slate-400">
-                  Quick contact options available with every costume.
+                  Available for dress inquiries.
                 </p>
-
               </div>
             </div>
 
@@ -425,28 +436,25 @@ Sender Contact Number: ${senderContact || 'Not provided'}`
           <div className="mt-8 border-t border-slate-100 pt-5 text-center text-xs text-slate-400">
             © {new Date().getFullYear()} {shopName}. All rights reserved.
           </div>
-
         </div>
       </footer>
 
       {/* ================= MODAL ================= */}
-
-{selectedDress && (
-  <DressDetailsModal
-    dress={selectedDress}
-    selectedSize={
-      selectedSizeFor(selectedDress)?.size ?? ''
-    }
-    senderContact={senderContact}
-    onSizeChange={(size) =>
-      updateSize(selectedDress.id, size)
-    }
-    onSenderContactChange={setSenderContact}
-    onClose={() => setSelectedDress(null)}
-    contactLinks={links(selectedDress)}
-  />
-)}
-
+      {selectedDress && (
+        <DressDetailsModal
+          dress={selectedDress}
+          selectedSize={
+            selectedSizeFor(selectedDress)?.size ?? ''
+          }
+          senderContact={senderContact}
+          onSizeChange={(size) =>
+            updateSize(selectedDress.id, size)
+          }
+          onSenderContactChange={setSenderContact}
+          onClose={() => setSelectedDress(null)}
+          contactLinks={links(selectedDress)}
+        />
+      )}
     </main>
   );
 }
