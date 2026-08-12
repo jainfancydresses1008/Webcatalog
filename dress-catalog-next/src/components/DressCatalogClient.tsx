@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useMemo, useState } from "react";
 import type { DressDto } from "@/lib/dress-types";
 
@@ -33,7 +34,8 @@ export default function DressCatalogClient({
     [dresses],
   );
 
-  const shopName = process.env.NEXT_PUBLIC_SHOP_NAME || "Jain Fancy Dresses";
+  const shopName =
+    process.env.NEXT_PUBLIC_SHOP_NAME || "Jain Fancy Dresses";
 
   const tagline =
     process.env.NEXT_PUBLIC_SHOP_TAGLINE ||
@@ -79,84 +81,119 @@ Price: ₹${selected?.price ?? ""}`;
 
     return {
       whatsapp: `https://wa.me/${sellerPhone}?text=${msg}`,
-
       email: `mailto:${sellerEmail}?subject=${encodeURIComponent(
         `Dress Inquiry - ${dress.characterName}`,
       )}&body=${msg}`,
-
       sms: `sms:+${sellerPhone}?body=${msg}`,
     };
   }
 
   return (
-    <main className="min-h-screen bg-[#fff9fc] text-slate-900">
+    <main className="min-h-screen overflow-hidden bg-[#fff9fc] text-slate-900">
       {/* ================= HERO ================= */}
-
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-pink-100 via-white to-purple-100" />
 
-        <div className="absolute -left-20 top-10 h-72 w-72 rounded-full bg-pink-300/20 blur-3xl" />
+        <div className="absolute -left-24 top-20 h-72 w-72 rounded-full bg-pink-300/25 blur-3xl" />
+        <div className="absolute -right-24 bottom-0 h-96 w-96 rounded-full bg-purple-300/25 blur-3xl" />
 
-        <div className="absolute -right-20 bottom-0 h-80 w-80 rounded-full bg-purple-300/20 blur-3xl" />
-
-        <div className="relative mx-auto max-w-7xl px-4 pb-12 pt-0 md:px-8 md:pb-16 md:pt-0">
-          <div className="max-w-5xl">
-            {/* Hero text */}
-            {/* Moving Banner */}
-            <div className="overflow-hidden rounded-full bg-gradient-to-r from-pink-600 via-fuchsia-600 to-purple-700 px-4 py-2 pt-0 text-white shadow-md">
-              <div className="animate-marquee whitespace-nowrap text-sm font-bold uppercase tracking-wide">
-                We also deal in wholesale and bulk orders
-              </div>
+        <div className="relative mx-auto max-w-7xl px-4 pb-12 pt-3 md:px-8 md:pb-16">
+          {/* Moving wholesale banner */}
+          <div className="mb-6 overflow-hidden rounded-full bg-gradient-to-r from-pink-600 via-fuchsia-600 to-purple-700 px-4 py-2 text-white shadow-lg">
+            <div className="animate-marquee whitespace-nowrap text-center text-sm font-black uppercase tracking-[0.18em]">
+              We also deal in wholesale and bulk orders ✨
             </div>
+          </div>
 
+          <div className="grid items-center gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:gap-16">
+            {/* LEFT: Branding and text */}
             <div>
-              <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-pink-200 bg-white/80 px-4 py-2 text-sm font-bold text-pink-700 shadow-sm backdrop-blur">
+              <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-pink-200 bg-white/85 px-4 py-2 text-sm font-bold text-pink-700 shadow-sm backdrop-blur">
                 <span>✨</span>
                 <span>Fancy Dress Collection</span>
               </div>
-              <h1 className="max-w-3xl text-4xl font-black leading-tight tracking-tight text-slate-950 sm:text-5xl md:text-6xl">
+
+              <h1 className="max-w-4xl text-4xl font-black leading-[1.02] tracking-tight text-slate-950 sm:text-5xl md:text-6xl lg:text-7xl">
                 Make every event
-                <span className="block bg-gradient-to-r from-pink-600 via-fuchsia-600 to-purple-600 bg-clip-text text-transparent">
+                <span className="mt-2 block bg-gradient-to-r from-pink-600 via-fuchsia-600 to-purple-600 bg-clip-text text-transparent">
                   extra special ✨
                 </span>
               </h1>
 
+              <div className="mt-5">
+                <p className="text-lg font-black tracking-tight text-slate-900 md:text-2xl">
+                  {shopName}
+                </p>
+                <div className="mt-2 h-1 w-24 rounded-full bg-gradient-to-r from-pink-500 via-fuchsia-500 to-purple-500" />
+              </div>
+
               <p className="mt-5 max-w-2xl text-base leading-7 text-slate-600 md:text-lg">
-                {tagline}. Explore our collection of costumes for school events,
-                cultural programs, parties, celebrations and special occasions.
+                {tagline}. Explore our collection of costumes for school
+                events, cultural programs, parties, celebrations and special
+                occasions.
               </p>
 
               {/* Quick stats */}
-
               <div className="mt-7 flex flex-wrap gap-3">
-                <div className="rounded-2xl border border-white bg-white/80 px-5 py-3 shadow-sm backdrop-blur">
+                <div className="rounded-2xl border border-white bg-white/85 px-5 py-3 shadow-sm backdrop-blur">
                   <p className="text-xl font-black text-pink-600">
                     {dresses.length}+
                   </p>
-
                   <p className="text-xs font-semibold text-slate-500">
                     Costumes
                   </p>
                 </div>
 
-                <div className="rounded-2xl border border-white bg-white/80 px-5 py-3 shadow-sm backdrop-blur">
+                <div className="rounded-2xl border border-white bg-white/85 px-5 py-3 shadow-sm backdrop-blur">
                   <p className="text-xl font-black text-purple-600">
                     {categories.length - 1}
                   </p>
-
                   <p className="text-xs font-semibold text-slate-500">
                     Categories
                   </p>
                 </div>
 
-                <div className="rounded-2xl border border-white bg-white/80 px-5 py-3 shadow-sm backdrop-blur">
+                <div className="rounded-2xl border border-white bg-white/85 px-5 py-3 shadow-sm backdrop-blur">
                   <p className="text-xl font-black text-fuchsia-600">
                     All Sizes
                   </p>
-
                   <p className="text-xs font-semibold text-slate-500">
                     Available
                   </p>
+                </div>
+              </div>
+            </div>
+
+            {/* RIGHT: Logo / visual */}
+            <div className="flex justify-center lg:justify-end">
+              <div className="relative w-full max-w-md">
+                <div className="absolute -inset-5 rounded-[3rem] bg-gradient-to-br from-pink-400/30 via-fuchsia-400/20 to-purple-400/30 blur-2xl" />
+
+                <div className="relative overflow-hidden rounded-[3rem] border border-white/80 bg-white/80 p-5 shadow-2xl backdrop-blur">
+                  <div className="rounded-[2.5rem] bg-gradient-to-br from-pink-50 via-white to-purple-50 p-6">
+                    <div className="relative aspect-square overflow-hidden rounded-[2rem] bg-white shadow-inner">
+                      <Image
+                        src="/images/logo.png"
+                        alt={`${shopName} logo`}
+                        fill
+                        priority
+                        sizes="(max-width: 1024px) 80vw, 420px"
+                        className="object-contain p-5"
+                      />
+                    </div>
+
+                    <div className="mt-5 text-center">
+                      <p className="text-xs font-black uppercase tracking-[0.25em] text-pink-600">
+                        Welcome to
+                      </p>
+                      <h2 className="mt-2 text-2xl font-black tracking-tight text-slate-950 md:text-3xl">
+                        {shopName}
+                      </h2>
+                      <p className="mt-2 text-sm font-semibold text-slate-500">
+                        Costumes that make celebrations memorable
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -165,13 +202,10 @@ Price: ₹${selected?.price ?? ""}`;
       </section>
 
       {/* ================= CATALOG ================= */}
-
       <section
         id="catalog"
         className="mx-auto max-w-7xl px-4 py-10 md:px-8 md:py-14"
       >
-        {/* Section heading */}
-
         <div className="mb-7 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="text-sm font-bold uppercase tracking-[0.2em] text-pink-600">
@@ -192,9 +226,7 @@ Price: ₹${selected?.price ?? ""}`;
           </div>
         </div>
 
-        {/* Search and filters */}
-
-        <div className="mb-8 rounded-3xl border border-pink-100 bg-white p-4 shadow-sm md:p-5">
+        <div className="mb-8">
           <SearchFilters
             categories={categories}
             searchText={searchText}
@@ -204,21 +236,16 @@ Price: ₹${selected?.price ?? ""}`;
           />
         </div>
 
-        {/* Results */}
-
         <div className="mb-5 flex items-center justify-between">
           <div>
             <h3 className="text-xl font-black text-slate-950">
               Available Dresses
             </h3>
-
             <p className="mt-1 text-sm text-slate-500">
               Choose a size to see the price.
             </p>
           </div>
         </div>
-
-        {/* Empty state */}
 
         {filteredDresses.length === 0 ? (
           <div className="rounded-[2rem] border border-dashed border-pink-200 bg-white px-6 py-16 text-center shadow-sm">
@@ -271,7 +298,6 @@ Price: ₹${selected?.price ?? ""}`;
       </section>
 
       {/* ================= CONTACT CTA ================= */}
-
       <section className="px-4 pb-12 md:px-8">
         <div className="mx-auto max-w-7xl overflow-hidden rounded-[2rem] bg-gradient-to-r from-pink-600 via-fuchsia-600 to-purple-700 px-6 py-10 text-white shadow-xl md:px-12">
           <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
@@ -301,21 +327,23 @@ Price: ₹${selected?.price ?? ""}`;
       </section>
 
       {/* ================= FOOTER ================= */}
-
       <footer id="contact" className="border-t border-pink-100 bg-white">
         <div className="mx-auto max-w-7xl px-4 py-10 md:px-8">
           <div className="grid gap-8 md:grid-cols-3">
-            {/* Brand */}
-
             <div>
               <div className="flex items-center gap-3">
-                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-pink-500 to-purple-600 text-xl shadow-md">
-                  👗
+                <div className="relative h-11 w-11 overflow-hidden rounded-2xl bg-white shadow-md ring-1 ring-pink-100">
+                  <Image
+                    src="/images/logo.png"
+                    alt={`${shopName} logo`}
+                    fill
+                    sizes="44px"
+                    className="object-contain p-1"
+                  />
                 </div>
 
                 <div>
                   <p className="font-black text-slate-950">{shopName}</p>
-
                   <p className="text-xs text-slate-500">
                     Fancy Dress Collection
                   </p>
@@ -327,8 +355,6 @@ Price: ₹${selected?.price ?? ""}`;
                 special occasions.
               </p>
             </div>
-
-            {/* Browse */}
 
             <div>
               <h3 className="font-black text-slate-900">Browse</h3>
@@ -357,15 +383,13 @@ Price: ₹${selected?.price ?? ""}`;
               </div>
             </div>
 
-            {/* Contact */}
-
             <div>
               <h3 className="font-black text-slate-900">Contact</h3>
 
               <div className="mt-3 space-y-2 text-sm text-slate-500">
                 <p>
-                  Contact us directly using the buttons available on each dress.
-                  Alternatively you can call on + 918826163522.
+                  Contact us directly using the buttons available on each
+                  dress.
                 </p>
 
                 <div className="space-y-1">
@@ -388,7 +412,6 @@ Price: ₹${selected?.price ?? ""}`;
       </footer>
 
       {/* ================= MODAL ================= */}
-
       {selectedDress && (
         <DressDetailsModal
           dress={selectedDress}

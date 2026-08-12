@@ -19,7 +19,7 @@ export default function Header() {
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 md:px-8">
         <Link href="/" className="flex items-center gap-3">
           <Image
-            src="/logo.png"
+            src="/images/logo_r.png"
             alt="Shop Logo"
             width={48}
             height={48}
