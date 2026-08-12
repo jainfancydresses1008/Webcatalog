@@ -108,7 +108,12 @@ Price: ₹${selected?.price ?? ""}`;
                 <span>✨</span>
                 <span>Fancy Dress Collection</span>
               </div>
-
+              {/* Moving Banner */}
+              <div className="mb-5 overflow-hidden rounded-full bg-gradient-to-r from-pink-600 via-fuchsia-600 to-purple-700 px-4 py-2 text-white shadow-md">
+                <div className="animate-marquee whitespace-nowrap text-sm font-bold uppercase tracking-wide">
+                  We also deal in wholesale and bulk orders
+                </div>
+              </div>
               <h1 className="max-w-3xl text-4xl font-black leading-tight tracking-tight text-slate-950 sm:text-5xl md:text-6xl">
                 Make every event
                 <span className="block bg-gradient-to-r from-pink-600 via-fuchsia-600 to-purple-600 bg-clip-text text-transparent">
@@ -158,12 +163,7 @@ Price: ₹${selected?.price ?? ""}`;
           </div>
         </div>
       </section>
-      {/* ================= MOVING BANNER ================= */}
-      <section className="overflow-hidden bg-gradient-to-r from-pink-600 via-fuchsia-600 to-purple-700 py-3 text-white shadow-md">
-        <div className="animate-marquee whitespace-nowrap text-lg font-bold">
-            We also proivde dresses in wholesale
-        </div>
-      </section>
+
       {/* ================= CATALOG ================= */}
 
       <section
