@@ -65,29 +65,28 @@ export default function DressCatalogClient({
     }));
   }
 
-function links(dress: DressDto) {
-  const selected = selectedSizeFor(dress);
+  function links(dress: DressDto) {
+    const selected = selectedSizeFor(dress);
 
-  const message = `Hello, I am interested in this dress.
+    const message = `Hello, I am interested in this dress.
 
 Category: ${dress.category}
 Character Name: ${dress.characterName}
-Selected Size: ${selected?.size ?? ''}
-Price: ₹${selected?.price ?? ''}`;
+Selected Size: ${selected?.size ?? ""}
+Price: ₹${selected?.price ?? ""}`;
 
-  const msg = encodeURIComponent(message);
+    const msg = encodeURIComponent(message);
 
-  return {
-    whatsapp: `https://wa.me/${sellerPhone}?text=${msg}`,
+    return {
+      whatsapp: `https://wa.me/${sellerPhone}?text=${msg}`,
 
-    email: `mailto:${sellerEmail}?subject=${encodeURIComponent(
-      `Dress Inquiry - ${dress.characterName}`
-    )}&body=${msg}`,
+      email: `mailto:${sellerEmail}?subject=${encodeURIComponent(
+        `Dress Inquiry - ${dress.characterName}`,
+      )}&body=${msg}`,
 
-    sms: `sms:+${sellerPhone}?body=${msg}`,
-  };
-}
-  
+      sms: `sms:+${sellerPhone}?body=${msg}`,
+    };
+  }
 
   return (
     <main className="min-h-screen bg-[#fff9fc] text-slate-900">
@@ -159,7 +158,12 @@ Price: ₹${selected?.price ?? ''}`;
           </div>
         </div>
       </section>
-
+      {/* ================= MOVING BANNER ================= */}
+      <section className="overflow-hidden bg-gradient-to-r from-pink-600 via-fuchsia-600 to-purple-700 py-3 text-white shadow-md">
+        <div className="animate-marquee whitespace-nowrap text-lg font-bold">
+            We also proivde dresses in wholesale
+        </div>
+      </section>
       {/* ================= CATALOG ================= */}
 
       <section
@@ -191,13 +195,13 @@ Price: ₹${selected?.price ?? ''}`;
         {/* Search and filters */}
 
         <div className="mb-8 rounded-3xl border border-pink-100 bg-white p-4 shadow-sm md:p-5">
-<SearchFilters
-  categories={categories}
-  searchText={searchText}
-  selectedCategory={selectedCategory}
-  onSearchTextChange={setSearchText}
-  onSelectedCategoryChange={setSelectedCategory}
-/>
+          <SearchFilters
+            categories={categories}
+            searchText={searchText}
+            selectedCategory={selectedCategory}
+            onSearchTextChange={setSearchText}
+            onSelectedCategoryChange={setSelectedCategory}
+          />
         </div>
 
         {/* Results */}
@@ -360,7 +364,7 @@ Price: ₹${selected?.price ?? ''}`;
 
               <div className="mt-3 space-y-2 text-sm text-slate-500">
                 <p>
-                  Contact us directly using the buttons available on each dress. 
+                  Contact us directly using the buttons available on each dress.
                   Alternatively you can call on + 918826163522.
                 </p>
 
@@ -389,9 +393,7 @@ Price: ₹${selected?.price ?? ''}`;
         <DressDetailsModal
           dress={selectedDress}
           selectedSize={selectedSizeFor(selectedDress)?.size ?? ""}
-          
           onSizeChange={(size) => updateSize(selectedDress.id, size)}
-          
           onClose={() => setSelectedDress(null)}
           contactLinks={links(selectedDress)}
         />

@@ -1,5 +1,27 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-body { margin: 0; background: #f8fafc; }
-button, input, textarea { font: inherit; }
+body {
+  margin: 0;
+  background: #f8fafc;
+}
+button,
+input,
+textarea {
+  font: inherit;
+}
+@keyframes marquee {
+  0% {
+    transform: translateX(100%);
+  }
+
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+.animate-marquee {
+  display: inline-block;
+  min-width: 100%;
+  animation: marquee 20s linear infinite;
+}

@@ -32,5 +32,5 @@ export async function loginAdminAction(_prevState: AdminAuthResult, formData: Fo
 
 export async function logoutAdminAction() {
   await destroyAdminSession();
-  redirect('/admin');
+  redirect('/');
 }
