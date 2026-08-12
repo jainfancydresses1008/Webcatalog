@@ -23,5 +23,5 @@ textarea {
 .animate-marquee {
   display: inline-block;
   min-width: max-content;
-  animation: marquee 8s linear infinite;
+  animation: marquee 18s linear infinite;
 }

@@ -34,8 +34,7 @@ export default function DressCatalogClient({
     [dresses],
   );
 
-  const shopName =
-    process.env.NEXT_PUBLIC_SHOP_NAME || "Jain Fancy Dresses";
+  const shopName = process.env.NEXT_PUBLIC_SHOP_NAME || "Jain Fancy Dresses";
 
   const tagline =
     process.env.NEXT_PUBLIC_SHOP_TAGLINE ||
@@ -120,17 +119,9 @@ Price: ₹${selected?.price ?? ""}`;
                 </span>
               </h1>
 
-              <div className="mt-5">
-                <p className="text-lg font-black tracking-tight text-slate-900 md:text-2xl">
-                  {shopName}
-                </p>
-                <div className="mt-2 h-1 w-24 rounded-full bg-gradient-to-r from-pink-500 via-fuchsia-500 to-purple-500" />
-              </div>
-
               <p className="mt-5 max-w-2xl text-base leading-7 text-slate-600 md:text-lg">
-                {tagline}. Explore our collection of costumes for school
-                events, cultural programs, parties, celebrations and special
-                occasions.
+                {tagline}. Explore our collection of costumes for school events,
+                cultural programs, parties, celebrations and special occasions.
               </p>
 
               {/* Quick stats */}
@@ -167,28 +158,34 @@ Price: ₹${selected?.price ?? ""}`;
             {/* RIGHT: Logo / visual */}
             <div className="flex justify-center lg:justify-end">
               <div className="relative w-full max-w-md">
+                {/* Decorative glow */}
                 <div className="absolute -inset-5 rounded-[3rem] bg-gradient-to-br from-pink-400/30 via-fuchsia-400/20 to-purple-400/30 blur-2xl" />
 
+                {/* Logo card */}
                 <div className="relative overflow-hidden rounded-[3rem] border border-white/80 bg-white/80 p-5 shadow-2xl backdrop-blur">
-                  <div className="rounded-[2.5rem] bg-gradient-to-br from-pink-50 via-white to-purple-50 p-6">
-                    <div className="relative aspect-square overflow-hidden rounded-[2rem] bg-white shadow-inner">
+                  <div className="rounded-[2.5rem] bg-gradient-to-br from-pink-50 via-white to-purple-50 p-4 md:p-6">
+                    {/* FULL IMAGE — no square container */}
+                    <div className="w-full overflow-hidden rounded-[2rem] bg-white shadow-inner">
                       <Image
                         src="/images/logo.png"
-                        alt={`${shopName} logo`}
-                        fill
+                        alt="Jain Fancy Dresses"
+                        width={1024}
+                        height={1536}
+                        className="block h-auto w-full"
                         priority
-                        sizes="(max-width: 1024px) 80vw, 420px"
-                        className="object-contain p-5"
                       />
                     </div>
 
+                    {/* Text below image */}
                     <div className="mt-5 text-center">
                       <p className="text-xs font-black uppercase tracking-[0.25em] text-pink-600">
                         Welcome to
                       </p>
+
                       <h2 className="mt-2 text-2xl font-black tracking-tight text-slate-950 md:text-3xl">
                         {shopName}
                       </h2>
+
                       <p className="mt-2 text-sm font-semibold text-slate-500">
                         Costumes that make celebrations memorable
                       </p>
@@ -334,7 +331,7 @@ Price: ₹${selected?.price ?? ""}`;
               <div className="flex items-center gap-3">
                 <div className="relative h-11 w-11 overflow-hidden rounded-2xl bg-white shadow-md ring-1 ring-pink-100">
                   <Image
-                    src="/images/logo.png"
+                    src="/images/logo_r.png"
                     alt={`${shopName} logo`}
                     fill
                     sizes="44px"
@@ -388,8 +385,7 @@ Price: ₹${selected?.price ?? ""}`;
 
               <div className="mt-3 space-y-2 text-sm text-slate-500">
                 <p>
-                  Contact us directly using the buttons available on each
-                  dress.
+                  Contact us directly using the buttons available on each dress.
                 </p>
 
                 <div className="space-y-1">
