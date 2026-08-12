@@ -102,19 +102,19 @@ Price: ₹${selected?.price ?? ""}`;
         <div className="relative mx-auto max-w-7xl px-4 pb-12 pt-10 md:px-8 md:pb-16 md:pt-16">
           <div className="max-w-5xl">
             {/* Hero text */}
-
-            <div>
-              <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-pink-200 bg-white/80 px-4 py-2 text-sm font-bold text-pink-700 shadow-sm backdrop-blur">
-                <span>✨</span>
-                <span>Fancy Dress Collection</span>
-              </div>
               {/* Moving Banner */}
               <div className="mb-5 overflow-hidden rounded-full bg-gradient-to-r from-pink-600 via-fuchsia-600 to-purple-700 px-4 py-2 text-white shadow-md">
                 <div className="animate-marquee whitespace-nowrap text-sm font-bold uppercase tracking-wide">
                   We also deal in wholesale and bulk orders
                 </div>
               </div>
-              <h1 className="max-w-3xl text-4xl font-black leading-tight tracking-tight text-slate-950 sm:text-5xl md:text-6xl">
+ 
+            <div>
+              <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-pink-200 bg-white/80 px-4 py-2 text-sm font-bold text-pink-700 shadow-sm backdrop-blur">
+                <span>✨</span>
+                <span>Fancy Dress Collection</span>
+              </div>
+             <h1 className="max-w-3xl text-4xl font-black leading-tight tracking-tight text-slate-950 sm:text-5xl md:text-6xl">
                 Make every event
                 <span className="block bg-gradient-to-r from-pink-600 via-fuchsia-600 to-purple-600 bg-clip-text text-transparent">
                   extra special ✨
