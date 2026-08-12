@@ -99,11 +99,11 @@ Price: ₹${selected?.price ?? ""}`;
 
         <div className="absolute -right-20 bottom-0 h-80 w-80 rounded-full bg-purple-300/20 blur-3xl" />
 
-        <div className="relative mx-auto max-w-7xl px-4 pb-12 pt-10 md:px-8 md:pb-16 md:pt-16">
+        <div className="relative mx-auto max-w-7xl px-4 pb-12 pt-0 md:px-8 md:pb-16 md:pt-0">
           <div className="max-w-5xl">
             {/* Hero text */}
             {/* Moving Banner */}
-            <div className="overflow-hidden rounded-full bg-gradient-to-r from-pink-600 via-fuchsia-600 to-purple-700 px-4 py-2 text-white shadow-md">
+            <div className="overflow-hidden rounded-full bg-gradient-to-r from-pink-600 via-fuchsia-600 to-purple-700 px-4 py-2 pt-0 text-white shadow-md">
               <div className="animate-marquee whitespace-nowrap text-sm font-bold uppercase tracking-wide">
                 We also deal in wholesale and bulk orders
               </div>
