@@ -1,7 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { useMemo, useState } from "react";
+import { useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import type { DressDto } from "@/lib/dress-types";
 
 import DressCard from "./DressCard";
@@ -12,15 +13,43 @@ type Props = {
   dresses: DressDto[];
   sellerPhone: string;
   sellerEmail: string;
+  categories: string[];
+  subcategories: string[];
+  total: number;
+  page: number;
+  totalPages: number;
+  pageSize: number;
+  initialSearch: string;
+  initialCategory: string;
+  initialSubcategory: string;
+  visitorCount: number;
 };
 
 export default function DressCatalogClient({
   dresses,
   sellerPhone,
   sellerEmail,
+  categories,
+  subcategories,
+  total,
+  page,
+  totalPages,
+  pageSize,
+  initialSearch,
+  initialCategory,
+  initialSubcategory,
+  visitorCount,
 }: Props) {
-  const [searchText, setSearchText] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("All");
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const [searchText, setSearchText] = useState(initialSearch);
+  const [selectedCategory, setSelectedCategory] = useState(
+    initialCategory || "All",
+  );
+  const [selectedSubcategory, setSelectedSubcategory] = useState(
+    initialSubcategory || "All",
+  );
   const [selectedDress, setSelectedDress] = useState<DressDto | null>(null);
 
   const [selectedSizes, setSelectedSizes] = useState<Record<number, string>>(
@@ -29,28 +58,50 @@ export default function DressCatalogClient({
     ),
   );
 
-  const categories = useMemo(
-    () => ["All", ...new Set(dresses.map((dress) => dress.category))],
-    [dresses],
-  );
-
-  const shopName = process.env.NEXT_PUBLIC_SHOP_NAME || "Jain Fancy Dresses";
+  const shopName =
+    process.env.NEXT_PUBLIC_SHOP_NAME || "Jain Fancy Dresses";
 
   const tagline =
     process.env.NEXT_PUBLIC_SHOP_TAGLINE ||
     "Beautiful costumes for every special occasion";
 
-  const filteredDresses = useMemo(() => {
-    const search = searchText.trim().toLowerCase();
+  function navigate(
+    nextSearch = searchText,
+    nextCategory = selectedCategory,
+    nextSubcategory = selectedSubcategory,
+    nextPage = 1,
+  ) {
+    const params = new URLSearchParams();
 
-    return dresses.filter(
-      (dress) =>
-        (selectedCategory === "All" || dress.category === selectedCategory) &&
-        (dress.category.toLowerCase().includes(search) ||
-          dress.characterName.toLowerCase().includes(search) ||
-          dress.description.toLowerCase().includes(search)),
-    );
-  }, [dresses, searchText, selectedCategory]);
+    if (nextSearch.trim()) params.set("search", nextSearch.trim());
+    if (nextCategory && nextCategory !== "All") {
+      params.set("category", nextCategory);
+    }
+    if (nextSubcategory && nextSubcategory !== "All") {
+      params.set("subcategory", nextSubcategory);
+    }
+
+    if (nextPage > 1) params.set("page", String(nextPage));
+
+    const query = params.toString();
+    router.push(query ? `${pathname}?${query}` : pathname);
+  }
+
+  function handleSearch(value: string) {
+    setSearchText(value);
+    navigate(value, selectedCategory, selectedSubcategory, 1);
+  }
+
+  function handleCategory(value: string) {
+    setSelectedCategory(value);
+    setSelectedSubcategory("All");
+    navigate(searchText, value, "All", 1);
+  }
+
+  function handleSubcategory(value: string) {
+    setSelectedSubcategory(value);
+    navigate(searchText, selectedCategory, value, 1);
+  }
 
   function selectedSizeFor(dress: DressDto) {
     return (
@@ -72,6 +123,7 @@ export default function DressCatalogClient({
     const message = `Hello, I am interested in this dress.
 
 Category: ${dress.category}
+Subcategory: ${dress.subcategory ?? ""}
 Character Name: ${dress.characterName}
 Selected Size: ${selected?.size ?? ""}
 Price: ₹${selected?.price ?? ""}`;
@@ -87,17 +139,27 @@ Price: ₹${selected?.price ?? ""}`;
     };
   }
 
+  const firstItem = total === 0 ? 0 : (page - 1) * pageSize + 1;
+  const lastItem = Math.min(page * pageSize, total);
+
+  const pageNumbers = Array.from(
+    { length: totalPages },
+    (_, index) => index + 1,
+  ).filter(
+    (number) =>
+      number === 1 ||
+      number === totalPages ||
+      Math.abs(number - page) <= 2,
+  );
+
   return (
     <main className="min-h-screen overflow-hidden bg-[#fff9fc] text-slate-900">
-      {/* ================= HERO ================= */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-pink-100 via-white to-purple-100" />
-
         <div className="absolute -left-24 top-20 h-72 w-72 rounded-full bg-pink-300/25 blur-3xl" />
         <div className="absolute -right-24 bottom-0 h-96 w-96 rounded-full bg-purple-300/25 blur-3xl" />
 
         <div className="relative mx-auto max-w-7xl px-4 pb-12 pt-3 md:px-8 md:pb-16">
-          {/* Moving wholesale banner */}
           <div className="mb-6 overflow-hidden rounded-full bg-gradient-to-r from-pink-600 via-fuchsia-600 to-purple-700 px-4 py-2 text-white shadow-lg">
             <div className="animate-marquee whitespace-nowrap text-center text-sm font-black uppercase tracking-[0.18em]">
               We also deal in wholesale and bulk orders ✨
@@ -105,7 +167,6 @@ Price: ₹${selected?.price ?? ""}`;
           </div>
 
           <div className="grid items-center gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:gap-16">
-            {/* LEFT: Branding and text */}
             <div>
               <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-pink-200 bg-white/85 px-4 py-2 text-sm font-bold text-pink-700 shadow-sm backdrop-blur">
                 <span>✨</span>
@@ -120,16 +181,14 @@ Price: ₹${selected?.price ?? ""}`;
               </h1>
 
               <p className="mt-5 max-w-2xl text-base leading-7 text-slate-600 md:text-lg">
-                {tagline}. Explore our collection of costumes for school events,
-                cultural programs, parties, celebrations and special occasions.
+                {tagline}. Explore our collection of costumes for school
+                events, cultural programs, parties, celebrations and special
+                occasions.
               </p>
 
-              {/* Quick stats */}
               <div className="mt-7 flex flex-wrap gap-3">
                 <div className="rounded-2xl border border-white bg-white/85 px-5 py-3 shadow-sm backdrop-blur">
-                  <p className="text-xl font-black text-pink-600">
-                    {dresses.length}+
-                  </p>
+                  <p className="text-xl font-black text-pink-600">{total}+</p>
                   <p className="text-xs font-semibold text-slate-500">
                     Costumes
                   </p>
@@ -146,25 +205,21 @@ Price: ₹${selected?.price ?? ""}`;
 
                 <div className="rounded-2xl border border-white bg-white/85 px-5 py-3 shadow-sm backdrop-blur">
                   <p className="text-xl font-black text-fuchsia-600">
-                    All Sizes
+                    {visitorCount}
                   </p>
                   <p className="text-xs font-semibold text-slate-500">
-                    Available
+                    Visitors
                   </p>
                 </div>
               </div>
             </div>
 
-            {/* RIGHT: Logo / visual */}
             <div className="flex justify-center lg:justify-end">
               <div className="relative w-full max-w-md">
-                {/* Decorative glow */}
                 <div className="absolute -inset-5 rounded-[3rem] bg-gradient-to-br from-pink-400/30 via-fuchsia-400/20 to-purple-400/30 blur-2xl" />
 
-                {/* Logo card */}
                 <div className="relative overflow-hidden rounded-[3rem] border border-white/80 bg-white/80 p-5 shadow-2xl backdrop-blur">
                   <div className="rounded-[2.5rem] bg-gradient-to-br from-pink-50 via-white to-purple-50 p-4 md:p-6">
-                    {/* FULL IMAGE — no square container */}
                     <div className="w-full overflow-hidden rounded-[2rem] bg-white shadow-inner">
                       <Image
                         src="/images/logo.png"
@@ -176,16 +231,13 @@ Price: ₹${selected?.price ?? ""}`;
                       />
                     </div>
 
-                    {/* Text below image */}
                     <div className="mt-5 text-center">
                       <p className="text-xs font-black uppercase tracking-[0.25em] text-pink-600">
                         Welcome to
                       </p>
-
                       <h2 className="mt-2 text-2xl font-black tracking-tight text-slate-950 md:text-3xl">
                         {shopName}
                       </h2>
-
                       <p className="mt-2 text-sm font-semibold text-slate-500">
                         Costumes that make celebrations memorable
                       </p>
@@ -198,7 +250,6 @@ Price: ₹${selected?.price ?? ""}`;
         </div>
       </section>
 
-      {/* ================= CATALOG ================= */}
       <section
         id="catalog"
         className="mx-auto max-w-7xl px-4 py-10 md:px-8 md:py-14"
@@ -208,62 +259,46 @@ Price: ₹${selected?.price ?? ""}`;
             <p className="text-sm font-bold uppercase tracking-[0.2em] text-pink-600">
               Explore Collection
             </p>
-
             <h2 className="mt-1 text-3xl font-black tracking-tight text-slate-950 md:text-4xl">
               Find the perfect costume
             </h2>
-
             <p className="mt-2 text-sm text-slate-500 md:text-base">
-              Browse by category, character, description and size.
+              Browse by category, subcategory, character and description.
             </p>
           </div>
 
           <div className="rounded-full bg-white px-4 py-2 text-sm font-bold text-slate-600 shadow-sm ring-1 ring-slate-100">
-            {filteredDresses.length} dresses
+            {firstItem}-{lastItem} of {total} dresses
           </div>
         </div>
 
         <div className="mb-8">
           <SearchFilters
             categories={categories}
+            subcategories={subcategories}
             searchText={searchText}
             selectedCategory={selectedCategory}
-            onSearchTextChange={setSearchText}
-            onSelectedCategoryChange={setSelectedCategory}
+            selectedSubcategory={selectedSubcategory}
+            onSearchTextChange={handleSearch}
+            onSelectedCategoryChange={handleCategory}
+            onSelectedSubcategoryChange={handleSubcategory}
           />
         </div>
 
-        <div className="mb-5 flex items-center justify-between">
-          <div>
-            <h3 className="text-xl font-black text-slate-950">
-              Available Dresses
-            </h3>
-            <p className="mt-1 text-sm text-slate-500">
-              Choose a size to see the price.
-            </p>
-          </div>
-        </div>
-
-        {filteredDresses.length === 0 ? (
+        {dresses.length === 0 ? (
           <div className="rounded-[2rem] border border-dashed border-pink-200 bg-white px-6 py-16 text-center shadow-sm">
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-pink-50 text-3xl">
               🔍
             </div>
-
             <h3 className="mt-5 text-xl font-black text-slate-900">
               No dresses found
             </h3>
-
             <p className="mt-2 text-sm text-slate-500">
               Try another search term or select a different category.
             </p>
-
             <button
               type="button"
-              onClick={() => {
-                setSearchText("");
-                setSelectedCategory("All");
-              }}
+              onClick={() => navigate("", "All", "All", 1)}
               className="mt-5 rounded-full bg-pink-600 px-5 py-2.5 text-sm font-bold text-white shadow-md transition hover:bg-pink-700"
             >
               Clear Filters
@@ -271,7 +306,7 @@ Price: ₹${selected?.price ?? ""}`;
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
-            {filteredDresses.map((dress) => {
+            {dresses.map((dress) => {
               const selected = selectedSizeFor(dress);
 
               return (
@@ -292,9 +327,79 @@ Price: ₹${selected?.price ?? ""}`;
             })}
           </div>
         )}
+
+        {totalPages > 1 && (
+          <nav
+            className="mt-10 flex flex-wrap items-center justify-center gap-2"
+            aria-label="Dress catalog pagination"
+          >
+            <button
+              type="button"
+              disabled={page <= 1}
+              onClick={() =>
+                navigate(
+                  searchText,
+                  selectedCategory,
+                  selectedSubcategory,
+                  page - 1,
+                )
+              }
+              className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700 shadow-sm transition hover:border-pink-300 hover:bg-pink-50 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              ← Previous
+            </button>
+
+            {pageNumbers.map((number, index) => {
+              const previous = pageNumbers[index - 1];
+              const showGap = previous && number - previous > 1;
+
+              return (
+                <span key={number} className="flex items-center gap-2">
+                  {showGap && (
+                    <span className="px-1 text-slate-400">…</span>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      navigate(
+                        searchText,
+                        selectedCategory,
+                        selectedSubcategory,
+                        number,
+                      )
+                    }
+                    className={`h-10 min-w-10 rounded-full px-3 text-sm font-black transition ${
+                      page === number
+                        ? "bg-pink-600 text-white shadow-md"
+                        : "border border-slate-200 bg-white text-slate-700 hover:border-pink-300 hover:bg-pink-50"
+                    }`}
+                  >
+                    {number}
+                  </button>
+                </span>
+              );
+            })}
+
+            <button
+              type="button"
+              disabled={page >= totalPages}
+              onClick={() =>
+                navigate(
+                  searchText,
+                  selectedCategory,
+                  selectedSubcategory,
+                  page + 1,
+                )
+              }
+              className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700 shadow-sm transition hover:border-pink-300 hover:bg-pink-50 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Next →
+            </button>
+          </nav>
+        )}
       </section>
 
-      {/* ================= CONTACT CTA ================= */}
       <section className="px-4 pb-12 md:px-8">
         <div className="mx-auto max-w-7xl overflow-hidden rounded-[2rem] bg-gradient-to-r from-pink-600 via-fuchsia-600 to-purple-700 px-6 py-10 text-white shadow-xl md:px-12">
           <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
@@ -302,11 +407,9 @@ Price: ₹${selected?.price ?? ""}`;
               <p className="text-sm font-bold uppercase tracking-[0.2em] text-pink-100">
                 Need help choosing?
               </p>
-
               <h2 className="mt-2 text-3xl font-black md:text-4xl">
                 Find the right dress for your event 💕
               </h2>
-
               <p className="mt-2 max-w-2xl text-sm leading-6 text-pink-50 md:text-base">
                 Select a dress and contact us directly through WhatsApp, email
                 or SMS.
@@ -323,7 +426,6 @@ Price: ₹${selected?.price ?? ""}`;
         </div>
       </section>
 
-      {/* ================= FOOTER ================= */}
       <footer id="contact" className="border-t border-pink-100 bg-white">
         <div className="mx-auto max-w-7xl px-4 py-10 md:px-8">
           <div className="grid gap-8 md:grid-cols-3">
@@ -331,7 +433,7 @@ Price: ₹${selected?.price ?? ""}`;
               <div className="flex items-center gap-3">
                 <div className="relative h-11 w-11 overflow-hidden rounded-2xl bg-white shadow-md ring-1 ring-pink-100">
                   <Image
-                    src="/images/logo_r.png"
+                    src="/images/logo.png"
                     alt={`${shopName} logo`}
                     fill
                     sizes="44px"
@@ -355,26 +457,14 @@ Price: ₹${selected?.price ?? ""}`;
 
             <div>
               <h3 className="font-black text-slate-900">Browse</h3>
-
               <div className="mt-3 space-y-2 text-sm text-slate-500">
-                <a
-                  href="#catalog"
-                  className="block transition hover:text-pink-600"
-                >
+                <a href="#catalog" className="block hover:text-pink-600">
                   Dress Catalog
                 </a>
-
-                <a
-                  href="#catalog"
-                  className="block transition hover:text-pink-600"
-                >
+                <a href="#catalog" className="block hover:text-pink-600">
                   Categories
                 </a>
-
-                <a
-                  href="#contact"
-                  className="block transition hover:text-pink-600"
-                >
+                <a href="#contact" className="block hover:text-pink-600">
                   Contact Us
                 </a>
               </div>
@@ -382,21 +472,11 @@ Price: ₹${selected?.price ?? ""}`;
 
             <div>
               <h3 className="font-black text-slate-900">Contact</h3>
-
               <div className="mt-3 space-y-2 text-sm text-slate-500">
-                <p>
-                  Contact us directly using the buttons available on each dress.
-                </p>
-
-                <div className="space-y-1">
-                  <p>✅ WhatsApp</p>
-                  <p>✅ Email</p>
-                  <p>✅ SMS</p>
-                </div>
-
-                <p className="pt-2 text-xs text-slate-400">
-                  Quick contact options available with every costume.
-                </p>
+                <p>Contact us directly using the buttons available on each dress.</p>
+                <p>✅ WhatsApp</p>
+                <p>✅ Email</p>
+                <p>✅ SMS</p>
               </div>
             </div>
           </div>
@@ -407,7 +487,6 @@ Price: ₹${selected?.price ?? ""}`;
         </div>
       </footer>
 
-      {/* ================= MODAL ================= */}
       {selectedDress && (
         <DressDetailsModal
           dress={selectedDress}

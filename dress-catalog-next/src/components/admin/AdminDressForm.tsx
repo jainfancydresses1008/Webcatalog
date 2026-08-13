@@ -29,6 +29,7 @@ export default function AdminDressForm({ createDressAction }: Props) {
       {message && <div className="mt-4 rounded-2xl bg-slate-100 p-3 text-sm font-semibold text-slate-700">{message}</div>}
       <div className="mt-4 grid gap-4 md:grid-cols-2">
         <input name="category" placeholder="Category" required className="rounded-2xl border border-slate-300 p-3" />
+        <input name="subcategory" placeholder="Subcategory" required className="mb-2 block text-sm font-bold text-slate-700" />
         <input name="characterName" placeholder="Character Name" required className="rounded-2xl border border-slate-300 p-3" />
         <input name="imageUrl" placeholder="Main image URL, optional if uploading file" className="rounded-2xl border border-slate-300 p-3 md:col-span-2" />
         <input name="imageFile" type="file" accept="image/*" className="rounded-2xl border border-slate-300 bg-white p-3 md:col-span-2" />

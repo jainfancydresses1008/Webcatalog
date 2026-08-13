@@ -13,7 +13,7 @@ export default function DressDetailsModal({
   dress,
   selectedSize,
   onSizeChange,
-   onClose,
+  onClose,
   contactLinks,
 }: Props) {
   const firstImage = dress.images[0]?.url ?? "/images/placeholder-dress.svg";
@@ -80,6 +80,9 @@ export default function DressDetailsModal({
               <div className="mt-4 space-y-3 text-sm text-slate-700">
                 <p>
                   <span className="font-bold">Category:</span> {dress.category}
+                </p>
+                <p>
+                  <span className="font-bold">Subcategory:</span> {dress.subcategory}
                 </p>
                 <p>
                   <span className="font-bold">Character Name:</span>{" "}

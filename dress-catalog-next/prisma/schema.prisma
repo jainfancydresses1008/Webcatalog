@@ -10,6 +10,7 @@ datasource db {
 model Dress {
   id            Int          @id @default(autoincrement())
   category      String
+  subcategory   String?
   characterName String
   description   String
   isActive      Boolean      @default(true)
@@ -19,6 +20,8 @@ model Dress {
   images        DressImage[]
 
   @@index([category])
+  @@index([subcategory])
+  @@index([category, subcategory])
   @@index([characterName])
 }
 
@@ -27,7 +30,7 @@ model DressSize {
   size    String
   price   Int
   dressId Int
-  dress   Dress  @relation(fields: [dressId], references: [id], onDelete: Cascade)
+  dress   Dress @relation(fields: [dressId], references: [id], onDelete: Cascade)
 
   @@index([dressId])
 }
@@ -53,4 +56,10 @@ model AdminSession {
 
   @@index([email])
   @@index([expiresAt])
+}
+
+model SiteStats {
+  id           Int      @id @default(1)
+  visitorCount Int      @default(0)
+  updatedAt    DateTime @updatedAt
 }
