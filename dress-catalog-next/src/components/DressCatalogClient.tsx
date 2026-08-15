@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import type { DressDto } from "@/lib/dress-types";
 
 import DressCard from "./DressCard";
@@ -42,6 +42,7 @@ export default function DressCatalogClient({
   visitorCount,
   totalCostumes,
 }: Props) {
+  const router = useRouter();
   const pathname = usePathname();
 
   const [searchText, setSearchText] = useState(initialSearch);
@@ -52,15 +53,7 @@ export default function DressCatalogClient({
     initialSubcategory || "All",
   );
   const [selectedDress, setSelectedDress] = useState<DressDto | null>(null);
-  const [catalogDresses, setCatalogDresses] = useState<DressDto[]>(dresses);
-  const [catalogTotal, setCatalogTotal] = useState(total);
-  const [catalogPage, setCatalogPage] = useState(page);
-  const [catalogTotalPages, setCatalogTotalPages] = useState(totalPages);
-  const [isCatalogLoading, setIsCatalogLoading] = useState(false);
-  const catalogCache = useRef(
-    new Map<string, { dresses: DressDto[]; total: number; page: number; totalPages: number }>(),
-  );
-  const requestController = useRef<AbortController | null>(null);
+  const categoryScrollYRef = useRef<number | null>(null);
   const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
   const [suggestionsLoading, setSuggestionsLoading] = useState(false);
 
@@ -78,94 +71,25 @@ export default function DressCatalogClient({
     "Beautiful costumes for every special occasion";
 
   function navigate(
-    search: string,
-    category: string,
-    subcategory: string,
-    nextPage: number,
+    nextSearch = searchText,
+    nextCategory = selectedCategory,
+    nextSubcategory = selectedSubcategory,
+    nextPage = 1,
   ) {
     const params = new URLSearchParams();
 
-    if (search) params.set("search", search);
-    if (category && category !== "All") params.set("category", category);
-    if (subcategory && subcategory !== "All")
-      params.set("subcategory", subcategory);
+    if (nextSearch.trim()) params.set("search", nextSearch.trim());
+    if (nextCategory && nextCategory !== "All") {
+      params.set("category", nextCategory);
+    }
+    if (nextSubcategory && nextSubcategory !== "All") {
+      params.set("subcategory", nextSubcategory);
+    }
+
     if (nextPage > 1) params.set("page", String(nextPage));
 
     const query = params.toString();
-    const url = query ? `${pathname}?${query}` : pathname;
-
-    // Keep the URL shareable without triggering a full server navigation.
-    window.history.replaceState(null, "", url);
-
-    loadCatalog(search, category, subcategory, nextPage);
-  }
-
-  async function loadCatalog(
-    search: string,
-    category: string,
-    subcategory: string,
-    nextPage: number,
-  ) {
-    const key = JSON.stringify({
-      search: search.trim(),
-      category,
-      subcategory,
-      page: nextPage,
-    });
-
-    const cached = catalogCache.current.get(key);
-    if (cached) {
-      setCatalogDresses(cached.dresses);
-      setCatalogTotal(cached.total);
-      setCatalogPage(cached.page);
-      setCatalogTotalPages(cached.totalPages);
-      return;
-    }
-
-    requestController.current?.abort();
-    const controller = new AbortController();
-    requestController.current = controller;
-
-    setIsCatalogLoading(true);
-
-    try {
-      const params = new URLSearchParams();
-      if (search.trim()) params.set("search", search.trim());
-      if (category && category !== "All") params.set("category", category);
-      if (subcategory && subcategory !== "All")
-        params.set("subcategory", subcategory);
-      params.set("page", String(nextPage));
-
-      const response = await fetch(`/api/dresses?${params.toString()}`, {
-        signal: controller.signal,
-        cache: "no-store",
-      });
-
-      if (!response.ok) {
-        throw new Error("Unable to load dresses.");
-      }
-
-      const data = (await response.json()) as {
-        dresses: DressDto[];
-        total: number;
-        page: number;
-        totalPages: number;
-      };
-
-      catalogCache.current.set(key, data);
-      setCatalogDresses(data.dresses);
-      setCatalogTotal(data.total);
-      setCatalogPage(data.page);
-      setCatalogTotalPages(data.totalPages);
-    } catch (error) {
-      if ((error as Error).name !== "AbortError") {
-        console.error("Catalog fetch failed:", error);
-      }
-    } finally {
-      if (!controller.signal.aborted) {
-        setIsCatalogLoading(false);
-      }
-    }
+    router.push(query ? `${pathname}?${query}` : pathname);
   }
 
   function handleSearch(value: string) {
@@ -245,6 +169,8 @@ export default function DressCatalogClient({
   }, [searchText]);
 
   function handleCategory(value: string) {
+    categoryScrollYRef.current = window.scrollY;
+
     setSuggestions([]);
     setSelectedCategory(value);
     setSelectedSubcategory("All");
@@ -252,10 +178,32 @@ export default function DressCatalogClient({
   }
 
   function handleSubcategory(value: string) {
+    categoryScrollYRef.current = window.scrollY;
+
     setSuggestions([]);
     setSelectedSubcategory(value);
     navigate(searchText, selectedCategory, value, 1);
   }
+
+  useEffect(() => {
+    const savedScrollY = categoryScrollYRef.current;
+
+    if (savedScrollY === null) {
+      return;
+    }
+
+    // Wait for the route/render update, then restore the exact position.
+    const frame = window.requestAnimationFrame(() => {
+      window.scrollTo({
+        top: savedScrollY,
+        left: 0,
+        behavior: "auto",
+      });
+      categoryScrollYRef.current = null;
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [initialCategory, initialSubcategory, initialSearch, page]);
 
   function selectedSizeFor(dress: DressDto) {
     return (
@@ -293,36 +241,21 @@ Price: ₹${selected?.price ?? ""}`;
     };
   }
 
-  const firstItem = catalogTotal === 0 ? 0 : (catalogPage - 1) * pageSize + 1;
-  const lastItem = Math.min(catalogPage * pageSize, catalogTotal);
+  const firstItem = total === 0 ? 0 : (page - 1) * pageSize + 1;
+  const lastItem = Math.min(page * pageSize, total);
 
   const pageNumbers = Array.from(
-    { length: catalogTotalPages },
+    { length: totalPages },
     (_, index) => index + 1,
   ).filter(
     (number) =>
       number === 1 ||
-      number === catalogTotalPages ||
+      number === totalPages ||
       Math.abs(number - page) <= 2,
   );
 
   return (
     <main className="min-h-screen overflow-hidden bg-[#fff9fc] text-slate-900">
-      <header className="sticky top-0 z-40 border-b border-pink-100/80 bg-white/90 shadow-sm backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 md:px-8">
-          <a href="/" className="flex items-center gap-2 font-black text-pink-700" aria-label="Go to home">
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-pink-500 to-purple-600 text-lg text-white">👗</span>
-            <span className="hidden sm:inline">{shopName}</span>
-          </a>
-          <nav className="flex items-center gap-1 text-sm font-bold">
-            <a href="/" className="rounded-full bg-pink-50 px-4 py-2 text-pink-700 hover:bg-pink-100">Home</a>
-            <a href="#catalog" className="rounded-full px-4 py-2 text-slate-600 hover:bg-pink-50 hover:text-pink-700">Costumes</a>
-            <a href="#catalog" className="rounded-full px-4 py-2 text-slate-600 hover:bg-pink-50 hover:text-pink-700">Categories</a>
-            <a href="#contact" className="rounded-full px-4 py-2 text-slate-600 hover:bg-pink-50 hover:text-pink-700">Contact</a>
-          </nav>
-        </div>
-      </header>
-
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-pink-100 via-white to-purple-100" />
         <div className="absolute -left-24 top-20 h-72 w-72 rounded-full bg-pink-300/25 blur-3xl" />
@@ -335,13 +268,7 @@ Price: ₹${selected?.price ?? ""}`;
             </div>
           </div>
 
-          {isCatalogLoading && (
-        <div className="mb-3 text-xs font-semibold text-slate-400">
-          Loading dresses…
-        </div>
-      )}
-
-      <div className="grid items-center gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:gap-16">
+          <div className="grid items-center gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:gap-16">
             <div>
               <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-pink-200 bg-white/85 px-4 py-2 text-sm font-bold text-pink-700 shadow-sm backdrop-blur">
                 <span>✨</span>
@@ -443,7 +370,7 @@ Price: ₹${selected?.price ?? ""}`;
           </div>
 
           <div className="rounded-full bg-white px-4 py-2 text-sm font-bold text-slate-600 shadow-sm ring-1 ring-slate-100">
-            {firstItem}-{lastItem} of {catalogTotal} dresses
+            {firstItem}-{lastItem} of {total} dresses
           </div>
         </div>
 
@@ -485,7 +412,7 @@ Price: ₹${selected?.price ?? ""}`;
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
-            {catalogDresses.map((dress) => {
+            {dresses.map((dress) => {
               const selected = selectedSizeFor(dress);
 
               return (
@@ -507,14 +434,14 @@ Price: ₹${selected?.price ?? ""}`;
           </div>
         )}
 
-        {catalogTotalPages > 1 && (
+        {totalPages > 1 && (
           <nav
             className="mt-10 flex flex-wrap items-center justify-center gap-2"
             aria-label="Dress catalog pagination"
           >
             <button
               type="button"
-              disabled={catalogPage <= 1}
+              disabled={page <= 1}
               onClick={() =>
                 navigate(
                   searchText,
@@ -549,7 +476,7 @@ Price: ₹${selected?.price ?? ""}`;
                       )
                     }
                     className={`h-10 min-w-10 rounded-full px-3 text-sm font-black transition ${
-                      catalogPage === number
+                      page === number
                         ? "bg-pink-600 text-white shadow-md"
                         : "border border-slate-200 bg-white text-slate-700 hover:border-pink-300 hover:bg-pink-50"
                     }`}
@@ -562,7 +489,7 @@ Price: ₹${selected?.price ?? ""}`;
 
             <button
               type="button"
-              disabled={catalogPage >= catalogTotalPages}
+              disabled={page >= totalPages}
               onClick={() =>
                 navigate(
                   searchText,
