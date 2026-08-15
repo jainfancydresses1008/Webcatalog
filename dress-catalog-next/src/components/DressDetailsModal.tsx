@@ -1,14 +1,23 @@
 "use client";
+
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { DressDto } from "@/lib/dress-types";
+
+type ContactLinks = {
+  whatsapp: string;
+  email: string;
+  sms: string;
+};
+
 type Props = {
   dress: DressDto;
   selectedSize: string;
-  onSizeChange: (s: string) => void;
+  onSizeChange: (size: string) => void;
   onClose: () => void;
-  contactLinks: { whatsapp: string; email: string; sms: string };
+  contactLinks: ContactLinks;
 };
+
 export default function DressDetailsModal({
   dress,
   selectedSize,
@@ -16,138 +25,212 @@ export default function DressDetailsModal({
   onClose,
   contactLinks,
 }: Props) {
-  const firstImage = dress.images[0]?.url ?? "/images/placeholder-dress.svg";
-  const [activeImage, setActiveImage] = useState(firstImage);
-  const selectedPrice =
-    dress.sizes.find((x) => x.size === selectedSize)?.price ??
-    dress.sizes[0]?.price ??
-    0;
+  const images = [...dress.images].sort((a, b) => {
+    if (a.isMain !== b.isMain) return a.isMain ? -1 : 1;
+    return a.sortOrder - b.sortOrder;
+  });
+
+  const [selectedIndex, setSelectedIndex] = useState(0);
+
+  useEffect(() => {
+    setSelectedIndex(0);
+  }, [dress.id]);
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+      if (images.length > 1 && event.key === "ArrowRight") {
+        setSelectedIndex((current) => (current + 1) % images.length);
+      }
+      if (images.length > 1 && event.key === "ArrowLeft") {
+        setSelectedIndex(
+          (current) => (current - 1 + images.length) % images.length,
+        );
+      }
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [images.length, onClose]);
+
+  const selectedImage = images[selectedIndex];
+  const selectedSizeData = dress.sizes.find(
+    (size) => size.size === selectedSize,
+  ) ?? dress.sizes[0];
+
+  function previousImage() {
+    setSelectedIndex(
+      (current) => (current - 1 + images.length) % images.length,
+    );
+  }
+
+  function nextImage() {
+    setSelectedIndex((current) => (current + 1) % images.length);
+  }
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-      <div className="max-h-[92vh] w-full max-w-5xl overflow-y-auto rounded-3xl bg-white shadow-2xl">
-        <div className="flex items-center justify-between border-b border-slate-200 p-5">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-3 backdrop-blur-sm sm:p-6"
+      role="dialog"
+      aria-modal="true"
+      aria-label={`${dress.characterName} dress details`}
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) onClose();
+      }}
+    >
+      <div className="relative max-h-[94vh] w-full max-w-5xl overflow-y-auto rounded-[2rem] bg-white shadow-2xl">
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close"
+          className="absolute right-3 top-3 z-20 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-xl font-black text-slate-700 shadow-md ring-1 ring-slate-200 hover:bg-white"
+        >
+          ×
+        </button>
+
+        <div className="grid gap-6 p-4 sm:p-6 md:grid-cols-2 md:p-8">
           <div>
-            <p className="text-sm font-bold uppercase tracking-wide text-pink-600">
+            <div className="relative aspect-[3/4] overflow-hidden rounded-3xl bg-slate-100">
+              {selectedImage ? (
+                <Image
+                  src={selectedImage.url}
+                  alt={selectedImage.altText ?? dress.characterName}
+                  fill
+                  priority
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                />
+              ) : (
+                <div className="flex h-full items-center justify-center text-sm font-semibold text-slate-400">
+                  No image available
+                </div>
+              )}
+
+              {images.length > 1 && (
+                <>
+                  <button
+                    type="button"
+                    onClick={previousImage}
+                    aria-label="Previous image"
+                    className="absolute left-3 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-xl font-black text-slate-800 shadow-lg hover:bg-white"
+                  >
+                    ←
+                  </button>
+                  <button
+                    type="button"
+                    onClick={nextImage}
+                    aria-label="Next image"
+                    className="absolute right-3 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-xl font-black text-slate-800 shadow-lg hover:bg-white"
+                  >
+                    →
+                  </button>
+
+                  <div className="absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full bg-slate-950/70 px-3 py-1 text-xs font-bold text-white">
+                    {selectedIndex + 1} / {images.length}
+                  </div>
+                </>
+              )}
+            </div>
+
+            {images.length > 1 && (
+              <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+                {images.map((image, index) => (
+                  <button
+                    key={image.id}
+                    type="button"
+                    onClick={() => setSelectedIndex(index)}
+                    aria-label={`View image ${index + 1}`}
+                    aria-current={index === selectedIndex}
+                    className={`relative h-20 w-16 shrink-0 overflow-hidden rounded-xl ring-2 transition sm:h-24 sm:w-20 ${
+                      index === selectedIndex
+                        ? "ring-pink-600"
+                        : "ring-transparent hover:ring-pink-200"
+                    }`}
+                  >
+                    <Image
+                      src={image.url}
+                      alt={image.altText ?? `Image ${index + 1}`}
+                      fill
+                      className="object-cover"
+                      sizes="80px"
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="flex flex-col">
+            <p className="text-xs font-black uppercase tracking-[0.2em] text-pink-600">
               {dress.category}
+              {dress.subcategory ? ` · ${dress.subcategory}` : ""}
             </p>
-            <h2 className="text-2xl font-black text-slate-950">
+
+            <h2 className="mt-2 pr-10 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">
               {dress.characterName}
             </h2>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-full bg-slate-100 px-4 py-2 font-semibold text-slate-700 hover:bg-slate-200"
-          >
-            Close
-          </button>
-        </div>
-        <div className="grid gap-6 p-5 lg:grid-cols-2">
-          <div>
-            <div className="relative h-[480px] overflow-hidden rounded-3xl bg-slate-100">
-              <Image
-                src={activeImage}
-                alt={dress.characterName}
-                fill
-                sizes="(max-width: 1024px) 100vw, 50vw"
-                className="object-cover"
-              />
-            </div>
-            <div className="mt-4 grid grid-cols-4 gap-3">
-              {dress.images.map((img) => (
-                <button
-                  type="button"
-                  key={img.id}
-                  onClick={() => setActiveImage(img.url)}
-                  className={`relative h-24 overflow-hidden rounded-2xl border-2 ${activeImage === img.url ? "border-pink-600" : "border-transparent"}`}
-                >
-                  <Image
-                    src={img.url}
-                    alt={img.altText ?? "Dress thumbnail"}
-                    fill
-                    sizes="25vw"
-                    className="object-cover"
-                  />
-                </button>
-              ))}
-            </div>
-          </div>
-          <div>
-            <div className="rounded-3xl bg-slate-50 p-5">
-              <h3 className="text-lg font-black text-slate-950">
-                Dress Information
-              </h3>
-              <div className="mt-4 space-y-3 text-sm text-slate-700">
-                <p>
-                  <span className="font-bold">Category:</span> {dress.category}
-                </p>
-                <p>
-                  <span className="font-bold">Subcategory:</span> {dress.subcategory}
-                </p>
-                <p>
-                  <span className="font-bold">Character Name:</span>{" "}
-                  {dress.characterName}
-                </p>
-                <p>
-                  <span className="font-bold">Description:</span>{" "}
-                  {dress.description}
-                </p>
-              </div>
-            </div>
-            <div className="mt-5 rounded-3xl bg-slate-50 p-5">
-              <h3 className="text-lg font-black text-slate-950">Choose Size</h3>
-              <div className="mt-4 flex flex-wrap gap-2">
-                {dress.sizes.map((item) => {
-                  const active = selectedSize === item.size;
-                  return (
-                    <button
-                      type="button"
-                      key={item.id}
-                      onClick={() => onSizeChange(item.size)}
-                      className={`rounded-full border px-4 py-2 text-sm font-black transition ${active ? "border-pink-600 bg-pink-600 text-white" : "border-slate-200 bg-white text-slate-700 hover:bg-pink-50"}`}
-                    >
-                      {item.size} · ₹{item.price}
-                    </button>
-                  );
-                })}
-              </div>
-              <div className="mt-4 rounded-2xl bg-white p-4 shadow-sm">
-                <p className="text-sm text-slate-500">Selected Price</p>
-                <p className="text-3xl font-black text-slate-950">
-                  ₹{selectedPrice}
-                </p>
-              </div>
-            </div>
-            <div id="contact" className="mt-5 rounded-3xl bg-slate-50 p-5">
-              <h3 className="text-lg font-black text-slate-950">
-                Contact Seller
-              </h3>
-              <p className="mt-1 text-sm text-slate-600">
-                Seller contact number is +91 8826163522.
-              </p>
 
-              <div className="mt-4 grid grid-cols-3 gap-3 text-center font-semibold">
-                <a
-                  href={contactLinks.whatsapp}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="rounded-2xl bg-green-600 px-4 py-3 text-white hover:bg-green-700"
-                >
-                  WhatsApp
-                </a>
-                <a
-                  href={contactLinks.email}
-                  className="rounded-2xl bg-blue-600 px-4 py-3 text-white hover:bg-blue-700"
-                >
-                  Email
-                </a>
-                <a
-                  href={contactLinks.sms}
-                  className="rounded-2xl bg-slate-700 px-4 py-3 text-white hover:bg-slate-800"
-                >
-                  SMS
-                </a>
+            <p className="mt-4 whitespace-pre-line text-sm leading-6 text-slate-600">
+              {dress.description}
+            </p>
+
+            {dress.sizes.length > 0 && (
+              <div className="mt-6">
+                <p className="text-sm font-black text-slate-900">Choose size</p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {dress.sizes.map((size) => (
+                    <button
+                      key={size.id}
+                      type="button"
+                      onClick={() => onSizeChange(size.size)}
+                      className={`rounded-full border px-4 py-2 text-sm font-black transition ${
+                        selectedSize === size.size
+                          ? "border-pink-600 bg-pink-600 text-white"
+                          : "border-slate-200 bg-white text-slate-700 hover:border-pink-300 hover:bg-pink-50"
+                      }`}
+                    >
+                      {size.size}
+                    </button>
+                  ))}
+                </div>
               </div>
+            )}
+
+            <div className="mt-5 rounded-2xl bg-pink-50 p-4">
+              <p className="text-xs font-bold uppercase tracking-wider text-pink-600">
+                Price
+              </p>
+              <p className="mt-1 text-3xl font-black text-slate-950">
+                ₹{selectedSizeData?.price ?? "—"}
+              </p>
+              {selectedSizeData && (
+                <p className="mt-1 text-xs font-semibold text-slate-500">
+                  Size {selectedSizeData.size}
+                </p>
+              )}
+            </div>
+
+            <div className="mt-auto grid gap-3 pt-6 sm:grid-cols-3">
+              <a
+                href={contactLinks.whatsapp}
+                target="_blank"
+                rel="noreferrer"
+                className="rounded-2xl bg-green-600 px-4 py-3 text-center text-sm font-black text-white shadow-sm hover:bg-green-700"
+              >
+                WhatsApp
+              </a>
+              <a
+                href={contactLinks.email}
+                className="rounded-2xl bg-pink-600 px-4 py-3 text-center text-sm font-black text-white shadow-sm hover:bg-pink-700"
+              >
+                Email
+              </a>
+              <a
+                href={contactLinks.sms}
+                className="rounded-2xl bg-slate-900 px-4 py-3 text-center text-sm font-black text-white shadow-sm hover:bg-slate-800"
+              >
+                SMS
+              </a>
             </div>
           </div>
         </div>

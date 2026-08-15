@@ -1,13 +1,13 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
 import type { DressDto } from "@/lib/dress-types";
 
 import DressCard from "./DressCard";
 import DressDetailsModal from "./DressDetailsModal";
-import SearchFilters from "./SearchFilters";
+import SearchFilters, { type SearchSuggestion } from "./SearchFilters";
 
 type Props = {
   dresses: DressDto[];
@@ -23,6 +23,7 @@ type Props = {
   initialCategory: string;
   initialSubcategory: string;
   visitorCount: number;
+  totalCostumes: number;
 };
 
 export default function DressCatalogClient({
@@ -39,8 +40,8 @@ export default function DressCatalogClient({
   initialCategory,
   initialSubcategory,
   visitorCount,
+  totalCostumes,
 }: Props) {
-  const router = useRouter();
   const pathname = usePathname();
 
   const [searchText, setSearchText] = useState(initialSearch);
@@ -51,6 +52,17 @@ export default function DressCatalogClient({
     initialSubcategory || "All",
   );
   const [selectedDress, setSelectedDress] = useState<DressDto | null>(null);
+  const [catalogDresses, setCatalogDresses] = useState<DressDto[]>(dresses);
+  const [catalogTotal, setCatalogTotal] = useState(total);
+  const [catalogPage, setCatalogPage] = useState(page);
+  const [catalogTotalPages, setCatalogTotalPages] = useState(totalPages);
+  const [isCatalogLoading, setIsCatalogLoading] = useState(false);
+  const catalogCache = useRef(
+    new Map<string, { dresses: DressDto[]; total: number; page: number; totalPages: number }>(),
+  );
+  const requestController = useRef<AbortController | null>(null);
+  const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
+  const [suggestionsLoading, setSuggestionsLoading] = useState(false);
 
   const [selectedSizes, setSelectedSizes] = useState<Record<number, string>>(
     Object.fromEntries(
@@ -66,39 +78,181 @@ export default function DressCatalogClient({
     "Beautiful costumes for every special occasion";
 
   function navigate(
-    nextSearch = searchText,
-    nextCategory = selectedCategory,
-    nextSubcategory = selectedSubcategory,
-    nextPage = 1,
+    search: string,
+    category: string,
+    subcategory: string,
+    nextPage: number,
   ) {
     const params = new URLSearchParams();
 
-    if (nextSearch.trim()) params.set("search", nextSearch.trim());
-    if (nextCategory && nextCategory !== "All") {
-      params.set("category", nextCategory);
-    }
-    if (nextSubcategory && nextSubcategory !== "All") {
-      params.set("subcategory", nextSubcategory);
-    }
-
+    if (search) params.set("search", search);
+    if (category && category !== "All") params.set("category", category);
+    if (subcategory && subcategory !== "All")
+      params.set("subcategory", subcategory);
     if (nextPage > 1) params.set("page", String(nextPage));
 
     const query = params.toString();
-    router.push(query ? `${pathname}?${query}` : pathname);
+    const url = query ? `${pathname}?${query}` : pathname;
+
+    // Keep the URL shareable without triggering a full server navigation.
+    window.history.replaceState(null, "", url);
+
+    loadCatalog(search, category, subcategory, nextPage);
+  }
+
+  async function loadCatalog(
+    search: string,
+    category: string,
+    subcategory: string,
+    nextPage: number,
+  ) {
+    const key = JSON.stringify({
+      search: search.trim(),
+      category,
+      subcategory,
+      page: nextPage,
+    });
+
+    const cached = catalogCache.current.get(key);
+    if (cached) {
+      setCatalogDresses(cached.dresses);
+      setCatalogTotal(cached.total);
+      setCatalogPage(cached.page);
+      setCatalogTotalPages(cached.totalPages);
+      return;
+    }
+
+    requestController.current?.abort();
+    const controller = new AbortController();
+    requestController.current = controller;
+
+    setIsCatalogLoading(true);
+
+    try {
+      const params = new URLSearchParams();
+      if (search.trim()) params.set("search", search.trim());
+      if (category && category !== "All") params.set("category", category);
+      if (subcategory && subcategory !== "All")
+        params.set("subcategory", subcategory);
+      params.set("page", String(nextPage));
+
+      const response = await fetch(`/api/dresses?${params.toString()}`, {
+        signal: controller.signal,
+        cache: "no-store",
+      });
+
+      if (!response.ok) {
+        throw new Error("Unable to load dresses.");
+      }
+
+      const data = (await response.json()) as {
+        dresses: DressDto[];
+        total: number;
+        page: number;
+        totalPages: number;
+      };
+
+      catalogCache.current.set(key, data);
+      setCatalogDresses(data.dresses);
+      setCatalogTotal(data.total);
+      setCatalogPage(data.page);
+      setCatalogTotalPages(data.totalPages);
+    } catch (error) {
+      if ((error as Error).name !== "AbortError") {
+        console.error("Catalog fetch failed:", error);
+      }
+    } finally {
+      if (!controller.signal.aborted) {
+        setIsCatalogLoading(false);
+      }
+    }
   }
 
   function handleSearch(value: string) {
     setSearchText(value);
+  }
+
+  function submitSearch(value = searchText) {
+    setSearchText(value);
+    setSuggestions([]);
     navigate(value, selectedCategory, selectedSubcategory, 1);
   }
 
+  function handleSuggestionSelect(suggestion: SearchSuggestion) {
+    setSearchText(suggestion.value);
+    setSuggestions([]);
+
+    if (suggestion.type === "category") {
+      handleCategory(suggestion.value);
+      return;
+    }
+
+    if (suggestion.type === "subcategory" && suggestion.category) {
+      setSelectedCategory(suggestion.category);
+      setSelectedSubcategory(suggestion.value);
+      navigate(suggestion.value, suggestion.category, suggestion.value, 1);
+      return;
+    }
+
+    navigate(suggestion.value, selectedCategory, selectedSubcategory, 1);
+  }
+
+  useEffect(() => {
+    const query = searchText.trim();
+
+    if (!query) {
+      setSuggestions([]);
+      setSuggestionsLoading(false);
+      return;
+    }
+
+    const controller = new AbortController();
+    const timer = window.setTimeout(async () => {
+      try {
+        setSuggestionsLoading(true);
+
+        const response = await fetch(
+          `/api/search-suggestions?q=${encodeURIComponent(query)}`,
+          {
+            signal: controller.signal,
+            cache: "no-store",
+          },
+        );
+
+        if (!response.ok) {
+          setSuggestions([]);
+          return;
+        }
+
+        const data = (await response.json()) as {
+          suggestions?: SearchSuggestion[];
+        };
+
+        setSuggestions(data.suggestions ?? []);
+      } catch (error) {
+        if ((error as Error).name !== "AbortError") {
+          setSuggestions([]);
+        }
+      } finally {
+        setSuggestionsLoading(false);
+      }
+    }, 220);
+
+    return () => {
+      window.clearTimeout(timer);
+      controller.abort();
+    };
+  }, [searchText]);
+
   function handleCategory(value: string) {
+    setSuggestions([]);
     setSelectedCategory(value);
     setSelectedSubcategory("All");
     navigate(searchText, value, "All", 1);
   }
 
   function handleSubcategory(value: string) {
+    setSuggestions([]);
     setSelectedSubcategory(value);
     navigate(searchText, selectedCategory, value, 1);
   }
@@ -139,21 +293,36 @@ Price: ₹${selected?.price ?? ""}`;
     };
   }
 
-  const firstItem = total === 0 ? 0 : (page - 1) * pageSize + 1;
-  const lastItem = Math.min(page * pageSize, total);
+  const firstItem = catalogTotal === 0 ? 0 : (catalogPage - 1) * pageSize + 1;
+  const lastItem = Math.min(catalogPage * pageSize, catalogTotal);
 
   const pageNumbers = Array.from(
-    { length: totalPages },
+    { length: catalogTotalPages },
     (_, index) => index + 1,
   ).filter(
     (number) =>
       number === 1 ||
-      number === totalPages ||
+      number === catalogTotalPages ||
       Math.abs(number - page) <= 2,
   );
 
   return (
     <main className="min-h-screen overflow-hidden bg-[#fff9fc] text-slate-900">
+      <header className="sticky top-0 z-40 border-b border-pink-100/80 bg-white/90 shadow-sm backdrop-blur">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 md:px-8">
+          <a href="/" className="flex items-center gap-2 font-black text-pink-700" aria-label="Go to home">
+            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-pink-500 to-purple-600 text-lg text-white">👗</span>
+            <span className="hidden sm:inline">{shopName}</span>
+          </a>
+          <nav className="flex items-center gap-1 text-sm font-bold">
+            <a href="/" className="rounded-full bg-pink-50 px-4 py-2 text-pink-700 hover:bg-pink-100">Home</a>
+            <a href="#catalog" className="rounded-full px-4 py-2 text-slate-600 hover:bg-pink-50 hover:text-pink-700">Costumes</a>
+            <a href="#catalog" className="rounded-full px-4 py-2 text-slate-600 hover:bg-pink-50 hover:text-pink-700">Categories</a>
+            <a href="#contact" className="rounded-full px-4 py-2 text-slate-600 hover:bg-pink-50 hover:text-pink-700">Contact</a>
+          </nav>
+        </div>
+      </header>
+
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-pink-100 via-white to-purple-100" />
         <div className="absolute -left-24 top-20 h-72 w-72 rounded-full bg-pink-300/25 blur-3xl" />
@@ -166,7 +335,13 @@ Price: ₹${selected?.price ?? ""}`;
             </div>
           </div>
 
-          <div className="grid items-center gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:gap-16">
+          {isCatalogLoading && (
+        <div className="mb-3 text-xs font-semibold text-slate-400">
+          Loading dresses…
+        </div>
+      )}
+
+      <div className="grid items-center gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:gap-16">
             <div>
               <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-pink-200 bg-white/85 px-4 py-2 text-sm font-bold text-pink-700 shadow-sm backdrop-blur">
                 <span>✨</span>
@@ -188,7 +363,7 @@ Price: ₹${selected?.price ?? ""}`;
 
               <div className="mt-7 flex flex-wrap gap-3">
                 <div className="rounded-2xl border border-white bg-white/85 px-5 py-3 shadow-sm backdrop-blur">
-                  <p className="text-xl font-black text-pink-600">{total}+</p>
+                  <p className="text-xl font-black text-pink-600">{totalCostumes}+</p>
                   <p className="text-xs font-semibold text-slate-500">
                     Costumes
                   </p>
@@ -268,7 +443,7 @@ Price: ₹${selected?.price ?? ""}`;
           </div>
 
           <div className="rounded-full bg-white px-4 py-2 text-sm font-bold text-slate-600 shadow-sm ring-1 ring-slate-100">
-            {firstItem}-{lastItem} of {total} dresses
+            {firstItem}-{lastItem} of {catalogTotal} dresses
           </div>
         </div>
 
@@ -279,7 +454,11 @@ Price: ₹${selected?.price ?? ""}`;
             searchText={searchText}
             selectedCategory={selectedCategory}
             selectedSubcategory={selectedSubcategory}
+            suggestions={suggestions}
+            suggestionsLoading={suggestionsLoading}
             onSearchTextChange={handleSearch}
+            onSearchSubmit={() => submitSearch()}
+            onSuggestionSelect={handleSuggestionSelect}
             onSelectedCategoryChange={handleCategory}
             onSelectedSubcategoryChange={handleSubcategory}
           />
@@ -306,7 +485,7 @@ Price: ₹${selected?.price ?? ""}`;
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
-            {dresses.map((dress) => {
+            {catalogDresses.map((dress) => {
               const selected = selectedSizeFor(dress);
 
               return (
@@ -328,14 +507,14 @@ Price: ₹${selected?.price ?? ""}`;
           </div>
         )}
 
-        {totalPages > 1 && (
+        {catalogTotalPages > 1 && (
           <nav
             className="mt-10 flex flex-wrap items-center justify-center gap-2"
             aria-label="Dress catalog pagination"
           >
             <button
               type="button"
-              disabled={page <= 1}
+              disabled={catalogPage <= 1}
               onClick={() =>
                 navigate(
                   searchText,
@@ -370,7 +549,7 @@ Price: ₹${selected?.price ?? ""}`;
                       )
                     }
                     className={`h-10 min-w-10 rounded-full px-3 text-sm font-black transition ${
-                      page === number
+                      catalogPage === number
                         ? "bg-pink-600 text-white shadow-md"
                         : "border border-slate-200 bg-white text-slate-700 hover:border-pink-300 hover:bg-pink-50"
                     }`}
@@ -383,7 +562,7 @@ Price: ₹${selected?.price ?? ""}`;
 
             <button
               type="button"
-              disabled={page >= totalPages}
+              disabled={catalogPage >= catalogTotalPages}
               onClick={() =>
                 navigate(
                   searchText,

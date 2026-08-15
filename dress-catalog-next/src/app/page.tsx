@@ -52,8 +52,8 @@ async function getCatalog(searchParams: SearchParams) {
       : {}),
   };
 
-  const [total, dresses, categories, subcategoryRows, stats] =
-    await prisma.$transaction([
+  const [total, dresses, categories, subcategoryRows, stats, totalCostumes] =
+    await Promise.all([
       prisma.dress.count({ where }),
       prisma.dress.findMany({
         where,
@@ -87,6 +87,10 @@ async function getCatalog(searchParams: SearchParams) {
         create: { id: 1, visitorCount: 1 },
         update: { visitorCount: { increment: 1 } },
       }),
+      // This is the homepage's total costume count. It intentionally does NOT
+      // use the current category/search filter, so adding a new active dress
+      // automatically increases the number shown in the hero after refresh.
+      prisma.dress.count({ where: { isActive: true } }),
     ]);
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
@@ -105,6 +109,7 @@ async function getCatalog(searchParams: SearchParams) {
       .map((item) => item.subcategory)
       .filter((value): value is string => Boolean(value)),
     visitorCount: stats.visitorCount,
+    totalCostumes,
     search,
     category,
     subcategory,
@@ -139,6 +144,7 @@ export default async function HomePage({
         initialCategory={catalog.category || "All"}
         initialSubcategory={catalog.subcategory || "All"}
         visitorCount={catalog.visitorCount}
+        totalCostumes={catalog.totalCostumes}
       />
     );
   } catch (error) {

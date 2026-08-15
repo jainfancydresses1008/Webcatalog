@@ -1,19 +1,21 @@
-'use client';
+"use client";
 
-import Image from 'next/image';
-import type { DressDto } from '@/lib/dress-types';
+import Image from "next/image";
+import type { DressDto } from "@/lib/dress-types";
 
-type DressCardProps = {
+type ContactLinks = {
+  whatsapp: string;
+  email: string;
+  sms: string;
+};
+
+type Props = {
   dress: DressDto;
   selectedSize: string;
   selectedPrice: number;
   onSizeChange: (size: string) => void;
   onView: () => void;
-  contactLinks: {
-    whatsapp: string;
-    email: string;
-    sms: string;
-  };
+  contactLinks: ContactLinks;
 };
 
 export default function DressCard({
@@ -23,249 +25,102 @@ export default function DressCard({
   onSizeChange,
   onView,
   contactLinks,
-}: DressCardProps) {
+}: Props) {
   const mainImage =
-    dress.images[0]?.url ?? '/images/placeholder-dress.svg';
+    dress.images.find((image) => image.isMain) ??
+    [...dress.images].sort((a, b) => a.sortOrder - b.sortOrder)[0];
 
   return (
-    <article
-      className="
-        group
-        overflow-hidden
-        rounded-3xl
-        bg-white
-        shadow-sm
-        ring-1
-        ring-slate-100
-        transition-all
-        duration-300
-        hover:-translate-y-1
-        hover:shadow-xl
-        hover:ring-pink-100
-      "
-    >
-      {/* Image Area */}
+    <article className="overflow-hidden rounded-3xl border border-pink-100 bg-white shadow-sm transition hover:shadow-xl">
       <button
         type="button"
         onClick={onView}
-        className="
-          relative
-          block
-          aspect-[3/4]
-          w-full
-          overflow-hidden
-          bg-gradient-to-br
-          from-pink-50
-          via-white
-          to-purple-50
-          text-left
-        "
+        className="group block w-full text-left"
+        aria-label={`View ${dress.characterName}`}
       >
-        <Image
-          src={mainImage}
-          alt={dress.characterName}
-          fill
-          sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 16vw"
-          className="
-            object-cover
-            transition
-            duration-500
-            group-hover:scale-105
-          "
-        />
+        <div className="relative aspect-[3/4] overflow-hidden bg-slate-100">
+          {mainImage ? (
+            <Image
+              src={mainImage.url}
+              alt={mainImage.altText ?? dress.characterName}
+              fill
+              className="object-cover transition duration-500 group-hover:scale-105"
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 16vw"
+            />
+          ) : (
+            <div className="flex h-full items-center justify-center text-xs font-bold text-slate-400">
+              No image
+            </div>
+          )}
 
-        {/* Image overlay */}
-        <div
-          className="
-            absolute
-            inset-0
-            bg-gradient-to-t
-            from-black/20
-            via-transparent
-            to-transparent
-            opacity-0
-            transition
-            duration-300
-            group-hover:opacity-100
-          "
-        />
-
-        {/* Category Badge */}
-        <span
-          className="
-            absolute
-            left-3
-            top-3
-            rounded-full
-            bg-white/90
-            px-3
-            py-1.5
-            text-xs
-            font-black
-            text-slate-800
-            shadow-sm
-            backdrop-blur
-          "
-        >
-          {dress.category}
-        </span>
-
-        {/* Price Badge */}
-        <span
-          className="
-            absolute
-            bottom-3
-            right-3
-            rounded-full
-            bg-gradient-to-r
-            from-pink-600
-            to-purple-600
-            px-3
-            py-1.5
-            text-sm
-            font-black
-            text-white
-            shadow-lg
-          "
-        >
-          ₹{selectedPrice}
-        </span>
-
-        {/* View button */}
-        <span
-          className="
-            absolute
-            bottom-3
-            left-3
-            rounded-full
-            bg-white/90
-            px-3
-            py-1.5
-            text-xs
-            font-bold
-            text-slate-800
-            opacity-0
-            shadow-md
-            backdrop-blur
-            transition
-            duration-300
-            group-hover:opacity-100
-          "
-        >
-          View Details
-        </span>
+          {dress.images.length > 1 && (
+            <span className="absolute right-3 top-3 rounded-full bg-slate-950/75 px-2.5 py-1 text-xs font-black text-white">
+              {dress.images.length} photos
+            </span>
+          )}
+        </div>
       </button>
 
-      {/* Card Content */}
       <div className="p-4">
-        {/* Dress name */}
+        <p className="text-[11px] font-black uppercase tracking-wider text-pink-600">
+          {dress.category}
+          {dress.subcategory ? ` · ${dress.subcategory}` : ""}
+        </p>
+
         <button
           type="button"
           onClick={onView}
-          className="w-full text-left"
+          className="mt-1 text-left text-base font-black text-slate-950 hover:text-pink-600"
         >
-          <h2 className="line-clamp-1 text-base font-black text-slate-950">
-            {dress.characterName}
-          </h2>
-
-          <p className="mt-1 line-clamp-2 min-h-[32px] text-xs font-medium leading-4 text-slate-500">
-            {dress.description}
-          </p>
+          {dress.characterName}
         </button>
 
-        {/* Size selection */}
-        <div className="mt-4">
-          <div className="mb-2 flex items-center justify-between">
-            <span className="text-xs font-black uppercase tracking-wide text-slate-500">
-              Select Size
-            </span>
+        {dress.sizes.length > 0 && (
+          <select
+            value={selectedSize}
+            onChange={(event) => onSizeChange(event.target.value)}
+            className="mt-3 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-bold outline-none focus:border-pink-400"
+            aria-label={`Size for ${dress.characterName}`}
+          >
+            {dress.sizes.map((size) => (
+              <option key={size.id} value={size.size}>
+                {size.size} — ₹{size.price}
+              </option>
+            ))}
+          </select>
+        )}
 
-            <span className="text-xs font-bold text-pink-600">
-              {selectedSize || 'Select'}
-            </span>
-          </div>
-
-          <div className="flex flex-wrap gap-2">
-            {dress.sizes.map((item) => {
-              const active = selectedSize === item.size;
-
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    onSizeChange(item.size);
-                  }}
-                  className={`
-                    min-w-10
-                    rounded-full
-                    border
-                    px-3
-                    py-1.5
-                    text-xs
-                    font-black
-                    transition-all
-                    duration-200
-                    ${
-                      active
-                        ? 'border-pink-600 bg-gradient-to-r from-pink-600 to-purple-600 text-white shadow-md'
-                        : 'border-slate-200 bg-white text-slate-700 hover:border-pink-300 hover:bg-pink-50 hover:text-pink-700'
-                    }
-                  `}
-                >
-                  {item.size}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Action buttons */}
-        <div className="mt-4 grid grid-cols-2 gap-2">
+        <div className="mt-3 flex items-center justify-between gap-2">
+          <p className="text-lg font-black text-slate-950">₹{selectedPrice}</p>
           <button
             type="button"
             onClick={onView}
-            className="
-              rounded-xl
-              border
-              border-slate-200
-              bg-white
-              px-3
-              py-2.5
-              text-xs
-              font-black
-              text-slate-700
-              transition
-              hover:border-pink-200
-              hover:bg-pink-50
-              hover:text-pink-700
-            "
+            className="rounded-full bg-slate-950 px-3 py-2 text-xs font-black text-white hover:bg-pink-600"
           >
-            View Details
+            View
           </button>
+        </div>
 
+        <div className="mt-3 grid grid-cols-3 gap-1.5">
           <a
             href={contactLinks.whatsapp}
             target="_blank"
-            rel="noopener noreferrer"
-            onClick={(event) => event.stopPropagation()}
-            className="
-              rounded-xl
-              bg-[#25D366]
-              px-3
-              py-2.5
-              text-center
-              text-xs
-              font-black
-              text-white
-              shadow-sm
-              transition
-              hover:-translate-y-0.5
-              hover:shadow-md
-            "
+            rel="noreferrer"
+            className="rounded-xl bg-green-50 px-2 py-2 text-center text-[10px] font-black text-green-700 hover:bg-green-100"
           >
             WhatsApp
+          </a>
+          <a
+            href={contactLinks.email}
+            className="rounded-xl bg-pink-50 px-2 py-2 text-center text-[10px] font-black text-pink-700 hover:bg-pink-100"
+          >
+            Email
+          </a>
+          <a
+            href={contactLinks.sms}
+            className="rounded-xl bg-slate-100 px-2 py-2 text-center text-[10px] font-black text-slate-700 hover:bg-slate-200"
+          >
+            SMS
           </a>
         </div>
       </div>
