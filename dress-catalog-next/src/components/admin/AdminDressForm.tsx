@@ -72,6 +72,17 @@ export default function AdminDressForm({ createDressAction }: Props) {
           accept="image/*"
           className="rounded-2xl border border-slate-300 bg-white p-3 md:col-span-2"
         />
+        <label className="text-sm font-bold text-slate-700 md:col-span-2">
+          Gallery Images
+        </label>
+
+        <input
+          name="galleryFiles"
+          type="file"
+          accept="image/*"
+          multiple
+          className="rounded-2xl border border-slate-300 bg-white p-3 md:col-span-2"
+        />
         <textarea
           name="description"
           placeholder="Description"

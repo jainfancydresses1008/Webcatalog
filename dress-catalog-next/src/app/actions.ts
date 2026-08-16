@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireAdminSession } from "@/lib/admin-auth";
 import {
@@ -34,6 +35,17 @@ export async function createDress(formData: FormData) {
   const characterName = String(formData.get("characterName") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim();
   const mainImageUrl = await getImageUrlFromForm(formData);
+  const galleryFiles = formData.getAll("galleryFiles");
+
+  const uploadedGalleryUrls: string[] = [];
+
+  for (const file of galleryFiles) {
+    if (file instanceof File && file.size > 0) {
+      const uploadedUrl = await uploadImageToCloudinary(file);
+
+      uploadedGalleryUrls.push(uploadedUrl);
+    }
+  }
   const galleryUrls = String(formData.get("galleryUrls") ?? "")
     .split("\n")
     .map((item) => item.trim())
@@ -54,7 +66,7 @@ export async function createDress(formData: FormData) {
     throw new Error("Sizes and prices must have the same count.");
   }
 
-  await prisma.dress.create({
+  const dress = await prisma.dress.create({
     data: {
       category,
       subcategory,
@@ -64,18 +76,21 @@ export async function createDress(formData: FormData) {
         create: sizes.map((size, index) => ({ size, price: prices[index] })),
       },
       images: {
-        create: [mainImageUrl, ...galleryUrls].map((url, index) => ({
-          url,
-          altText: `${characterName} dress image ${index + 1}`,
-          isMain: index === 0,
-          sortOrder: index,
-        })),
+        create: [mainImageUrl, ...uploadedGalleryUrls, ...galleryUrls].map(
+          (url, index) => ({
+            url,
+            altText: `${characterName} dress image ${index + 1}`,
+            isMain: index === 0,
+            sortOrder: index,
+          }),
+        ),
       },
     },
   });
 
   revalidatePath("/");
   revalidatePath("/admin/manage");
+  redirect(`/admin/edit/${dress.id}`);
 }
 
 export async function updateDressDetails(formData: FormData) {
@@ -106,7 +121,7 @@ export async function updateDressDetails(formData: FormData) {
   await prisma.$transaction([
     prisma.dress.update({
       where: { id: dressId },
-      data: { category,subcategory, characterName, description, isActive },
+      data: { category, subcategory, characterName, description, isActive },
     }),
     prisma.dressSize.deleteMany({ where: { dressId } }),
     prisma.dressSize.createMany({
