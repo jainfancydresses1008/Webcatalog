@@ -1,6 +1,5 @@
 "use client";
-
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 export type SearchSuggestion = {
   type: "character" | "category" | "subcategory";
@@ -41,13 +40,10 @@ export default function SearchFilters({
 }: Props) {
   const visibleCategories = [...new Set(categories.filter(Boolean))];
   const visibleSubcategories = [...new Set(subcategories.filter(Boolean))];
-  const searchRef = useRef<HTMLDivElement>(null);
-  const [isSearchFocused, setIsSearchFocused] = useState(false);
-
   const showSuggestions =
-    isSearchFocused &&
-    searchText.trim().length > 0 &&
-    (suggestionsLoading || suggestions.length > 0);
+    searchText.trim().length > 0 && suggestions.length > 0;
+
+  const searchRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -55,8 +51,8 @@ export default function SearchFilters({
         searchRef.current &&
         !searchRef.current.contains(event.target as Node)
       ) {
-        setIsSearchFocused(false);
-        const activeElement = document.activeElement as HTMLElement | null;
+        const activeElement = document.activeElement as HTMLElement;
+
         activeElement?.blur();
       }
     }
@@ -69,7 +65,7 @@ export default function SearchFilters({
   }, []);
 
   return (
-    <section className="w-full rounded-3xl border border-pink-100 bg-white p-4 shadow-sm md:p-5">
+    <section className="rounded-3xl border border-pink-100 bg-white p-4 shadow-sm md:p-5">
       {/* Live search */}
       <div className="relative" ref={searchRef}>
         <label
@@ -83,19 +79,13 @@ export default function SearchFilters({
           <input
             id="dress-search"
             value={searchText}
-            onFocus={() => setIsSearchFocused(true)}
-            onChange={(event) => {
-              setIsSearchFocused(true);
-              onSearchTextChange(event.target.value);
-            }}
+            onChange={(event) => onSearchTextChange(event.target.value)}
             onKeyDown={(event) => {
               if (event.key === "Enter") {
                 event.preventDefault();
-                setIsSearchFocused(false);
                 onSearchSubmit();
               }
               if (event.key === "Escape") {
-                setIsSearchFocused(false);
                 onSearchTextChange("");
               }
             }}
@@ -107,10 +97,7 @@ export default function SearchFilters({
           {searchText.trim() && (
             <button
               type="button"
-              onClick={() => {
-                setIsSearchFocused(false);
-                onSearchTextChange("");
-              }}
+              onClick={() => onSearchTextChange("")}
               className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full px-2 py-1 text-xs font-bold text-slate-400 hover:bg-slate-100 hover:text-slate-700"
             >
               Clear
@@ -122,18 +109,19 @@ export default function SearchFilters({
           <div className="absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl">
             {suggestionsLoading ? (
               <div className="px-4 py-4 text-sm text-slate-500">
-                Looking for matches...
+                Looking for matches…
               </div>
-            ) : (
+            ) : suggestions.length > 0 ? (
               <div className="max-h-80 overflow-y-auto py-2">
+                <p className="px-4 pb-2 pt-1 text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">
+                  Possible matches
+                </p>
+
                 {suggestions.map((suggestion, index) => (
                   <button
-                    key={`${suggestion.type}-${suggestion.value}-${suggestion.category ?? ""}-${suggestion.subcategory ?? ""}-${index}`}
+                    key={`${suggestion.type}-${suggestion.value}-${index}`}
                     type="button"
-                    onClick={() => {
-                      setIsSearchFocused(false);
-                      onSuggestionSelect(suggestion);
-                    }}
+                    onClick={() => onSuggestionSelect(suggestion)}
                     className="flex w-full items-center gap-3 px-4 py-3 text-left transition hover:bg-pink-50"
                   >
                     <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-sm">
@@ -163,6 +151,19 @@ export default function SearchFilters({
                     <span className="text-slate-300">→</span>
                   </button>
                 ))}
+              </div>
+            ) : (
+              <div className="px-4 py-4">
+                <p className="text-sm font-semibold text-slate-600">
+                  No matching suggestions
+                </p>
+                <button
+                  type="button"
+                  onClick={onSearchSubmit}
+                  className="mt-1 text-xs font-bold text-pink-600 hover:text-pink-700"
+                >
+                  Search for “{searchText.trim()}” anyway
+                </button>
               </div>
             )}
           </div>

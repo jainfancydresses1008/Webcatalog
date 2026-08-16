@@ -33,28 +33,6 @@ const heroImages = [
   { src: "/images/hero/fairy.svg", title: "Fairy Costume" },
 ];
 
-function cleanFilterValue(value?: string | null) {
-  if (!value || value.trim() === "") return "All";
-  return value;
-}
-
-function dedupeSuggestions(items: SearchSuggestion[]) {
-  const seen = new Set<string>();
-
-  return items.filter((item) => {
-    const key = [
-      item.type,
-      item.value?.trim().toLowerCase(),
-      item.category?.trim().toLowerCase() ?? "",
-      item.subcategory?.trim().toLowerCase() ?? "",
-    ].join("|");
-
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  });
-}
-
 export default function DressCatalogClient({
   dresses,
   sellerPhone,
@@ -99,21 +77,16 @@ export default function DressCatalogClient({
     nextPage = 1,
   ) {
     const params = new URLSearchParams();
-
     if (nextSearch.trim()) params.set("search", nextSearch.trim());
-
     if (nextCategory && nextCategory !== "All") {
       params.set("category", nextCategory);
     }
-
     if (nextSubcategory && nextSubcategory !== "All") {
       params.set("subcategory", nextSubcategory);
     }
-
     if (nextPage > 1) params.set("page", String(nextPage));
-
     const query = params.toString();
-    router.push(query ? `${pathname}?${query}` : pathname, { scroll: false });
+    router.push(query ? `${pathname}?${query}` : pathname, {scroll: false,});
   }
 
   function handleSearch(value: string) {
@@ -121,65 +94,61 @@ export default function DressCatalogClient({
   }
 
   function submitSearch(value = searchText) {
-    const trimmedValue = value.trim();
-    const exactSuggestion = suggestions.find(
-      (suggestion) =>
-        suggestion.value.trim().toLowerCase() === trimmedValue.toLowerCase(),
-    );
-
-    if (exactSuggestion) {
-      handleSuggestionSelect(exactSuggestion);
-      return;
-    }
-
     setSearchText(value);
     setSuggestions([]);
     navigate(value, selectedCategory, selectedSubcategory, 1);
   }
 
   function handleSuggestionSelect(suggestion: SearchSuggestion) {
-    const nextSearch = suggestion.value;
-
-    categoryScrollYRef.current = window.scrollY;
-    setSearchText(nextSearch);
+    setSearchText(suggestion.value);
     setSuggestions([]);
-
     if (suggestion.type === "category") {
-      setSelectedCategory(suggestion.value);
-      setSelectedSubcategory("All");
-      navigate(nextSearch, suggestion.value, "All", 1);
+      handleCategory(suggestion.value);
       return;
     }
+if (suggestion.type === "subcategory" && suggestion.category) {
+  setSelectedCategory(suggestion.category);
+  setSelectedSubcategory(suggestion.value);
+  navigate(
+    suggestion.value,
+    suggestion.category,
+    suggestion.value,
+    1
+  );
+  return;
+}
 
-    if (suggestion.type === "subcategory") {
-      const nextCategory = cleanFilterValue(suggestion.category);
-      setSelectedCategory(nextCategory);
-      setSelectedSubcategory(suggestion.value);
-      navigate(nextSearch, nextCategory, suggestion.value, 1);
-      return;
-    }
+if (suggestion.type === "character") {
+  const category = suggestion.category ?? "All";
+  const subcategory = suggestion.subcategory ?? "All";
 
-    if (suggestion.type === "character") {
-      const nextCategory = cleanFilterValue(suggestion.category);
-      const nextSubcategory = cleanFilterValue(suggestion.subcategory);
-      setSelectedCategory(nextCategory);
-      setSelectedSubcategory(nextSubcategory);
-      navigate(nextSearch, nextCategory, nextSubcategory, 1);
-      return;
-    }
+  setSelectedCategory(category);
+  setSelectedSubcategory(subcategory);
 
-    navigate(nextSearch, selectedCategory, selectedSubcategory, 1);
+  navigate(
+    suggestion.value,
+    category,
+    subcategory,
+    1
+  );
+  return;
+}
+
+navigate(
+  suggestion.value,
+  selectedCategory,
+  selectedSubcategory,
+  1
+);
   }
 
   useEffect(() => {
     const query = searchText.trim();
-
     if (!query) {
       setSuggestions([]);
       setSuggestionsLoading(false);
       return;
     }
-
     const controller = new AbortController();
     const timer = window.setTimeout(async () => {
       try {
@@ -191,17 +160,14 @@ export default function DressCatalogClient({
             cache: "no-store",
           },
         );
-
         if (!response.ok) {
           setSuggestions([]);
           return;
         }
-
         const data = (await response.json()) as {
           suggestions?: SearchSuggestion[];
         };
-
-        setSuggestions(dedupeSuggestions(data.suggestions ?? []));
+        setSuggestions(data.suggestions ?? []);
       } catch (error) {
         if ((error as Error).name !== "AbortError") {
           setSuggestions([]);
@@ -210,7 +176,6 @@ export default function DressCatalogClient({
         setSuggestionsLoading(false);
       }
     }, 220);
-
     return () => {
       window.clearTimeout(timer);
       controller.abort();
@@ -235,12 +200,10 @@ export default function DressCatalogClient({
   useEffect(() => {
     const savedScrollY = categoryScrollYRef.current;
     if (savedScrollY === null) return;
-
     const frame = window.requestAnimationFrame(() => {
       window.scrollTo({ top: savedScrollY, left: 0, behavior: "auto" });
       categoryScrollYRef.current = null;
     });
-
     return () => window.cancelAnimationFrame(frame);
   }, [initialCategory, initialSubcategory, initialSearch, page]);
 
@@ -264,7 +227,6 @@ Character Name: ${dress.characterName}
 Selected Size: ${selected?.size ?? ""}
 Price: ₹${selected?.price ?? ""}`;
     const msg = encodeURIComponent(message);
-
     return {
       whatsapp: `https://wa.me/${sellerPhone}?text=${msg}`,
       email: `mailto:${sellerEmail}?subject=${encodeURIComponent(
@@ -410,9 +372,12 @@ Price: ₹${selected?.price ?? ""}`;
         </div>
       </section>
 
-      <section id="catalog" className="w-full px-4 py-10 md:px-8 md:py-14">
+      <section
+        id="catalog"
+        className="mx-auto max-w-7xl px-4 py-10 md:px-8 md:py-14"
+      >
         <div className="mb-7">
-          <div className="mx-auto max-w-7xl">
+          <div>
             <p className="text-sm font-bold uppercase tracking-[0.2em] text-pink-600">
               Explore Collection
             </p>
@@ -423,8 +388,7 @@ Price: ₹${selected?.price ?? ""}`;
               Browse by category, subcategory, character and description.
             </p>
           </div>
-
-          <div className="relative z-10 mt-10 w-full rounded-[2rem] border border-white/80 bg-white/90 p-4 shadow-xl backdrop-blur">
+          <div className="relative z-10 mx-auto mt-10 w-full rounded-[2rem] border border-white/80 bg-white/90 p-4 shadow-xl backdrop-blur">
             <SearchFilters
               categories={categories}
               subcategories={subcategories}
@@ -440,8 +404,7 @@ Price: ₹${selected?.price ?? ""}`;
               onSelectedSubcategoryChange={handleSubcategory}
             />
           </div>
-
-          <div className="mt-5 inline-flex rounded-full bg-white px-4 py-2 text-sm font-bold text-slate-600 shadow-sm ring-1 ring-slate-100">
+          <div className="rounded-full bg-white px-4 py-2 text-sm font-bold text-slate-600 shadow-sm ring-1 ring-slate-100">
             {firstItem}-{lastItem} of {total} dresses
           </div>
         </div>

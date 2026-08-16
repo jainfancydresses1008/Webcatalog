@@ -1,15 +1,23 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   margin: 0;
-  background: #f8fafc;
+  background: #fff9fc;
 }
+
 button,
 input,
-textarea {
+textarea,
+select {
   font: inherit;
 }
+
 @keyframes marquee {
   from {
     transform: translateX(100%);
@@ -22,6 +30,17 @@ textarea {
 
 .animate-marquee {
   display: inline-block;
+  white-space: nowrap;
   min-width: max-content;
-  animation: marquee 18s linear infinite;
+  animation: marquee 40s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .animate-marquee {
+    animation: none;
+  }
 }

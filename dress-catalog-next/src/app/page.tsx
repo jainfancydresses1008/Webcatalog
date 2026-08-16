@@ -84,12 +84,9 @@ async function getCatalog(searchParams: SearchParams) {
       }),
       prisma.siteStats.upsert({
         where: { id: 1 },
-        create: { id: 1, visitorCount: 1 },
-        update: { visitorCount: { increment: 1 } },
+        create: { id: 1, visitorCount: 0 },
+        update: {},
       }),
-      // This is the homepage's total costume count. It intentionally does NOT
-      // use the current category/search filter, so adding a new active dress
-      // automatically increases the number shown in the hero after refresh.
       prisma.dress.count({ where: { isActive: true } }),
     ]);
 
@@ -128,9 +125,7 @@ export default async function HomePage({
     return (
       <DressCatalogClient
         dresses={catalog.dresses}
-        sellerPhone={
-          process.env.NEXT_PUBLIC_SELLER_PHONE ?? "919999999999"
-        }
+        sellerPhone={process.env.NEXT_PUBLIC_SELLER_PHONE ?? "919999999999"}
         sellerEmail={
           process.env.NEXT_PUBLIC_SELLER_EMAIL ?? "seller@example.com"
         }

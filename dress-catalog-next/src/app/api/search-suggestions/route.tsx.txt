@@ -18,7 +18,10 @@ export async function GET(request: Request) {
       prisma.dress.findMany({
         where: {
           isActive: true,
-          OR: [{ characterName: contains }, { description: contains }],
+          OR: [
+            { characterName: contains },
+            { description: contains },
+          ],
         },
         select: {
           characterName: true,
@@ -29,6 +32,7 @@ export async function GET(request: Request) {
         orderBy: { characterName: "asc" },
         take: 6,
       }),
+
       prisma.dress.findMany({
         where: {
           isActive: true,
@@ -39,6 +43,7 @@ export async function GET(request: Request) {
         orderBy: { category: "asc" },
         take: 5,
       }),
+
       prisma.dress.findMany({
         where: {
           isActive: true,
@@ -54,21 +59,17 @@ export async function GET(request: Request) {
       }),
     ]);
 
-    const rawSuggestions = [
-      ...characters
-        .filter((item) => item.characterName)
-        .map((item) => ({
-          type: "character" as const,
-          value: item.characterName,
-          category: item.category,
-          subcategory: item.subcategory,
-        })),
-      ...categories
-        .filter((item) => item.category)
-        .map((item) => ({
-          type: "category" as const,
-          value: item.category,
-        })),
+    const suggestions = [
+      ...characters.map((item) => ({
+        type: "character" as const,
+        value: item.characterName,
+        category: item.category,
+        subcategory: item.subcategory,
+      })),
+      ...categories.map((item) => ({
+        type: "category" as const,
+        value: item.category,
+      })),
       ...subcategories
         .filter((item) => item.subcategory)
         .map((item) => ({
@@ -77,13 +78,6 @@ export async function GET(request: Request) {
           category: item.category,
         })),
     ];
-
-    const seen = new Set<string>();
-    const suggestions = Array.from(
-      new Map(
-        rawSuggestions.map((item) => [`${item.type}-${item.value}`, item]),
-      ).values(),
-    );
 
     return NextResponse.json({ suggestions });
   } catch (error) {
