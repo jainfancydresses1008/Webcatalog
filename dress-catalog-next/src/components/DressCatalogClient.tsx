@@ -73,13 +73,11 @@ export default function DressCatalogClient({
 }: Props) {
   const router = useRouter();
   const pathname = usePathname();
-  const [searchText, setSearchText] = useState(initialSearch);
-  const [selectedCategory, setSelectedCategory] = useState(
-    initialCategory || "All",
-  );
-  const [selectedSubcategory, setSelectedSubcategory] = useState(
-    initialSubcategory || "All",
-  );
+  const [searchText, setSearchText] = useState("");
+
+  const [selectedCategory, setSelectedCategory] = useState("All");
+
+  const [selectedSubcategory, setSelectedSubcategory] = useState("All");
   const [selectedDress, setSelectedDress] = useState<DressDto | null>(null);
   const categoryScrollYRef = useRef<number | null>(null);
   const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
@@ -91,30 +89,63 @@ export default function DressCatalogClient({
   );
 
   const shopName = process.env.NEXT_PUBLIC_SHOP_NAME || "Jain Fancy Dresses";
-
-  function navigate(
-    nextSearch = searchText,
-    nextCategory = selectedCategory,
-    nextSubcategory = selectedSubcategory,
-    nextPage = 1,
-  ) {
-    const params = new URLSearchParams();
-
-    if (nextSearch.trim()) params.set("search", nextSearch.trim());
-
-    if (nextCategory && nextCategory !== "All") {
-      params.set("category", nextCategory);
-    }
-
-    if (nextSubcategory && nextSubcategory !== "All") {
-      params.set("subcategory", nextSubcategory);
-    }
-
-    if (nextPage > 1) params.set("page", String(nextPage));
-
-    const query = params.toString();
-    router.push(query ? `${pathname}?${query}` : pathname, { scroll: false });
+  function resetFilters() {
+    setSearchText("");
+    setSelectedCategory("All");
+    setSelectedSubcategory("All");
+    setSuggestions([]);
   }
+  useEffect(() => {
+    const goHome = () => {
+      resetFilters();
+
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+    };
+
+    window.addEventListener("jfd-home", goHome as EventListener);
+
+    return () => {
+      window.removeEventListener("jfd-home", goHome as EventListener);
+    };
+  }, []);
+  useEffect(() => {
+    window.history.replaceState({}, "", window.location.pathname);
+  }, []);
+
+function navigate(
+  nextSearch = searchText,
+  nextCategory = selectedCategory,
+  nextSubcategory = selectedSubcategory,
+  nextPage = 1,
+) {
+  const params = new URLSearchParams();
+
+  if (nextSearch.trim()) {
+    params.set("search", nextSearch.trim());
+  }
+
+  if (nextCategory && nextCategory !== "All") {
+    params.set("category", nextCategory);
+  }
+
+  if (nextSubcategory && nextSubcategory !== "All") {
+    params.set("subcategory", nextSubcategory);
+  }
+
+  if (nextPage > 1) {
+    params.set("page", String(nextPage));
+  }
+
+  const query = params.toString();
+
+  router.push(
+    query ? `${pathname}?${query}` : pathname,
+    { scroll: false },
+  );
+}
 
   function handleSearch(value: string) {
     setSearchText(value);
@@ -479,7 +510,13 @@ Price: ₹${selected?.price ?? ""}`;
                     selectedSize={selected?.size ?? ""}
                     selectedPrice={selected?.price ?? 0}
                     onSizeChange={(size) => updateSize(dress.id, size)}
-                    onView={() => setSelectedDress(dress)}
+                    onView={() => {
+                      resetFilters();
+
+                      setTimeout(() => {
+                        setSelectedDress(dress);
+                      }, 0);
+                    }}
                     contactLinks={links(dress)}
                   />
                 </div>

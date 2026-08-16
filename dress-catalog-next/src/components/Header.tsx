@@ -56,9 +56,16 @@ export default function Header() {
         </Link>
 
         <nav className="hidden items-center gap-7 text-sm font-bold text-slate-600 md:flex">
-          <Link href="/" prefetch={true} className="text-pink-600">
+          <Link
+            href="/"
+            prefetch={true}
+            className="text-pink-600"
+            onClick={() => {
+              sessionStorage.setItem("resetFilters", "true");
+            }}
+          >
             Home
-          </Link>
+          </Link>{" "}
           <a href="#catalog" className="transition hover:text-pink-600">
             Dresses
           </a>
@@ -77,7 +84,7 @@ export default function Header() {
             WhatsApp Us
           </a>
 
-          <div className="relative" ref = {menuRef}>
+          <div className="relative" ref={menuRef}>
             <button
               type="button"
               onClick={() => setMenuOpen((current) => !current)}
