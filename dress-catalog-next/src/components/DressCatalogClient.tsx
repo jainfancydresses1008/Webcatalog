@@ -39,20 +39,14 @@ function cleanFilterValue(value?: string | null) {
 }
 
 function dedupeSuggestions(items: SearchSuggestion[]) {
-  const seen = new Set<string>();
-
-  return items.filter((item) => {
-    const key = [
-      item.type,
-      item.value?.trim().toLowerCase(),
-      item.category?.trim().toLowerCase() ?? "",
-      item.subcategory?.trim().toLowerCase() ?? "",
-    ].join("|");
-
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  });
+  return Array.from(
+    new Map(
+      items.map((item) => [
+        `${item.type}-${item.value.trim().toLowerCase()}`,
+        item,
+      ]),
+    ).values(),
+  );
 }
 
 export default function DressCatalogClient({
@@ -73,11 +67,13 @@ export default function DressCatalogClient({
 }: Props) {
   const router = useRouter();
   const pathname = usePathname();
-  const [searchText, setSearchText] = useState("");
-
-  const [selectedCategory, setSelectedCategory] = useState("All");
-
-  const [selectedSubcategory, setSelectedSubcategory] = useState("All");
+  const [searchText, setSearchText] = useState(initialSearch || "");
+  const [selectedCategory, setSelectedCategory] = useState(
+    initialCategory || "All",
+  );
+  const [selectedSubcategory, setSelectedSubcategory] = useState(
+    initialSubcategory || "All",
+  );
   const [selectedDress, setSelectedDress] = useState<DressDto | null>(null);
   const categoryScrollYRef = useRef<number | null>(null);
   const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
@@ -89,34 +85,58 @@ export default function DressCatalogClient({
   );
 
   const shopName = process.env.NEXT_PUBLIC_SHOP_NAME || "Jain Fancy Dresses";
-  function resetFilters() {
+
+  function clearFilterState() {
     setSearchText("");
     setSelectedCategory("All");
     setSelectedSubcategory("All");
     setSuggestions([]);
-
-    router.push("/", {
-      scroll: false,
-    });
   }
+
+  function resetFilters() {
+    clearFilterState();
+    router.replace("/", { scroll: false });
+  }
+
+  function scrollToSection(id: string) {
+    window.setTimeout(() => {
+      document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+    }, 100);
+  }
+
   useEffect(() => {
     const goHome = () => {
       resetFilters();
+      window.setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }, 100);
+    };
 
-      window.scrollTo({
-        top: 0,
-        behavior: "smooth",
-      });
+    const goDresses = () => {
+      resetFilters();
+      scrollToSection("catalog");
+    };
+
+    const goContact = () => {
+      resetFilters();
+      scrollToSection("contact");
     };
 
     window.addEventListener("jfd-home", goHome as EventListener);
+    window.addEventListener("jfd-dresses", goDresses as EventListener);
+    window.addEventListener("jfd-contact", goContact as EventListener);
 
     return () => {
       window.removeEventListener("jfd-home", goHome as EventListener);
+      window.removeEventListener("jfd-dresses", goDresses as EventListener);
+      window.removeEventListener("jfd-contact", goContact as EventListener);
     };
   }, []);
+
   useEffect(() => {
-    window.history.replaceState({}, "", window.location.pathname);
+    if (window.location.search) {
+      window.history.replaceState({}, "", window.location.pathname);
+    }
   }, []);
 
   function navigate(
@@ -144,7 +164,6 @@ export default function DressCatalogClient({
     }
 
     const query = params.toString();
-
     router.push(query ? `${pathname}?${query}` : pathname, { scroll: false });
   }
 
@@ -349,12 +368,16 @@ Price: ₹${selected?.price ?? ""}`;
               </p>
 
               <div className="mt-7 flex flex-wrap gap-3">
-                <a
-                  href="#catalog"
+                <button
+                  type="button"
+                  onClick={() => {
+                    resetFilters();
+                    scrollToSection("catalog");
+                  }}
                   className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-pink-600 to-fuchsia-600 px-6 py-3 text-sm font-black text-white shadow-lg shadow-pink-200 transition hover:-translate-y-0.5 hover:shadow-xl"
                 >
                   Browse Collection →
-                </a>
+                </button>
               </div>
 
               <div className="mt-7 grid grid-cols-2 gap-3 sm:flex sm:flex-wrap">
@@ -513,10 +536,9 @@ Price: ₹${selected?.price ?? ""}`;
                     onSizeChange={(size) => updateSize(dress.id, size)}
                     onView={() => {
                       resetFilters();
-
-                      setTimeout(() => {
+                      window.setTimeout(() => {
                         setSelectedDress(dress);
-                      }, 0);
+                      }, 50);
                     }}
                     contactLinks={links(dress)}
                   />
@@ -606,12 +628,16 @@ Price: ₹${selected?.price ?? ""}`;
                 Select a dress and contact us directly from the dress card.
               </p>
             </div>
-            <a
-              href="#contact"
+            <button
+              type="button"
+              onClick={() => {
+                resetFilters();
+                scrollToSection("contact");
+              }}
               className="inline-flex w-fit items-center justify-center rounded-full bg-white px-6 py-3 text-sm font-black text-pink-700 shadow-lg transition hover:-translate-y-0.5 hover:shadow-xl"
             >
               Contact Us →
-            </a>
+            </button>
           </div>
         </div>
       </section>
@@ -645,15 +671,36 @@ Price: ₹${selected?.price ?? ""}`;
             <div>
               <h3 className="font-black text-slate-900">Browse</h3>
               <div className="mt-3 space-y-2 text-sm text-slate-500">
-                <a href="#catalog" className="block hover:text-pink-600">
+                <button
+                  type="button"
+                  onClick={() => {
+                    resetFilters();
+                    scrollToSection("catalog");
+                  }}
+                  className="block hover:text-pink-600"
+                >
                   Dress Catalog
-                </a>
-                <a href="#catalog" className="block hover:text-pink-600">
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    resetFilters();
+                    scrollToSection("catalog");
+                  }}
+                  className="block hover:text-pink-600"
+                >
                   Categories
-                </a>
-                <a href="#contact" className="block hover:text-pink-600">
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    resetFilters();
+                    scrollToSection("contact");
+                  }}
+                  className="block hover:text-pink-600"
+                >
                   Contact Us
-                </a>
+                </button>
               </div>
             </div>
             <div>

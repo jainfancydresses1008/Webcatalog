@@ -94,24 +94,82 @@ export default function DressCatalogClient({
     setSelectedCategory("All");
     setSelectedSubcategory("All");
     setSuggestions([]);
+
+    router.push("/", {
+      scroll: false,
+    });
   }
   useEffect(() => {
-    const shouldReset = sessionStorage.getItem("resetFilters");
-
-    if (shouldReset === "true") {
+    const goHome = () => {
       resetFilters();
-
-      sessionStorage.removeItem("resetFilters");
 
       window.scrollTo({
         top: 0,
         behavior: "smooth",
       });
-    }
+    };
+    useEffect(() => {
+      const goContact = () => {
+        resetFilters();
+
+        setTimeout(() => {
+          document.getElementById("contact")?.scrollIntoView({
+            behavior: "smooth",
+          });
+        }, 100);
+      };
+
+      window.addEventListener("jfd-contact", goContact as EventListener);
+
+      return () => {
+        window.removeEventListener("jfd-contact", goContact as EventListener);
+      };
+    }, []);
+    useEffect(() => {
+      const goContact = () => {
+        resetFilters();
+
+        setTimeout(() => {
+          document.getElementById("contact")?.scrollIntoView({
+            behavior: "smooth",
+          });
+        }, 100);
+      };
+
+      window.addEventListener("jfd-contact", goContact as EventListener);
+
+      return () => {
+        window.removeEventListener("jfd-contact", goContact as EventListener);
+      };
+    }, []);
+
+    useEffect(() => {
+      const goContact = () => {
+        resetFilters();
+
+        setTimeout(() => {
+          document.getElementById("contact")?.scrollIntoView({
+            behavior: "smooth",
+          });
+        }, 100);
+      };
+
+      window.addEventListener("jfd-contact", goContact as EventListener);
+
+      return () => {
+        window.removeEventListener("jfd-contact", goContact as EventListener);
+      };
+    }, []);
+    window.addEventListener("jfd-home", goHome as EventListener);
+
+    return () => {
+      window.removeEventListener("jfd-home", goHome as EventListener);
+    };
   }, []);
   useEffect(() => {
     window.history.replaceState({}, "", window.location.pathname);
   }, []);
+
   function navigate(
     nextSearch = searchText,
     nextCategory = selectedCategory,
@@ -120,7 +178,9 @@ export default function DressCatalogClient({
   ) {
     const params = new URLSearchParams();
 
-    if (nextSearch.trim()) params.set("search", nextSearch.trim());
+    if (nextSearch.trim()) {
+      params.set("search", nextSearch.trim());
+    }
 
     if (nextCategory && nextCategory !== "All") {
       params.set("category", nextCategory);
@@ -130,9 +190,12 @@ export default function DressCatalogClient({
       params.set("subcategory", nextSubcategory);
     }
 
-    if (nextPage > 1) params.set("page", String(nextPage));
+    if (nextPage > 1) {
+      params.set("page", String(nextPage));
+    }
 
     const query = params.toString();
+
     router.push(query ? `${pathname}?${query}` : pathname, { scroll: false });
   }
 
@@ -501,7 +564,10 @@ Price: ₹${selected?.price ?? ""}`;
                     onSizeChange={(size) => updateSize(dress.id, size)}
                     onView={() => {
                       resetFilters();
-                      setSelectedDress(dress);
+
+                      setTimeout(() => {
+                        setSelectedDress(dress);
+                      }, 50);
                     }}
                     contactLinks={links(dress)}
                   />

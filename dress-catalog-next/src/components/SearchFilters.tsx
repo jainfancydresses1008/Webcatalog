@@ -70,7 +70,6 @@ export default function SearchFilters({
 
   return (
     <section className="w-full rounded-3xl border border-pink-100 bg-white p-4 shadow-sm md:p-5">
-      {/* Live search */}
       <div className="relative" ref={searchRef}>
         <label
           htmlFor="dress-search"
@@ -94,6 +93,7 @@ export default function SearchFilters({
                 setIsSearchFocused(false);
                 onSearchSubmit();
               }
+
               if (event.key === "Escape") {
                 setIsSearchFocused(false);
                 onSearchTextChange("");
@@ -169,7 +169,6 @@ export default function SearchFilters({
         )}
       </div>
 
-      {/* Categories - scalable selector for many categories */}
       <div className="mt-5">
         <div className="mb-2 flex items-end justify-between gap-3">
           <div>
@@ -212,7 +211,6 @@ export default function SearchFilters({
         </div>
       </div>
 
-      {/* Subcategories only for the selected category */}
       {selectedCategory !== "All" && visibleSubcategories.length > 0 && (
         <div className="mt-4 rounded-2xl border border-pink-100 bg-pink-50/50 p-3">
           <div className="mb-2 flex items-center gap-2">

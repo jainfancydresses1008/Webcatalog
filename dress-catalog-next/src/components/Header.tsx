@@ -7,16 +7,15 @@ import { useEffect, useRef, useState } from "react";
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-
   const shopName = process.env.NEXT_PUBLIC_SHOP_NAME || "Jain Fancy Dresses";
   const tagline =
     process.env.NEXT_PUBLIC_SHOP_TAGLINE ||
     "Fancy dress collection for kids, school events and parties";
   const sellerPhone = process.env.NEXT_PUBLIC_SELLER_PHONE || "919999999999";
-
   const whatsappMessage = encodeURIComponent(
     "Hello, I want to know more about Jain Fancy Dresses.",
   );
+
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -30,10 +29,17 @@ export default function Header() {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
   return (
     <header className="sticky top-0 z-50 border-b border-pink-100/80 bg-white/90 shadow-sm backdrop-blur-xl">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 md:px-8">
-        <Link href="/" className="flex min-w-0 items-center gap-3">
+        <button
+          type="button"
+          className="flex min-w-0 items-center gap-3 text-left"
+          onClick={() => {
+            window.dispatchEvent(new CustomEvent("jfd-home"));
+          }}
+        >
           <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-2xl bg-white shadow-md ring-1 ring-pink-100">
             <Image
               src="/images/logo_r.png"
@@ -44,7 +50,6 @@ export default function Header() {
               priority
             />
           </div>
-
           <div className="min-w-0 leading-tight">
             <p className="truncate text-lg font-black tracking-tight text-slate-950 md:text-2xl">
               {shopName}
@@ -53,7 +58,7 @@ export default function Header() {
               {tagline}
             </p>
           </div>
-        </Link>
+        </button>
 
         <nav className="hidden items-center gap-7 text-sm font-bold text-slate-600 md:flex">
           <button
@@ -64,13 +69,27 @@ export default function Header() {
             }}
           >
             Home
-          </button>{" "}
-          <a href="#catalog" className="transition hover:text-pink-600">
+          </button>
+
+          <button
+            type="button"
+            className="transition hover:text-pink-600"
+            onClick={() => {
+              window.dispatchEvent(new CustomEvent("jfd-dresses"));
+            }}
+          >
             Dresses
-          </a>
-          <a href="#contact" className="transition hover:text-pink-600">
+          </button>
+
+          <button
+            type="button"
+            className="transition hover:text-pink-600"
+            onClick={() => {
+              window.dispatchEvent(new CustomEvent("jfd-contact"));
+            }}
+          >
             Contact Us
-          </a>
+          </button>
         </nav>
 
         <div className="flex shrink-0 items-center gap-2">
@@ -116,13 +135,17 @@ export default function Header() {
                 >
                   Admin Login
                 </Link>
-                <a
-                  href="#catalog"
-                  onClick={() => setMenuOpen(false)}
-                  className="block rounded-2xl px-4 py-3 text-sm font-black text-slate-800 transition hover:bg-pink-50 hover:text-pink-700 md:hidden"
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMenuOpen(false);
+                    window.dispatchEvent(new CustomEvent("jfd-dresses"));
+                  }}
+                  className="block w-full rounded-2xl px-4 py-3 text-left text-sm font-black text-slate-800 transition hover:bg-pink-50 hover:text-pink-700 md:hidden"
                 >
                   View Dresses
-                </a>
+                </button>
               </div>
             )}
           </div>
