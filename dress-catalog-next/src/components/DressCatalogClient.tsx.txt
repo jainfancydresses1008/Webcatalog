@@ -352,23 +352,19 @@ Price: ₹${selected?.price ?? ""}`;
             </div>
           </div>
 
-          <div className="grid items-center gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-14">
-            <div className="max-w-2xl">
-              <div className="inline-flex items-center gap-2 rounded-full border border-pink-100 bg-white/80 px-4 py-2 text-xs font-black uppercase tracking-[0.2em] text-pink-600 shadow-sm">
-                <span aria-hidden="true">✦</span>
-                India's Premium
-              </div>
-
-              <h1 className="mt-6 text-4xl font-black leading-[1.02] tracking-tight text-slate-950 sm:text-5xl md:text-6xl">
-                Fancy Dress
+          <div className="grid items-center gap-10 lg:grid-cols-[1.08fr_0.92fr] lg:gap-14">
+            <div>
+              <h1 className="max-w-4xl text-3xl font-black leading-[1.02] tracking-tight text-slate-950 sm:text-4xl md:text-5xl lg:text-6xl">
+                Premium Fancy Dress
                 <span className="mt-2 block bg-gradient-to-r from-pink-600 via-fuchsia-600 to-purple-600 bg-clip-text text-transparent">
                   Collection
                 </span>
               </h1>
 
-              <p className="mt-5 max-w-xl text-base leading-8 text-slate-600 md:text-lg">
-                Beautiful costumes for school events, annual functions, theme
-                parties, competitions and cultural celebrations.
+              <p className="mt-5 max-w-2xl text-lg leading-8 text-slate-600">
+                Browse 1000+ costumes designed for school events, annual
+                functions, theme parties, cultural programs, competitions and
+                celebrations across dozens of categories.
               </p>
 
               <div className="mt-7 grid grid-cols-2 gap-3 sm:flex sm:flex-wrap">
@@ -392,31 +388,58 @@ Price: ₹${selected?.price ?? ""}`;
 
                 <VisitorCounter initialCount={visitorCount} />
               </div>
+
+              <div className="mt-7 grid gap-3 text-sm font-bold text-slate-600 sm:grid-cols-2">
+                <div className="flex items-center gap-2">
+                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-pink-100 text-pink-700">
+                    ✓
+                  </span>
+                  Premium quality costumes
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-purple-100 text-purple-700">
+                    ✓
+                  </span>
+                  School event ready collection
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-amber-100 text-amber-700">
+                    ✓
+                  </span>
+                  Multiple sizes and prices
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-green-100 text-green-700">
+                    ✓
+                  </span>
+                  Easy inquiry from dress cards
+                </div>
+              </div>
             </div>
 
-            <div className="relative">
-              <div className="absolute -inset-4 rounded-[3rem] bg-gradient-to-br from-pink-300/25 via-fuchsia-200/20 to-purple-300/25 blur-2xl" />
-              <div className="relative overflow-hidden rounded-[2.5rem] border border-white/80 bg-white/80 p-4 shadow-2xl backdrop-blur">
-                <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4">
+            <div className="flex justify-center lg:justify-end">
+              <div className="relative w-full max-w-lg">
+                <div className="absolute -inset-5 rounded-[3rem] bg-gradient-to-br from-pink-400/30 via-fuchsia-400/20 to-purple-400/30 blur-2xl" />
+                <div className="relative grid grid-cols-2 gap-4 rounded-[2.5rem] border border-white/80 bg-white/75 p-4 shadow-2xl backdrop-blur">
                   {heroImages.map((item, index) => (
                     <div
                       key={item.src}
-                      className={`relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-pink-50 to-white shadow-lg ring-1 ring-pink-100 ${
-                        index % 2 === 1 ? "sm:mt-8 lg:mt-8 xl:mt-8" : ""
-                      }`}
+                      className={`relative overflow-hidden rounded-[2rem] bg-white shadow-lg ring-1 ring-pink-100 ${
+                        index === 1 ? "mt-8" : ""
+                      } ${index === 2 ? "-mt-4" : ""}`}
                     >
-                      <div className="relative aspect-[4/5] w-full">
+                      <div className="relative aspect-[4/5] w-full bg-pink-50">
                         <Image
                           src={item.src}
                           alt={item.title}
                           fill
-                          sizes="(max-width: 768px) 45vw, 180px"
+                          sizes="(max-width: 768px) 45vw, 260px"
                           className="object-cover"
                           priority={index < 2}
                         />
                       </div>
-                      <div className="absolute inset-x-3 bottom-3 rounded-2xl bg-white/90 px-3 py-2 text-center shadow-sm backdrop-blur">
-                        <p className="truncate text-xs font-black text-slate-800">
+                      <div className="absolute inset-x-3 bottom-3 rounded-2xl bg-white/90 px-3 py-2 text-left shadow-md backdrop-blur">
+                        <p className="truncate text-xs font-black text-slate-900">
                           {item.title}
                         </p>
                       </div>
