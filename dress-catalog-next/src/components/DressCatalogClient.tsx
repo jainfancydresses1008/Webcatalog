@@ -675,31 +675,31 @@ Price: ₹${selected?.price ?? ""}`;
                   type="button"
                   onClick={() => {
                     resetFilters();
-                    scrollToSection("catalog");
+
+                    window.scrollTo({
+                      top: 0,
+                      behavior: "smooth",
+                    });
+                  }}
+                  className="block hover:text-pink-600"
+                >
+                  Home
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    resetFilters();
+
+                    setTimeout(() => {
+                      document.getElementById("catalog")?.scrollIntoView({
+                        behavior: "smooth",
+                      });
+                    }, 100);
                   }}
                   className="block hover:text-pink-600"
                 >
                   Dress Catalog
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    resetFilters();
-                    scrollToSection("catalog");
-                  }}
-                  className="block hover:text-pink-600"
-                >
-                  Categories
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    resetFilters();
-                    scrollToSection("contact");
-                  }}
-                  className="block hover:text-pink-600"
-                >
-                  Contact Us
                 </button>
               </div>
             </div>
