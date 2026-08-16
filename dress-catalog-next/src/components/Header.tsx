@@ -56,16 +56,15 @@ export default function Header() {
         </Link>
 
         <nav className="hidden items-center gap-7 text-sm font-bold text-slate-600 md:flex">
-          <Link
-            href="/"
-            prefetch={true}
+          <button
+            type="button"
             className="text-pink-600"
             onClick={() => {
-              sessionStorage.setItem("resetFilters", "true");
+              window.dispatchEvent(new CustomEvent("jfd-home"));
             }}
           >
             Home
-          </Link>{" "}
+          </button>{" "}
           <a href="#catalog" className="transition hover:text-pink-600">
             Dresses
           </a>

@@ -94,6 +94,10 @@ export default function DressCatalogClient({
     setSelectedCategory("All");
     setSelectedSubcategory("All");
     setSuggestions([]);
+
+    router.push("/", {
+      scroll: false,
+    });
   }
   useEffect(() => {
     const goHome = () => {
@@ -115,37 +119,34 @@ export default function DressCatalogClient({
     window.history.replaceState({}, "", window.location.pathname);
   }, []);
 
-function navigate(
-  nextSearch = searchText,
-  nextCategory = selectedCategory,
-  nextSubcategory = selectedSubcategory,
-  nextPage = 1,
-) {
-  const params = new URLSearchParams();
+  function navigate(
+    nextSearch = searchText,
+    nextCategory = selectedCategory,
+    nextSubcategory = selectedSubcategory,
+    nextPage = 1,
+  ) {
+    const params = new URLSearchParams();
 
-  if (nextSearch.trim()) {
-    params.set("search", nextSearch.trim());
+    if (nextSearch.trim()) {
+      params.set("search", nextSearch.trim());
+    }
+
+    if (nextCategory && nextCategory !== "All") {
+      params.set("category", nextCategory);
+    }
+
+    if (nextSubcategory && nextSubcategory !== "All") {
+      params.set("subcategory", nextSubcategory);
+    }
+
+    if (nextPage > 1) {
+      params.set("page", String(nextPage));
+    }
+
+    const query = params.toString();
+
+    router.push(query ? `${pathname}?${query}` : pathname, { scroll: false });
   }
-
-  if (nextCategory && nextCategory !== "All") {
-    params.set("category", nextCategory);
-  }
-
-  if (nextSubcategory && nextSubcategory !== "All") {
-    params.set("subcategory", nextSubcategory);
-  }
-
-  if (nextPage > 1) {
-    params.set("page", String(nextPage));
-  }
-
-  const query = params.toString();
-
-  router.push(
-    query ? `${pathname}?${query}` : pathname,
-    { scroll: false },
-  );
-}
 
   function handleSearch(value: string) {
     setSearchText(value);
