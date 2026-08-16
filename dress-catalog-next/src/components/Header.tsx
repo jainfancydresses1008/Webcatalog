@@ -3,9 +3,11 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const router = useRouter();
   const menuRef = useRef<HTMLDivElement>(null);
   const shopName = process.env.NEXT_PUBLIC_SHOP_NAME || "Jain Fancy Dresses";
   const tagline =
@@ -37,7 +39,11 @@ export default function Header() {
           type="button"
           className="flex min-w-0 items-center gap-3 text-left"
           onClick={() => {
-            window.dispatchEvent(new CustomEvent("jfd-home"));
+            if (window.location.pathname === "/") {
+              window.dispatchEvent(new CustomEvent("jfd-home"));
+            } else {
+              router.push("/");
+            }
           }}
         >
           <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-2xl bg-white shadow-md ring-1 ring-pink-100">
@@ -75,7 +81,11 @@ export default function Header() {
             type="button"
             className="transition hover:text-pink-600"
             onClick={() => {
-              window.dispatchEvent(new CustomEvent("jfd-dresses"));
+              if (window.location.pathname === "/") {
+                window.dispatchEvent(new CustomEvent("jfd-dresses"));
+              } else {
+                router.push("/#catalog");
+              }
             }}
           >
             Dresses
@@ -85,7 +95,11 @@ export default function Header() {
             type="button"
             className="transition hover:text-pink-600"
             onClick={() => {
-              window.dispatchEvent(new CustomEvent("jfd-contact"));
+              if (window.location.pathname === "/") {
+                window.dispatchEvent(new CustomEvent("jfd-contact"));
+              } else {
+                router.push("/#contact");
+              }
             }}
           >
             Contact Us
@@ -140,7 +154,11 @@ export default function Header() {
                   type="button"
                   onClick={() => {
                     setMenuOpen(false);
-                    window.dispatchEvent(new CustomEvent("jfd-dresses"));
+                    if (window.location.pathname === "/") {
+                      window.dispatchEvent(new CustomEvent("jfd-dresses"));
+                    } else {
+                      router.push("/#catalog");
+                    }
                   }}
                   className="block w-full rounded-2xl px-4 py-3 text-left text-sm font-black text-slate-800 transition hover:bg-pink-50 hover:text-pink-700 md:hidden"
                 >
