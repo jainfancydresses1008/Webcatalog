@@ -71,7 +71,11 @@ export default function Header() {
             type="button"
             className="text-pink-600"
             onClick={() => {
-              window.dispatchEvent(new CustomEvent("jfd-home"));
+              if (window.location.pathname === "/") {
+                window.dispatchEvent(new CustomEvent("jfd-home"));
+              } else {
+                router.push("/");
+              }
             }}
           >
             Home
