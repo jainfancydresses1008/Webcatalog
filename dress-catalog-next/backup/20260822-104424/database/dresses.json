@@ -1,0 +1,32 @@
+[
+  {
+    "id": 9,
+    "category": "Princess",
+    "subcategory": null,
+    "characterName": "Elsa",
+    "description": "Frozen blue gown with silver snowflake design",
+    "isActive": true,
+    "createdAt": "2026-08-22T04:12:04.386Z",
+    "updatedAt": "2026-08-22T04:12:04.386Z"
+  },
+  {
+    "id": 10,
+    "category": "Superhero",
+    "subcategory": null,
+    "characterName": "Spiderman",
+    "description": "Classic red and blue superhero costume",
+    "isActive": true,
+    "createdAt": "2026-08-22T04:12:06.852Z",
+    "updatedAt": "2026-08-22T04:12:06.852Z"
+  },
+  {
+    "id": 11,
+    "category": "Cartoon",
+    "subcategory": null,
+    "characterName": "Mickey Mouse",
+    "description": "Fun cartoon party dress for kids",
+    "isActive": true,
+    "createdAt": "2026-08-22T04:12:08.285Z",
+    "updatedAt": "2026-08-22T04:12:08.285Z"
+  }
+]
