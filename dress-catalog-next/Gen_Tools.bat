@@ -1,7 +1,15 @@
 @echo off
 setlocal EnableExtensions
 
-title Jain Fancy Dresses - Project Tools
+REM ================================================
+REM If an option was supplied by another batch file,
+REM use it directly. Otherwise show the menu.
+REM ================================================
+
+if "%~1"=="" goto menu
+
+set "choice=%~1"
+goto process_choice
 
 :menu
 cls
@@ -25,8 +33,10 @@ echo 13. Restore EVERYTHING
 echo 14. TypeScript check
 echo 15. Exit
 echo.
-set /p choice=Enter your choice (1-15): 
+set /p "choice=Enter your choice (1-16): "
 
+
+:process_choice
 if "%choice%"=="1" goto install
 if "%choice%"=="2" goto prisma_generate
 if "%choice%"=="3" goto prisma_migrate
@@ -43,7 +53,8 @@ if "%choice%"=="13" goto restore_all
 if "%choice%"=="14" goto typecheck
 if "%choice%"=="15" goto end
 
-echo Invalid choice.
+echo.
+echo Invalid choice: %choice%
 pause
 goto menu
 
