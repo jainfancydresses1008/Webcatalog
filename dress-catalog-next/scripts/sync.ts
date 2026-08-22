@@ -20,6 +20,8 @@ import { dressesFile } from "./_paths";
   characterName: string;
   description: string;
   isActive?: boolean;
+  deletedAt?: string | null;
+  deletedBy?: string | null;
   sizes: Array<{ id?: number; size: string; price: number }>;
   images: LocalImage[];
 };
@@ -47,6 +49,8 @@ async function syncDress(local: LocalDress) {
           characterName: local.characterName,
           description: local.description,
           isActive: local.isActive ?? true,
+          deletedAt: local.deletedAt ? new Date(local.deletedAt) : null,
+          deletedBy: local.deletedBy ?? null,
         },
         update: {
           category: local.category,
@@ -87,6 +91,7 @@ async function syncDress(local: LocalDress) {
   for (const [index, { image, url }] of resolvedImages.entries()) {
     const data = {
       url,
+      publicId: image.cloudinaryPublicId ?? null,
       altText: image.altText ?? `${dress.characterName} dress image ${index + 1}`,
       isMain: Boolean(image.isMain),
       sortOrder: image.sortOrder ?? index,
@@ -132,12 +137,14 @@ async function main() {
         characterName: fresh.characterName,
         description: fresh.description,
         isActive: fresh.isActive,
+        deletedAt: fresh.deletedAt ? fresh.deletedAt.toISOString() : null,
+        deletedBy: fresh.deletedBy,
         sizes: fresh.sizes.map((size) => ({ id: size.id, size: size.size, price: size.price })),
         images: fresh.images.map((image) => ({
           id: image.id,
           url: image.url,
+          cloudinaryPublicId: image.publicId,
           localFile: (dress.images.find((item) => item.id === image.id) ?? dress.images.find((item) => item.url === image.url))?.localFile ?? null,
-          cloudinaryPublicId: (dress.images.find((item) => item.id === image.id) ?? dress.images.find((item) => item.url === image.url))?.cloudinaryPublicId ?? null,
           altText: image.altText,
           isMain: image.isMain,
           sortOrder: image.sortOrder,

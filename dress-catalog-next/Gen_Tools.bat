@@ -20,43 +20,49 @@ echo.
 echo  1. Install dependencies
 echo  2. Generate Prisma Client
 echo  3. Deploy Prisma migrations
-echo  4. Build application
-echo  5. Full build
-echo  6. Full build with deployment
-echo  7. Backup Neon/PostgreSQL + Cloudinary
-echo  8. Export local catalog data
-echo  9. Validate local changes
-echo  10. Sync local changes
-echo 11. Restore PostgreSQL database
-echo 12. Restore Cloudinary images
-echo 13. Restore EVERYTHING
-echo 14. TypeScript check
-echo 15. Exit
+echo  4. Create Prisma migration
+echo  5. Check Prisma migration status
+echo  6. Build application
+echo  7. Full build
+echo  8. Full build Deploy
+echo  9. Backup Neon/PostgreSQL + Cloudinary
+echo 10. Export local catalog data
+echo 11. Validate local changes
+echo 12. Sync local changes
+echo 13. Restore PostgreSQL database
+echo 14. Restore Cloudinary images
+echo 15. Restore EVERYTHING
+echo 16. TypeScript check
+echo 17. Exit
 echo.
-set /p "choice=Enter your choice (1-16): "
+set /p "choice=Enter your choice (1-17): "
+
 
 
 :process_choice
 if "%choice%"=="1" goto install
 if "%choice%"=="2" goto prisma_generate
 if "%choice%"=="3" goto prisma_migrate
-if "%choice%"=="4" goto build
-if "%choice%"=="5" goto full_build
-if "%choice%"=="6" goto full_build_deploy
-if "%choice%"=="7" goto backup
-if "%choice%"=="8" goto export_data
-if "%choice%"=="9" goto validate
-if "%choice%"=="10" goto sync
-if "%choice%"=="11" goto restore_db
-if "%choice%"=="12" goto restore_cloudinary
-if "%choice%"=="13" goto restore_all
-if "%choice%"=="14" goto typecheck
-if "%choice%"=="15" goto end
+if "%choice%"=="4" goto prisma_migrate_dev
+if "%choice%"=="5" goto prisma_status
+if "%choice%"=="6" goto build
+if "%choice%"=="7" goto full_build
+if "%choice%"=="8" goto full_build_deploy
+if "%choice%"=="9" goto backup
+if "%choice%"=="10" goto export_data
+if "%choice%"=="11" goto validate
+if "%choice%"=="12" goto sync
+if "%choice%"=="13" goto restore_db
+if "%choice%"=="14" goto restore_cloudinary
+if "%choice%"=="15" goto restore_all
+if "%choice%"=="16" goto typecheck
+if "%choice%"=="17" goto end
 
 echo.
 echo Invalid choice: %choice%
 pause
 goto menu
+
 
 :install
 cls
@@ -76,6 +82,27 @@ goto success
 cls
 echo Deploying Prisma migrations...
 call npx prisma migrate deploy
+if errorlevel 1 goto failed
+goto success
+
+
+:prisma_migrate_dev
+cls
+if "%~2"=="" (
+  set /p "migration_name=Enter migration name: "
+) else (
+  set "migration_name=%~2"
+)
+if "%migration_name%"=="" goto cancelled
+echo Creating Prisma migration: %migration_name%
+call npx prisma migrate dev --name "%migration_name%"
+if errorlevel 1 goto failed
+goto success
+
+:prisma_status
+cls
+echo Checking Prisma migration status...
+call npx prisma migrate status
 if errorlevel 1 goto failed
 goto success
 

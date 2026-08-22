@@ -7,6 +7,7 @@ export type DressSizeDto = {
 export type DressImageDto = {
   id: number;
   url: string;
+  publicId: string | null;
   altText: string | null;
   isMain: boolean;
   sortOrder: number;

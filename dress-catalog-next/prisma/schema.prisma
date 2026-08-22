@@ -14,6 +14,8 @@ model Dress {
   characterName String
   description   String
   isActive      Boolean      @default(true)
+  deletedAt     DateTime?
+  deletedBy     String?
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
   sizes         DressSize[]
@@ -23,6 +25,8 @@ model Dress {
   @@index([subcategory])
   @@index([category, subcategory])
   @@index([characterName])
+  @@index([isActive])
+  @@index([deletedAt])
 }
 
 model DressSize {
@@ -30,7 +34,7 @@ model DressSize {
   size    String
   price   Int
   dressId Int
-  dress   Dress @relation(fields: [dressId], references: [id], onDelete: Cascade)
+  dress   Dress  @relation(fields: [dressId], references: [id], onDelete: Cascade)
 
   @@index([dressId])
 }
@@ -38,6 +42,7 @@ model DressSize {
 model DressImage {
   id        Int     @id @default(autoincrement())
   url       String
+  publicId  String?
   altText   String?
   isMain    Boolean @default(false)
   sortOrder Int     @default(0)
@@ -45,6 +50,7 @@ model DressImage {
   dress     Dress   @relation(fields: [dressId], references: [id], onDelete: Cascade)
 
   @@index([dressId])
+  @@index([publicId])
 }
 
 model AdminSession {
@@ -58,8 +64,23 @@ model AdminSession {
   @@index([expiresAt])
 }
 
+model AdminAuditLog {
+  id         Int      @id @default(autoincrement())
+  adminEmail String
+  action     String
+  entity     String
+  entityId   Int?
+  details    String?
+  createdAt  DateTime @default(now())
+
+  @@index([adminEmail])
+  @@index([action])
+  @@index([entity])
+  @@index([createdAt])
+}
+
 model SiteStats {
   id           Int      @id @default(1)
   visitorCount Int      @default(0)
-  updatedAt    DateTime @updatedAt
+  updatedAt   DateTime @updatedAt
 }

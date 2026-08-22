@@ -25,11 +25,12 @@ async function main() {
   ensureDir(databaseDir);
   ensureDir(imagesDir);
 
-  const [dresses, dressSizes, dressImages, adminSessions, siteStats, assets] = await Promise.all([
+  const [dresses, dressSizes, dressImages, adminSessions, adminAuditLogs, siteStats, assets] = await Promise.all([
     prisma.dress.findMany({ orderBy: { id: "asc" } }),
     prisma.dressSize.findMany({ orderBy: { id: "asc" } }),
     prisma.dressImage.findMany({ orderBy: { id: "asc" } }),
     prisma.adminSession.findMany({ orderBy: { id: "asc" } }),
+    prisma.adminAuditLog.findMany({ orderBy: { id: "asc" } }),
     prisma.siteStats.findMany({ orderBy: { id: "asc" } }),
     listAllImageAssets(),
   ]);
@@ -38,6 +39,7 @@ async function main() {
   await fs.writeFile(path.join(databaseDir, "dress-sizes.json"), JSON.stringify(dressSizes, null, 2) + "\n");
   await fs.writeFile(path.join(databaseDir, "dress-images.json"), JSON.stringify(dressImages, null, 2) + "\n");
   await fs.writeFile(path.join(databaseDir, "admin-sessions.json"), JSON.stringify(adminSessions, null, 2) + "\n");
+  await fs.writeFile(path.join(databaseDir, "admin-audit-logs.json"), JSON.stringify(adminAuditLogs, null, 2) + "\n");
   await fs.writeFile(path.join(databaseDir, "site-stats.json"), JSON.stringify(siteStats, null, 2) + "\n");
 
   const manifestAssets: Array<Record<string, unknown>> = [];
@@ -93,6 +95,7 @@ async function main() {
         "database/dress-sizes.json",
         "database/dress-images.json",
         "database/admin-sessions.json",
+        "database/admin-audit-logs.json",
         "database/site-stats.json",
       ],
       cloudinaryManifest: "cloudinary/manifest.json",

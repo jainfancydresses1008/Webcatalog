@@ -15,6 +15,9 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
               <Link href="/admin/dashboard" className="rounded-xl bg-slate-100 px-4 py-2 text-slate-700 hover:bg-slate-200">Dashboard</Link>
               <Link href="/admin/add" className="rounded-xl bg-green-600 px-4 py-2 text-white hover:bg-green-700">Add Dress</Link>
               <Link href="/admin/manage" className="rounded-xl bg-blue-600 px-4 py-2 text-white hover:bg-blue-700">Manage Dresses</Link>
+              <Link href="/admin/images" className="rounded-xl bg-purple-600 px-4 py-2 text-white hover:bg-purple-700">Image Library</Link>
+              <Link href="/admin/cleanup" className="rounded-xl bg-amber-600 px-4 py-2 text-white hover:bg-amber-700">Cleanup</Link>
+              <Link href="/admin/audit" className="rounded-xl bg-slate-700 px-4 py-2 text-white hover:bg-slate-800">Audit Logs</Link>
               <Link href="/" className="rounded-xl bg-slate-900 px-4 py-2 text-white hover:bg-slate-800">View Site</Link>
               <form action={logoutAdminAction}>
                 <button type="submit" className="rounded-xl bg-red-600 px-4 py-2 text-white hover:bg-red-700">Logout</button>

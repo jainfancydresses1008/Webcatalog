@@ -16,6 +16,8 @@ type LocalDress = {
   characterName: string;
   description: string;
   isActive?: boolean;
+  deletedAt?: string | null;
+  deletedBy?: string | null;
   sizes: Array<{ size: string; price: number; id?: number }>;
   images: LocalImage[];
 };
@@ -45,6 +47,7 @@ function main() {
     if (!dress.category?.trim()) errors.push(`${label}: category is required.`);
     if (!dress.characterName?.trim()) errors.push(`${label}: characterName is required.`);
     if (!dress.description?.trim()) errors.push(`${label}: description is required.`);
+    if (dress.deletedAt != null && Number.isNaN(Date.parse(dress.deletedAt))) errors.push(`${label}: deletedAt must be a valid ISO date or null.`);
     if (!Array.isArray(dress.sizes) || dress.sizes.length === 0) errors.push(`${label}: at least one size is required.`);
     for (const size of dress.sizes ?? []) {
       if (!size.size?.trim()) errors.push(`${label}: size name cannot be empty.`);

@@ -2,29 +2,21 @@
 
 import { useRef, useState } from "react";
 
-export default function DeleteDressButton({
+export default function RestoreDressButton({
   dressId,
   dressName,
-  deleteDressAction,
+  restoreDressAction,
 }: {
   dressId: number;
   dressName: string;
-  deleteDressAction: (fd: FormData) => Promise<void>;
+  restoreDressAction: (fd: FormData) => Promise<void>;
 }) {
   const formRef = useRef<HTMLFormElement>(null);
   const [isPending, setIsPending] = useState(false);
 
-  function onDelete() {
-    const confirmed = window.confirm(
-      `Move ${dressName} to Deleted Dresses?\n\n` +
-        `The dress will be hidden, but its database record and ` +
-        `Cloudinary images will be retained.`,
-    );
-
-    if (!confirmed) return;
-
+  function onRestore() {
     const pin = window.prompt(
-      "Enter your admin security PIN to continue:",
+      `Enter your admin security PIN to restore ${dressName}:`,
     );
 
     if (pin === null) return;
@@ -47,14 +39,14 @@ export default function DeleteDressButton({
       ref={formRef}
       action={async (formData) => {
         try {
-          await deleteDressAction(formData);
+          await restoreDressAction(formData);
           window.location.reload();
         } catch (error) {
           setIsPending(false);
           alert(
             error instanceof Error
               ? error.message
-              : "Unable to delete dress.",
+              : "Unable to restore dress.",
           );
         }
       }}
@@ -65,10 +57,10 @@ export default function DeleteDressButton({
       <button
         disabled={isPending}
         type="button"
-        onClick={onDelete}
-        className="rounded-xl bg-red-600 px-3 py-2 text-xs font-bold text-white hover:bg-red-700 disabled:opacity-60"
+        onClick={onRestore}
+        className="rounded-xl bg-green-600 px-3 py-2 text-xs font-bold text-white hover:bg-green-700 disabled:opacity-60"
       >
-        {isPending ? "Deleting..." : "Delete"}
+        {isPending ? "Restoring..." : "Restore"}
       </button>
     </form>
   );
