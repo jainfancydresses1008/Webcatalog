@@ -10,7 +10,15 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:seed": "tsx prisma/seed.ts",
-    "prisma:studio": "prisma studio"
+    "prisma:studio": "prisma studio",
+    "backup": "tsx scripts/backup.ts",
+    "export:data": "tsx scripts/export-data.ts",
+    "validate:changes": "tsx scripts/validate-changes.ts",
+    "sync": "tsx scripts/sync.ts",
+    "restore": "tsx scripts/restore.ts",
+    "images:inventory": "tsx scripts/images-inventory.ts",
+    "restore:cloudinary": "tsx scripts/restore-cloudinary.ts",
+    "restore:all": "tsx scripts/restore-all.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.14.0",
@@ -32,5 +40,7 @@
     "tsx": "^4.19.2",
     "typescript": "^5.7.2"
   },
-  "prisma": { "seed": "tsx prisma/seed.ts" }
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  }
 }
