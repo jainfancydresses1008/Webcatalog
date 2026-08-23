@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useRef, useTransition } from 'react';
+import { useRef } from "react";
 import {
   attachCloudinaryImage,
   permanentlyDeleteCloudinaryImage,
-} from '@/app/actions';
+} from "@/app/actions";
 
 type DressOption = {
   id: number;
@@ -20,8 +20,6 @@ export default function CloudinaryAssetActions({
   url: string;
   dressOptions: DressOption[];
 }) {
-  const [isPending, startTransition] = useTransition();
-
   const attachFormRef = useRef<HTMLFormElement>(null);
   const deleteFormRef = useRef<HTMLFormElement>(null);
 
@@ -30,22 +28,22 @@ export default function CloudinaryAssetActions({
       `Enter Dress ID to reuse this image:\n\n${dressOptions
         .slice(0, 30)
         .map((dress) => `${dress.id}: ${dress.characterName}`)
-        .join('\n')}`
+        .join("\n")}`,
     );
 
     if (!dressId) return;
 
     const dress = dressOptions.find(
-      (item) => item.id === Number(dressId)
+      (item) => item.id === Number(dressId),
     );
 
     if (!dress) {
-      window.alert('Invalid Dress ID.');
+      window.alert("Invalid Dress ID.");
       return;
     }
 
     const pin = window.prompt(
-      `Enter admin PIN to attach this image to ${dress.characterName}:`
+      `Enter admin PIN to attach this image to ${dress.characterName}:`,
     );
 
     if (pin === null) return;
@@ -55,19 +53,19 @@ export default function CloudinaryAssetActions({
     if (!form) return;
 
     const dressIdInput = form.elements.namedItem(
-      'dressId'
+      "dressId",
     ) as HTMLInputElement;
 
     const publicIdInput = form.elements.namedItem(
-      'publicId'
+      "publicId",
     ) as HTMLInputElement;
 
     const urlInput = form.elements.namedItem(
-      'url'
+      "url",
     ) as HTMLInputElement;
 
     const pinInput = form.elements.namedItem(
-      'pin'
+      "pin",
     ) as HTMLInputElement;
 
     dressIdInput.value = dressId;
@@ -75,22 +73,20 @@ export default function CloudinaryAssetActions({
     urlInput.value = url;
     pinInput.value = pin;
 
-    startTransition(() => {
-      form.requestSubmit();
-    });
+    form.requestSubmit();
   }
 
   function remove() {
     if (
       !window.confirm(
-        `Permanently delete Cloudinary image ${publicId}? This cannot be undone.`
+        `Permanently delete Cloudinary image ${publicId}? This cannot be undone.`,
       )
     ) {
       return;
     }
 
     const pin = window.prompt(
-      'Enter admin PIN to permanently delete this Cloudinary image:'
+      "Enter admin PIN to permanently delete this Cloudinary image:",
     );
 
     if (pin === null) return;
@@ -100,24 +96,22 @@ export default function CloudinaryAssetActions({
     if (!form) return;
 
     const publicIdInput = form.elements.namedItem(
-      'publicId'
+      "publicId",
     ) as HTMLInputElement;
 
     const urlInput = form.elements.namedItem(
-      'url'
+      "url",
     ) as HTMLInputElement;
 
     const pinInput = form.elements.namedItem(
-      'pin'
+      "pin",
     ) as HTMLInputElement;
 
     publicIdInput.value = publicId;
     urlInput.value = url;
     pinInput.value = pin;
 
-    startTransition(() => {
-      form.requestSubmit();
-    });
+    form.requestSubmit();
   }
 
   return (
@@ -133,9 +127,8 @@ export default function CloudinaryAssetActions({
 
         <button
           type="button"
-          disabled={isPending}
           onClick={attach}
-          className="w-full rounded-xl bg-blue-600 px-3 py-2 text-xs font-bold text-white hover:bg-blue-700 disabled:opacity-60"
+          className="w-full rounded-xl bg-blue-600 px-3 py-2 text-xs font-bold text-white hover:bg-blue-700"
         >
           Reuse
         </button>
@@ -151,9 +144,8 @@ export default function CloudinaryAssetActions({
 
         <button
           type="button"
-          disabled={isPending}
           onClick={remove}
-          className="w-full rounded-xl bg-red-600 px-3 py-2 text-xs font-bold text-white hover:bg-red-700 disabled:opacity-60"
+          className="w-full rounded-xl bg-red-600 px-3 py-2 text-xs font-bold text-white hover:bg-red-700"
         >
           Delete
         </button>
