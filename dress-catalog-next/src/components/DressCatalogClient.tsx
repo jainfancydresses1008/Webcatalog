@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { MapPin } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import type { DressDto } from "@/lib/dress-types";
@@ -602,6 +603,85 @@ Price: ₹${selected?.price ?? ""}`;
             >
               Contact Us →
             </button>
+          </div>
+        </div>
+      </section>
+
+      {/* ================= STORE LOCATION ================= */}
+
+      <section className="px-4 pb-12 md:px-8">
+        <div className="mx-auto max-w-7xl overflow-hidden rounded-[2rem] bg-white shadow-xl">
+          <div className="grid lg:grid-cols-2">
+            {/* LEFT COLUMN */}
+
+            <div className="p-8 md:p-10">
+              <p className="text-sm font-black uppercase tracking-[0.2em] text-pink-600">
+                Visit Our Store
+              </p>
+
+              <h2 className="mt-2 text-4xl font-black text-slate-950">
+                Jain Fancy Dresses
+              </h2>
+
+              <p className="mt-5 text-slate-600 leading-7">
+                Beautiful costumes for school functions, annual days, fancy
+                dress competitions, stage performances, cultural programs,
+                Janmashtami celebrations, fancy dress events and theme parties.
+              </p>
+
+              <div className="mt-8 space-y-5">
+                {/* ADDRESS */}
+
+                <div>
+                  <h3 className="font-black text-slate-900">Store Address</h3>
+
+                  <p className="mt-1 text-slate-600">
+                    Shop No. 7, Gyan 4, Indirapuram
+                    <br />
+                    Ghaziabad
+                    <br />
+                    U.P.
+                    <br />
+                    201014
+                  </p>
+                </div>
+
+                {/* CONTACT */}
+
+                <div>
+                  <h3 className="font-black text-slate-900">Phone Number</h3>
+
+                  <p className="mt-1 text-slate-600">+91 8826163522</p>
+                </div>
+
+                {/* TIMINGS */}
+
+                <div>
+                  <h3 className="font-black text-slate-900">Working Hours</h3>
+
+                  <p className="mt-1 text-slate-600">
+                    Monday - Sunday
+                    <br />
+                    10:00 AM - 8:30 PM
+                  </p>
+                </div>
+              </div>
+
+              {/* BUTTONS */}
+
+              <div className="mt-8 flex flex-wrap gap-3">
+                {/* Maps Link */}
+                <a
+                  href="https://maps.app.goo.gl/pnGViXSGMkGe6m5s7"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+                  title="Get Directions" /* Shows text tooltip on hover */
+                >
+                  <MapPin className="w-6 h-6 text-red-500" />
+                </a>
+              </div>
+            </div>
           </div>
         </div>
       </section>
