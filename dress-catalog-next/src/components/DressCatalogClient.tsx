@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import { MapPin } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import type { DressDto } from "@/lib/dress-types";
@@ -28,10 +27,10 @@ type Props = {
 };
 
 const heroImages = [
-  { src: "/images/hero/krishna.svg", title: "Krishna Costume" },
-  { src: "/images/hero/prince.svg", title: "Prince Costume" },
-  { src: "/images/hero/police.svg", title: "Police Costume" },
-  { src: "/images/hero/fairy.svg", title: "Fairy Costume" },
+  { src: "/images/hero/krishna.svg", title: "Krishna" },
+  { src: "/images/hero/prince.svg", title: "Prince" },
+  { src: "/images/hero/police.svg", title: "Police" },
+  { src: "/images/hero/fairy.svg", title: "Fairy" },
 ];
 
 function cleanFilterValue(value?: string | null) {
@@ -86,6 +85,9 @@ export default function DressCatalogClient({
   );
 
   const shopName = process.env.NEXT_PUBLIC_SHOP_NAME || "Jain Fancy Dresses";
+  const whatsappContactLink = `https://wa.me/${sellerPhone}?text=${encodeURIComponent(
+    "Hello, I am interested in your fancy dress collection."
+  )}`;
 
   function clearFilterState() {
     setSearchText("");
@@ -314,7 +316,7 @@ Category: ${dress.category}
 Subcategory: ${dress.subcategory ?? ""}
 Character Name: ${dress.characterName}
 Selected Size: ${selected?.size ?? ""}
-Price: ₹${selected?.price ?? ""}`;
+Price: \u20B9${selected?.price ?? ""}`;
     const msg = encodeURIComponent(message);
 
     return {
@@ -347,16 +349,16 @@ Price: ₹${selected?.price ?? ""}`;
         <div className="relative mx-auto max-w-7xl px-4 pb-12 pt-4 md:px-8 md:pb-16">
           <div className="mb-6 overflow-hidden rounded-full bg-gradient-to-r from-pink-600 via-fuchsia-600 to-purple-700 px-4 py-2 text-white shadow-lg">
             <div className="animate-marquee whitespace-nowrap text-center text-sm font-black uppercase tracking-[0.18em]">
-              New school event collection available ✨ 1000+ costumes for every
-              occasion ✨ Wholesale and bulk orders available ✨ Best quality at
-              affordable prices ✨
+              New school event collection available &#10024; 1000+ costumes for every
+              occasion &#10024; Wholesale and bulk orders available &#10024; Best quality at
+              affordable prices &#10024;
             </div>
           </div>
 
           <div className="grid items-center gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-14">
             <div className="max-w-2xl">
               <div className="inline-flex items-center gap-2 rounded-full border border-pink-100 bg-white/80 px-4 py-2 text-xs font-black uppercase tracking-[0.2em] text-pink-600 shadow-sm">
-                <span aria-hidden="true">✦</span>
+                <span aria-hidden="true">&#10022;</span>
                 India's Premium
               </div>
 
@@ -398,13 +400,11 @@ Price: ₹${selected?.price ?? ""}`;
             <div className="relative">
               <div className="absolute -inset-4 rounded-[3rem] bg-gradient-to-br from-pink-300/25 via-fuchsia-200/20 to-purple-300/25 blur-2xl" />
               <div className="relative overflow-hidden rounded-[2.5rem] border border-white/80 bg-white/80 p-4 shadow-2xl backdrop-blur">
-                <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4">
+                <div className="grid grid-cols-2 items-stretch gap-4 sm:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4">
                   {heroImages.map((item, index) => (
                     <div
                       key={item.src}
-                      className={`relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-pink-50 to-white shadow-lg ring-1 ring-pink-100 ${
-                        index % 2 === 1 ? "sm:mt-8 lg:mt-8 xl:mt-8" : ""
-                      }`}
+                      className="group relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-pink-50 to-white shadow-lg ring-1 ring-pink-100 transition duration-300 hover:-translate-y-1 hover:shadow-xl"
                     >
                       <div className="relative aspect-[4/5] w-full">
                         <Image
@@ -412,7 +412,7 @@ Price: ₹${selected?.price ?? ""}`;
                           alt={item.title}
                           fill
                           sizes="(max-width: 768px) 45vw, 180px"
-                          className="object-cover"
+                          className="object-contain p-2 transition duration-500 group-hover:scale-[1.03]"
                           priority={index < 2}
                         />
                       </div>
@@ -469,7 +469,7 @@ Price: ₹${selected?.price ?? ""}`;
         {dresses.length === 0 ? (
           <div className="rounded-[2rem] border border-dashed border-pink-200 bg-white px-6 py-16 text-center shadow-sm">
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-pink-50 text-3xl">
-              🔍
+              &#128269;
             </div>
             <h3 className="mt-5 text-xl font-black text-slate-900">
               No dresses found
@@ -531,14 +531,14 @@ Price: ₹${selected?.price ?? ""}`;
               }
               className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700 shadow-sm transition hover:border-pink-300 hover:bg-pink-50 disabled:cursor-not-allowed disabled:opacity-40"
             >
-              ← Previous
+              &#8592; Previous
             </button>
             {pageNumbers.map((number, index) => {
               const previous = pageNumbers[index - 1];
               const showGap = previous && number - previous > 1;
               return (
                 <span key={number} className="flex items-center gap-2">
-                  {showGap && <span className="px-1 text-slate-400">…</span>}
+                  {showGap && <span className="px-1 text-slate-400">&#8230;</span>}
                   <button
                     type="button"
                     onClick={() =>
@@ -573,21 +573,21 @@ Price: ₹${selected?.price ?? ""}`;
               }
               className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700 shadow-sm transition hover:border-pink-300 hover:bg-pink-50 disabled:cursor-not-allowed disabled:opacity-40"
             >
-              Next →
+              Next &#8594;
             </button>
           </nav>
         )}
       </section>
 
       <section className="px-4 pb-12 md:px-8">
-        <div className="mx-auto max-w-7xl overflow-hidden rounded-[2rem] bg-gradient-to-r from-pink-600 via-fuchsia-600 to-purple-700 px-6 py-10 text-white shadow-xl md:px-12">
+        <div className="mx-auto max-w-7xl overflow-hidden rounded-[2rem] bg-gradient-to-r from-pink-600 via-fuchsia-600 to-purple-700 px-6 py-10 text-white shadow-xl ring-1 ring-white/40 md:px-12">
           <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
             <div>
               <p className="text-sm font-bold uppercase tracking-[0.2em] text-pink-100">
                 Need help choosing?
               </p>
               <h2 className="mt-2 text-3xl font-black md:text-4xl">
-                Find the right dress for your event 💕
+                Find the right dress for your event &#128149;
               </h2>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-pink-50 md:text-base">
                 Select a dress and contact us directly from the dress card.
@@ -601,163 +601,179 @@ Price: ₹${selected?.price ?? ""}`;
               }}
               className="inline-flex w-fit items-center justify-center rounded-full bg-white px-6 py-3 text-sm font-black text-pink-700 shadow-lg transition hover:-translate-y-0.5 hover:shadow-xl"
             >
-              Contact Us →
+              <span className="inline-flex items-center gap-2">
+                Contact Us
+                <svg
+                  viewBox="0 0 24 24"
+                  className="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  aria-hidden="true"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14M13 6l6 6-6 6" />
+                </svg>
+              </span>
             </button>
           </div>
         </div>
       </section>
 
-      {/* ================= STORE LOCATION ================= */}
-
-      <section className="px-4 pb-12 md:px-8">
-        <div className="mx-auto max-w-7xl overflow-hidden rounded-[2rem] bg-white shadow-xl">
-          <div className="grid lg:grid-cols-2">
-            {/* LEFT COLUMN */}
-
-            <div className="p-8 md:p-10">
-              <p className="text-sm font-black uppercase tracking-[0.2em] text-pink-600">
-                Visit Our Store
-              </p>
-
-              <h2 className="mt-2 text-4xl font-black text-slate-950">
-                Jain Fancy Dresses
-              </h2>
-
-              <p className="mt-5 text-slate-600 leading-7">
-                Beautiful costumes for school functions, annual days, fancy
-                dress competitions, stage performances, cultural programs,
-                Janmashtami celebrations, fancy dress events and theme parties.
-              </p>
-
-              <div className="mt-8 space-y-5">
-                {/* ADDRESS */}
-
-                <div>
-                  <h3 className="font-black text-slate-900">Store Address</h3>
-
-                  <p className="mt-1 text-slate-600">
-                    Shop No. 7, Gyan 4, Indirapuram
-                    <br />
-                    Ghaziabad
-                    <br />
-                    U.P.
-                    <br />
-                    201014
-                  </p>
-                </div>
-
-                {/* CONTACT */}
-
-                <div>
-                  <h3 className="font-black text-slate-900">Phone Number</h3>
-
-                  <p className="mt-1 text-slate-600">+91 8826163522</p>
-                </div>
-
-                {/* TIMINGS */}
-
-                <div>
-                  <h3 className="font-black text-slate-900">Working Hours</h3>
-
-                  <p className="mt-1 text-slate-600">
-                    Monday - Sunday
-                    <br />
-                    10:00 AM - 8:30 PM
-                  </p>
-                </div>
-              </div>
-
-              {/* BUTTONS */}
-
-              <div className="mt-8 flex flex-wrap gap-3">
-                {/* Maps Link */}
-                <a
-                  href="https://maps.app.goo.gl/pnGViXSGMkGe6m5s7"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="p-2 rounded-full hover:bg-gray-100 transition-colors"
-                  title="Get Directions" /* Shows text tooltip on hover */
-                >
-                  <MapPin className="w-6 h-6 text-red-500" />
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <footer id="contact" className="border-t border-pink-100 bg-white">
-        <div className="mx-auto max-w-7xl px-4 py-10 md:px-8">
-          <div className="grid gap-8 md:grid-cols-3">
-            <div>
-              <div className="flex items-center gap-3">
-                <div className="relative h-11 w-11 overflow-hidden rounded-2xl bg-white shadow-md ring-1 ring-pink-100">
+      <footer id="contact" className="border-t border-pink-100 bg-gradient-to-b from-white to-pink-50/60">
+        <div className="mx-auto max-w-7xl px-4 py-12 md:px-8 md:py-14">
+          <div className="mb-8 rounded-[2rem] border border-pink-100 bg-white/90 p-6 shadow-xl shadow-pink-100/50 backdrop-blur md:p-8">
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+              <div className="flex items-start gap-4">
+                <div className="relative flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-pink-50 to-purple-50 shadow-md ring-1 ring-pink-100">
                   <Image
                     src="/images/logo.png"
                     alt={`${shopName} logo`}
                     fill
-                    sizes="44px"
+                    sizes="56px"
                     className="object-contain p-1"
                   />
                 </div>
                 <div>
-                  <p className="font-black text-slate-950">{shopName}</p>
-                  <p className="text-xs text-slate-500">
-                    Fancy Dress Collection
+                  <p className="text-xs font-black uppercase tracking-[0.2em] text-pink-600">
+                    Contact Us
+                  </p>
+                  <h2 className="mt-1 text-2xl font-black tracking-tight text-slate-950 md:text-3xl">
+                    Let&apos;s find the perfect costume
+                  </h2>
+                  <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
+                    Contact us for school events, annual functions, parties, competitions and bulk requirements.
                   </p>
                 </div>
               </div>
-              <p className="mt-4 max-w-sm text-sm leading-6 text-slate-500">
-                Beautiful costumes for school events, parties, celebrations and
-                special occasions.
-              </p>
+
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:min-w-[560px]">
+                <a
+                  href={`tel:${sellerPhone}`}
+                  className="group flex items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3 transition hover:-translate-y-0.5 hover:border-green-200 hover:bg-green-50"
+                >
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-green-100 text-green-700">
+                    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.12.9.33 1.78.62 2.63a2 2 0 0 1-.45 2.11L8 9.73a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.85.29 1.73.5 2.63.62A2 2 0 0 1 22 16.92Z" />
+                    </svg>
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block text-xs font-bold text-slate-500">Call us</span>
+                    <span className="block truncate text-sm font-black text-slate-900 group-hover:text-green-700">{sellerPhone}</span>
+                  </span>
+                </a>
+
+                <a
+                  href={whatsappContactLink}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="group flex items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3 transition hover:-translate-y-0.5 hover:border-emerald-200 hover:bg-emerald-50"
+                >
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
+                    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M20 11.5a8.5 8.5 0 0 1-12.75 7.36L4 20l1.14-3.03A8.5 8.5 0 1 1 20 11.5Z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M8.6 8.7c.2-.45.42-.46.78-.47h.48c.2 0 .39.07.49.3l.66 1.55c.1.22.08.4-.08.58l-.5.58c-.13.14-.16.3-.07.47.3.58 1.12 1.55 2.2 2.12.18.1.33.08.46-.07l.55-.65c.15-.18.34-.22.56-.12l1.49.7c.23.1.3.3.27.53-.1.72-.67 1.28-1.36 1.47-.47.13-1.1.08-1.92-.23-1.07-.4-2.35-1.25-3.6-2.5-1.25-1.25-2.1-2.53-2.5-3.6-.3-.82-.36-1.45-.23-1.92.11-.41.33-.66.51-.69Z" />
+                    </svg>
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block text-xs font-bold text-slate-500">WhatsApp us</span>
+                    <span className="block truncate text-sm font-black text-slate-900 group-hover:text-emerald-700">Chat with us on WhatsApp</span>
+                  </span>
+                </a>
+
+                <a
+                  href={`mailto:${sellerEmail}`}
+                  className="group flex items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3 transition hover:-translate-y-0.5 hover:border-purple-200 hover:bg-purple-50"
+                >
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-purple-100 text-purple-700">
+                    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2Z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="m22 6-10 7L2 6" />
+                    </svg>
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block text-xs font-bold text-slate-500">Email us</span>
+                    <span className="block truncate text-sm font-black text-slate-900 group-hover:text-purple-700">{sellerEmail}</span>
+                  </span>
+                </a>
+
+                <a
+                  href={`https://maps.app.goo.gl/pnGViXSGMkGe6m5s7`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="group flex items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3 transition hover:-translate-y-0.5 hover:border-pink-200 hover:bg-pink-50"
+                >
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-pink-100 text-pink-700 shadow-sm">
+                    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z" />
+                      <circle cx="12" cy="10" r="2.5" />
+                    </svg>
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block text-xs font-bold text-slate-500">Find us on Maps</span>
+                    <span className="block truncate text-sm font-black text-slate-900 group-hover:text-pink-600">Open in Google Maps</span>
+                  </span>
+                  <span
+                    className="text-slate-400 transition group-hover:translate-x-1 group-hover:text-pink-600"
+                    aria-hidden="true"
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      className="h-5 w-5"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14M13 6l6 6-6 6" />
+                    </svg>
+                  </span>
+                </a>
+              </div>
             </div>
+          </div>
+
+          <div className="grid gap-8 md:grid-cols-2">
             <div>
-              <h3 className="font-black text-slate-900">Browse</h3>
-              <div className="mt-3 space-y-2 text-sm text-slate-500">
+              <h3 className="text-xs font-black uppercase tracking-[0.2em] text-pink-600">Browse</h3>
+              <div className="mt-4 space-y-3 text-sm font-semibold text-slate-600">
                 <button
                   type="button"
                   onClick={() => {
                     resetFilters();
-
-                    window.scrollTo({
-                      top: 0,
-                      behavior: "smooth",
-                    });
+                    window.scrollTo({ top: 0, behavior: "smooth" });
                   }}
-                  className="block hover:text-pink-600"
+                  className="block transition hover:translate-x-1 hover:text-pink-600"
                 >
                   Home
                 </button>
-
                 <button
                   type="button"
                   onClick={() => {
                     resetFilters();
-
                     setTimeout(() => {
-                      document.getElementById("catalog")?.scrollIntoView({
-                        behavior: "smooth",
-                      });
+                      document.getElementById("catalog")?.scrollIntoView({ behavior: "smooth" });
                     }, 100);
                   }}
-                  className="block hover:text-pink-600"
+                  className="block transition hover:translate-x-1 hover:text-pink-600"
                 >
                   Dress Catalog
                 </button>
               </div>
             </div>
+
             <div>
-              <h3 className="font-black text-slate-900">Contact</h3>
-              <div className="mt-3 space-y-2 text-sm text-slate-500">
-                <p>Use the contact options available on each dress card.</p>
-                <p>Quick response for school events and bulk orders.</p>
-                <p>Share size and character requirement for faster help.</p>
-              </div>
+              <h3 className="text-xs font-black uppercase tracking-[0.2em] text-pink-600">Need help?</h3>
+              <p className="mt-4 text-sm leading-6 text-slate-500">
+                Share the character, size and event requirement for faster assistance.
+              </p>
+              <p className="mt-3 text-xs font-semibold text-slate-400">
+                Quick response for school events and bulk orders.
+              </p>
             </div>
           </div>
-          <div className="mt-8 border-t border-slate-100 pt-5 text-center text-xs text-slate-400">
-            © {new Date().getFullYear()} {shopName}. All rights reserved.
+
+          <div className="mt-10 flex flex-col gap-3 border-t border-pink-100 pt-5 text-center text-xs text-slate-400 sm:flex-row sm:items-center sm:justify-between sm:text-left">
+            <span>&#169; {new Date().getFullYear()} {shopName}. All rights reserved.</span>
+            <span className="font-semibold text-slate-400">Made for memorable celebrations &#10024;</span>
           </div>
         </div>
       </footer>
