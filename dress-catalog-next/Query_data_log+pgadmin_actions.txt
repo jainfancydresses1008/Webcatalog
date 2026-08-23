@@ -1,0 +1,100 @@
+CREATE OR REPLACE FUNCTION audit_direct_database_changes()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    old_record JSONB;
+    new_record JSONB;
+    record_id TEXT;
+    details_json TEXT;
+BEGIN
+
+    IF TG_OP = 'DELETE' THEN
+        old_record := to_jsonb(OLD);
+        new_record := NULL;
+        record_id := OLD.id::TEXT;
+
+    ELSIF TG_OP = 'UPDATE' THEN
+        old_record := to_jsonb(OLD);
+        new_record := to_jsonb(NEW);
+        record_id := NEW.id::TEXT;
+
+    ELSIF TG_OP = 'INSERT' THEN
+        old_record := NULL;
+        new_record := to_jsonb(NEW);
+        record_id := NEW.id::TEXT;
+    END IF;
+
+    details_json := jsonb_build_object(
+        'source', 'DATABASE_DIRECT',
+        'databaseUser', CURRENT_USER,
+        'operation', TG_OP,
+        'tableName', TG_TABLE_NAME,
+        'recordId', record_id,
+        'oldData', old_record,
+        'newData', new_record
+    )::TEXT;
+
+    INSERT INTO "AdminAuditLog" (
+        "adminEmail",
+        "action",
+        "entity",
+        "entityId",
+        "details"
+    )
+    VALUES (
+        'DATABASE_DIRECT',
+        'DB_' || TG_OP,
+        TG_TABLE_NAME,
+        CASE
+            WHEN record_id ~ '^[0-9]+$'
+            THEN record_id::INTEGER
+            ELSE NULL
+        END,
+        details_json
+    );
+
+    IF TG_OP = 'DELETE' THEN
+        RETURN OLD;
+    ELSE
+        RETURN NEW;
+    END IF;
+END;
+$$;
+
+
+
+
+---------
+
+
+DROP TRIGGER IF EXISTS audit_dress_changes
+ON "Dress";
+
+CREATE TRIGGER audit_dress_changes
+AFTER INSERT OR UPDATE OR DELETE
+ON "Dress"
+FOR EACH ROW
+EXECUTE FUNCTION audit_direct_database_changes();
+
+-------
+
+DROP TRIGGER IF EXISTS audit_dress_image_changes
+ON "DressImage";
+
+CREATE TRIGGER audit_dress_image_changes
+AFTER INSERT OR UPDATE OR DELETE
+ON "DressImage"
+FOR EACH ROW
+EXECUTE FUNCTION audit_direct_database_changes();
+
+------
+
+DROP TRIGGER IF EXISTS audit_dress_size_changes
+ON "DressSize";
+
+CREATE TRIGGER audit_dress_size_changes
+AFTER INSERT OR UPDATE OR DELETE
+ON "DressSize"
+FOR EACH ROW
+EXECUTE FUNCTION audit_direct_database_changes();
