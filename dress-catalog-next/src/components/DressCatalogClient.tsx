@@ -33,6 +33,54 @@ const heroImages = [
   { src: "/images/hero/fairy.svg", title: "Fairy" },
 ];
 
+
+type GoogleReview = {
+  id: string;
+  reviewerName: string;
+  rating: number;
+  text: string;
+  date: string;
+  avatar?: string;
+};
+
+const mockGoogleReviews: GoogleReview[] = [
+  {
+    id: "1",
+    reviewerName: "Priya Sharma",
+    rating: 5,
+    text: "Amazing collection of fancy dresses. The quality was excellent and the staff was very helpful.",
+    date: "2 weeks ago",
+  },
+  {
+    id: "2",
+    reviewerName: "Neha Gupta",
+    rating: 5,
+    text: "Beautiful costumes and lots of options for school functions. Highly recommended!",
+    date: "3 weeks ago",
+  },
+  {
+    id: "3",
+    reviewerName: "Rahul Jain",
+    rating: 5,
+    text: "Very good collection and reasonable prices. We purchased costumes for our school event.",
+    date: "1 month ago",
+  },
+  {
+    id: "4",
+    reviewerName: "Anita Verma",
+    rating: 4,
+    text: "Good variety and very cooperative service. We found exactly what we were looking for.",
+    date: "1 month ago",
+  },
+  {
+    id: "5",
+    reviewerName: "Pooja Agarwal",
+    rating: 5,
+    text: "Excellent fancy dress collection. The costumes looked beautiful on the children.",
+    date: "2 months ago",
+  },
+];
+
 function cleanFilterValue(value?: string | null) {
   if (!value || value.trim() === "") return "All";
   return value;
@@ -618,6 +666,190 @@ Price: \u20B9${selected?.price ?? ""}`;
           </div>
         </div>
       </section>
+
+      {/* Google Reviews */}
+      <section
+        id="reviews"
+        className="border-t border-pink-100 bg-gradient-to-b from-pink-50/40 via-white to-white px-4 py-14 md:px-8 md:py-16"
+      >
+        <div className="mx-auto max-w-7xl">
+          <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <div className="inline-flex items-center gap-2 rounded-full border border-pink-100 bg-white px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-pink-600 shadow-sm">
+                <svg
+                  viewBox="0 0 24 24"
+                  className="h-4 w-4"
+                  fill="currentColor"
+                  aria-hidden="true"
+                >
+                  <path d="M12 2.5l2.95 5.98 6.6.96-4.78 4.66 1.13 6.58L12 17.57l-5.9 3.1 1.13-6.58-4.78-4.66 6.6-.96L12 2.5z" />
+                </svg>
+                Google Reviews
+              </div>
+
+              <h2 className="mt-4 text-3xl font-black tracking-tight text-slate-950 md:text-4xl">
+                What our customers say
+              </h2>
+
+              <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-500 md:text-base">
+                See what customers have shared about their experience with{" "}
+                {shopName}.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-4 rounded-[1.5rem] border border-pink-100 bg-white px-5 py-4 shadow-lg shadow-pink-100/40">
+              <div className="text-center">
+                <div className="text-3xl font-black text-slate-950">
+                  4.8
+                </div>
+
+                <div className="mt-1 flex justify-center gap-0.5 text-amber-400">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <svg
+                      key={star}
+                      viewBox="0 0 24 24"
+                      className="h-4 w-4"
+                      fill="currentColor"
+                      aria-hidden="true"
+                    >
+                      <path d="M12 2.5l2.95 5.98 6.6.96-4.78 4.66 1.13 6.58L12 17.57l-5.9 3.1 1.13-6.58-4.78-4.66 6.6-.96L12 2.5z" />
+                    </svg>
+                  ))}
+                </div>
+
+                <p className="mt-1 text-xs font-bold text-slate-400">
+                  Google rating
+                </p>
+              </div>
+
+              <div className="h-12 w-px bg-slate-100" />
+
+              <div>
+                <p className="text-xl font-black text-slate-900">
+                  100+
+                </p>
+                <p className="text-xs font-semibold text-slate-400">
+                  customer reviews
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-9 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+            {mockGoogleReviews.map((review) => (
+              <article
+                key={review.id}
+                className="group relative overflow-hidden rounded-[1.75rem] border border-slate-100 bg-white p-6 shadow-md transition duration-300 hover:-translate-y-1 hover:shadow-xl"
+              >
+                <div className="absolute right-5 top-5 text-pink-100 transition group-hover:text-pink-200">
+                  <svg
+                    viewBox="0 0 24 24"
+                    className="h-9 w-9"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path d="M7.2 5.5C4.88 5.5 3 7.38 3 9.7v.55c0 2.32 1.88 4.2 4.2 4.2h.55c.2 0 .4-.02.59-.04C8.05 16.56 6.58 18.1 5 19.5l2.1 1.7c2.67-2.15 4.55-4.3 5.65-6.45.78-1.53 1.15-3.06 1.15-4.6C13.9 7.58 11.18 5.5 7.2 5.5Zm9.8 0c-2.32 0-4.2 1.88-4.2 4.2v.55c0 2.32 1.88 4.2 4.2 4.2h.55c.2 0 .4-.02.59-.04-1.09 2.15-2.56 3.69-4.14 5.09l2.1 1.7c2.67-2.15 4.55-4.3 5.65-6.45.78-1.53 1.15-3.06 1.15-4.6 0-2.57-2.72-4.65-4.75-4.65Z" />
+                  </svg>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-pink-100 to-purple-100 text-sm font-black text-pink-700">
+                    {review.reviewerName.charAt(0).toUpperCase()}
+                  </div>
+
+                  <div className="min-w-0">
+                    <h3 className="truncate text-sm font-black text-slate-900">
+                      {review.reviewerName}
+                    </h3>
+
+                    <p className="text-xs font-semibold text-slate-400">
+                      {review.date}
+                    </p>
+                  </div>
+
+                  <div className="ml-auto flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1">
+                    <span className="text-sm font-black text-amber-500">
+                      {review.rating.toFixed(1)}
+                    </span>
+
+                    <svg
+                      viewBox="0 0 24 24"
+                      className="h-3.5 w-3.5 text-amber-400"
+                      fill="currentColor"
+                      aria-hidden="true"
+                    >
+                      <path d="M12 2.5l2.95 5.98 6.6.96-4.78 4.66 1.13 6.58L12 17.57l-5.9 3.1 1.13-6.58 6.6-.96L12 2.5z" />
+                    </svg>
+                  </div>
+                </div>
+
+                <div className="mt-5 flex gap-0.5 text-amber-400">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <svg
+                      key={star}
+                      viewBox="0 0 24 24"
+                      className={`h-4 w-4 ${
+                        star <= review.rating
+                          ? "text-amber-400"
+                          : "text-slate-200"
+                      }`}
+                      fill="currentColor"
+                      aria-hidden="true"
+                    >
+                      <path d="M12 2.5l2.95 5.98 6.6.96-4.78 4.66 1.13 6.58-5.9-3.1-5.9 3.1 1.13-6.58-4.78-4.66 6.6-.96L12 2.5z" />
+                    </svg>
+                  ))}
+                </div>
+
+                <p className="mt-4 text-sm leading-7 text-slate-600">
+                  &quot;{review.text}&quot;
+                </p>
+
+                <div className="mt-5 flex items-center gap-2 border-t border-slate-100 pt-4">
+                  <svg
+                    viewBox="0 0 24 24"
+                    className="h-4 w-4 text-pink-600"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path d="M12 2.5l2.95 5.98 6.6.96-4.78 4.66 1.13 6.58L12 17.57l-5.9 3.1 1.13-6.58-4.78-4.66 6.6-.96L12 2.5z" />
+                  </svg>
+
+                  <span className="text-xs font-bold text-slate-400">
+                    Google review
+                  </span>
+                </div>
+              </article>
+            ))}
+          </div>
+
+          <div className="mt-8 flex justify-center">
+            <a
+              href="https://maps.app.goo.gl/pnGViXSGMkGe6m5s7"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-2 rounded-full bg-slate-950 px-6 py-3 text-sm font-black text-white shadow-lg transition hover:-translate-y-0.5 hover:bg-slate-800 hover:shadow-xl"
+            >
+              Read all reviews on Google
+              <svg
+                viewBox="0 0 24 24"
+                className="h-4 w-4"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                aria-hidden="true"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M5 12h14M13 6l6 6-6 6"
+                />
+              </svg>
+            </a>
+          </div>
+        </div>
+      </section>
+
 
       <footer id="contact" className="border-t border-pink-100 bg-gradient-to-b from-white to-pink-50/60">
         <div className="mx-auto max-w-7xl px-4 py-12 md:px-8 md:py-14">
