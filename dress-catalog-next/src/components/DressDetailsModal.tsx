@@ -54,9 +54,8 @@ export default function DressDetailsModal({
   }, [images.length, onClose]);
 
   const selectedImage = images[selectedIndex];
-  const selectedSizeData = dress.sizes.find(
-    (size) => size.size === selectedSize,
-  ) ?? dress.sizes[0];
+  const selectedSizeData =
+    dress.sizes.find((size) => size.size === selectedSize) ?? dress.sizes[0];
 
   function previousImage() {
     setSelectedIndex(
@@ -97,7 +96,9 @@ export default function DressDetailsModal({
                   alt={selectedImage.altText ?? dress.characterName}
                   fill
                   priority
-                  className="object-cover"
+                  draggable={false}
+                  onContextMenu={(event) => event.preventDefault()}
+                  className="select-none object-cover"
                   sizes="(max-width: 768px) 100vw, 50vw"
                 />
               ) : (
@@ -151,7 +152,9 @@ export default function DressDetailsModal({
                       src={image.url}
                       alt={image.altText ?? `Image ${index + 1}`}
                       fill
-                      className="object-cover"
+                      draggable={false}
+                      onContextMenu={(event) => event.preventDefault()}
+                      className="select-none object-cover"
                       sizes="80px"
                     />
                   </button>

@@ -44,7 +44,9 @@ export default function DressCard({
               src={mainImage.url}
               alt={mainImage.altText ?? dress.characterName}
               fill
-              className="object-cover transition duration-500 group-hover:scale-105"
+              draggable={false}
+              onContextMenu={(event) => event.preventDefault()}
+              className="select-none object-cover transition duration-500 group-hover:scale-105"
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 16vw"
             />
           ) : (
