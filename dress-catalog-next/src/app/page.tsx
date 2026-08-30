@@ -3,7 +3,7 @@ import DressCatalogClient from "@/components/DressCatalogClient";
 
 export const dynamic = "force-dynamic";
 
-const PAGE_SIZE = 24;
+const PAGE_SIZE = 12;
 
 type SearchParams = {
   page?: string;

@@ -4,7 +4,7 @@ import type { DressDto } from "@/lib/dress-types";
 
 export const dynamic = "force-dynamic";
 
-const PAGE_SIZE = 24;
+const PAGE_SIZE = 12;
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
