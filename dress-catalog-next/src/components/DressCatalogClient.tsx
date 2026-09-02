@@ -127,6 +127,7 @@ export default function DressCatalogClient({
   );
   const [selectedDress, setSelectedDress] = useState<DressDto | null>(null);
   const categoryScrollYRef = useRef<number | null>(null);
+  const scrollToCatalogRef = useRef(false);
   const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
   const [suggestionsLoading, setSuggestionsLoading] = useState(false);
   const [searchSubmitted, setSearchSubmitted] = useState(
@@ -363,11 +364,29 @@ export default function DressCatalogClient({
   }
 
   useEffect(() => {
+    if (scrollToCatalogRef.current) {
+      const frame = window.requestAnimationFrame(() => {
+        document.getElementById("catalog")?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+
+        scrollToCatalogRef.current = false;
+      });
+
+      return () => window.cancelAnimationFrame(frame);
+    }
+
     const savedScrollY = categoryScrollYRef.current;
     if (savedScrollY === null) return;
 
     const frame = window.requestAnimationFrame(() => {
-      window.scrollTo({ top: savedScrollY, left: 0, behavior: "auto" });
+      window.scrollTo({
+        top: savedScrollY,
+        left: 0,
+        behavior: "auto",
+      });
+
       categoryScrollYRef.current = null;
     });
 
@@ -375,8 +394,9 @@ export default function DressCatalogClient({
   }, [initialCategory, initialSubcategory, initialSearch, page]);
 
   function openCategory(categoryId: number) {
-    categoryScrollYRef.current = window.scrollY;
     setSuggestions([]);
+    scrollToCatalogRef.current = true;
+
     startTransition(() => {
       router.push(`${pathname}?categoryId=${categoryId}&page=1`, {
         scroll: false,
