@@ -20,12 +20,13 @@ export type CloudinaryImageAsset = {
 
 export async function uploadImageAssetToCloudinary(
   file: File,
+  folder = "dress-catalog",
 ): Promise<CloudinaryImageAsset> {
   const bytes = await file.arrayBuffer();
   const buffer = Buffer.from(bytes);
   return new Promise((resolve, reject) => {
     const uploadStream = cloudinary.uploader.upload_stream(
-      { folder: "dress-catalog", resource_type: "image" },
+      { folder, resource_type: "image" },
       (error, result) => {
         if (error) {
           console.error("CLOUDINARY_UPLOAD_ERROR:", error);

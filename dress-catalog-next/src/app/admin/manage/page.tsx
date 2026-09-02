@@ -10,10 +10,20 @@ export const dynamic = "force-dynamic";
 export default async function AdminManagePage() {
   await requireAdminSession();
   const dresses = await prisma.dress.findMany({
-    orderBy: { createdAt: "desc" },
     include: {
-      images: { orderBy: [{ isMain: "desc" }, { sortOrder: "asc" }] },
-      sizes: { orderBy: { id: "asc" } },
+      categoryRef: {
+        select: {
+          name: true,
+        },
+      },
+      images: {
+        orderBy: {
+          sortOrder: "asc",
+        },
+      },
+    },
+    orderBy: {
+      id: "asc",
     },
   });
   return (
@@ -67,7 +77,7 @@ export default async function AdminManagePage() {
                     <td className="p-3 font-bold text-slate-900">
                       {dress.characterName}
                     </td>
-                    <td className="p-3 text-slate-600">{dress.category}</td>
+                    <td className="p-3 text-slate-600">{dress.categoryRef.name}</td>
                     <td className="p-3">
                       <span
                         className={`rounded-full px-3 py-1 text-xs font-bold ${dress.isActive ? "bg-green-50 text-green-700" : "bg-red-50 text-red-700"}`}

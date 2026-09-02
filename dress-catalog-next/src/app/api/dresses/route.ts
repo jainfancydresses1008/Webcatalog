@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import type { DressDto } from "@/lib/dress-types";
 
 export const dynamic = "force-dynamic";
 
@@ -20,12 +19,12 @@ export async function GET(request: Request) {
 
   const where = {
     isActive: true,
-    ...(category && category !== "All" ? { category } : {}),
+    ...(category && category !== "All" ? { categoryRef: { name: category } } : {}),
     ...(subcategory && subcategory !== "All" ? { subcategory } : {}),
     ...(search
       ? {
           OR: [
-            { category: { contains: search, mode: "insensitive" as const } },
+            { categoryRef: { name: { contains: search, mode: "insensitive" as const } } },
             { subcategory: { contains: search, mode: "insensitive" as const } },
             { characterName: { contains: search, mode: "insensitive" as const } },
             { description: { contains: search, mode: "insensitive" as const } },
@@ -38,10 +37,11 @@ export async function GET(request: Request) {
     prisma.dress.count({ where }),
     prisma.dress.findMany({
       where,
-      orderBy: { createdAt: "desc" },
+      orderBy: [{ characterName: "asc" }, { id: "asc" }],
       skip: (page - 1) * PAGE_SIZE,
       take: PAGE_SIZE,
       include: {
+        categoryRef: true,
         sizes: { orderBy: { id: "asc" } },
         images: {
           orderBy: [{ isMain: "desc" }, { sortOrder: "asc" }],
@@ -54,7 +54,7 @@ export async function GET(request: Request) {
 
   return NextResponse.json(
     {
-      dresses: dresses as unknown as DressDto[],
+      dresses,
       total,
       page: Math.min(page, totalPages),
       totalPages,

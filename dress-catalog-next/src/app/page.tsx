@@ -9,27 +9,45 @@ type SearchParams = {
   page?: string;
   search?: string;
   category?: string;
+  categoryId?: string;
   subcategory?: string;
 };
 
 async function getCatalog(searchParams: SearchParams) {
   const requestedPage = Number.parseInt(searchParams.page ?? "1", 10);
+  const requestedCategoryId = Number.parseInt(searchParams.categoryId ?? "", 10);
   const page =
     Number.isFinite(requestedPage) && requestedPage > 0 ? requestedPage : 1;
+  const categoryId =
+    Number.isInteger(requestedCategoryId) && requestedCategoryId > 0
+      ? requestedCategoryId
+      : null;
   const search = searchParams.search?.trim() ?? "";
-
   const category = searchParams.category?.trim() ?? "";
-
   const subcategory = searchParams.subcategory?.trim() ?? "";
 
-  const where = {
+  const selectedCategory = categoryId
+    ? await prisma.category.findUnique({ where: { id: categoryId } })
+    : null;
+
+  const effectiveCategoryId = selectedCategory ? categoryId : null;
+
+  const dressWhere = {
     isActive: true,
-    ...(category && category !== "All" ? { category } : {}),
+    ...(effectiveCategoryId
+      ? { categoryId: effectiveCategoryId }
+      : category && category !== "All"
+        ? { categoryRef: { name: category } }
+        : {}),
     ...(subcategory && subcategory !== "All" ? { subcategory } : {}),
     ...(search
       ? {
           OR: [
-            { category: { contains: search, mode: "insensitive" as const } },
+            {
+              categoryRef: {
+                name: { contains: search, mode: "insensitive" as const },
+              },
+            },
             {
               subcategory: {
                 contains: search,
@@ -53,64 +71,96 @@ async function getCatalog(searchParams: SearchParams) {
       : {}),
   };
 
-  const [total, dresses, categories, subcategoryRows, stats, totalCostumes] =
-    await Promise.all([
-      prisma.dress.count({ where }),
-      prisma.dress.findMany({
-        where,
-        orderBy: { createdAt: "desc" },
-        skip: (page - 1) * PAGE_SIZE,
-        take: PAGE_SIZE,
-        include: {
-          sizes: { orderBy: { id: "asc" } },
-          images: {
-            orderBy: [{ isMain: "desc" }, { sortOrder: "asc" }],
-          },
+  const [categories, stats, totalCostumes] = await Promise.all([
+    prisma.category.findMany({
+      orderBy: { name: "asc" },
+    }),
+    prisma.siteStats.upsert({
+      where: { id: 1 },
+      create: { id: 1, visitorCount: 0 },
+      update: {},
+    }),
+    prisma.dress.count({ where: { isActive: true } }),
+  ]);
+
+  // Home page: show only Category Master cards, alphabetically paginated.
+  if (!effectiveCategoryId && (!category || category === "All") && !search && !subcategory) {
+    const total = categories.length;
+    const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+    const safePage = Math.min(page, totalPages);
+    const categoryRecords = categories.slice(
+      (safePage - 1) * PAGE_SIZE,
+      safePage * PAGE_SIZE,
+    );
+
+    return {
+      dresses: [],
+      categoryRecords,
+      total,
+      page: safePage,
+      totalPages,
+      pageSize: PAGE_SIZE,
+      categories: ["All", ...categories.map((item) => item.name)],
+      subcategories: [],
+      visitorCount: stats.visitorCount,
+      totalCostumes,
+      search: "",
+      category: "",
+      subcategory: "",
+      selectedCategoryId: null,
+    };
+  }
+
+  const [total, dresses, subcategoryRows] = await Promise.all([
+    prisma.dress.count({ where: dressWhere }),
+    prisma.dress.findMany({
+      where: dressWhere,
+      orderBy: [{ characterName: "asc" }, { id: "asc" }],
+      skip: (page - 1) * PAGE_SIZE,
+      take: PAGE_SIZE,
+      include: {
+        categoryRef: true,
+        sizes: { orderBy: { id: "asc" } },
+        images: {
+          orderBy: [{ isMain: "desc" }, { sortOrder: "asc" }],
         },
-      }),
-      prisma.dress.findMany({
-        where: { isActive: true },
-        select: { category: true },
-        distinct: ["category"],
-        orderBy: { category: "asc" },
-      }),
-      prisma.dress.findMany({
-        where: {
-          isActive: true,
-          ...(category && category !== "All" ? { category } : {}),
-        },
-        select: { subcategory: true },
-        distinct: ["subcategory"],
-        orderBy: { subcategory: "asc" },
-      }),
-      prisma.siteStats.upsert({
-        where: { id: 1 },
-        create: { id: 1, visitorCount: 0 },
-        update: {},
-      }),
-      prisma.dress.count({ where: { isActive: true } }),
-    ]);
+      },
+    }),
+    prisma.dress.findMany({
+      where: {
+        isActive: true,
+        ...(effectiveCategoryId
+          ? { categoryId: effectiveCategoryId }
+          : category && category !== "All"
+            ? { categoryRef: { name: category } }
+            : {}),
+      },
+      select: { subcategory: true },
+      distinct: ["subcategory"],
+      orderBy: { subcategory: "asc" },
+    }),
+  ]);
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
 
   return {
     dresses,
+    categoryRecords: [],
     total,
-    page: Math.min(page, totalPages),
+    page: safePage,
     totalPages,
     pageSize: PAGE_SIZE,
-    categories: [
-      "All",
-      ...categories.map((item) => item.category).filter(Boolean),
-    ],
+    categories: ["All", ...categories.map((item) => item.name)],
     subcategories: subcategoryRows
       .map((item) => item.subcategory)
       .filter((value): value is string => Boolean(value)),
     visitorCount: stats.visitorCount,
     totalCostumes,
     search,
-    category,
+    category: selectedCategory?.name ?? category,
     subcategory,
+    selectedCategoryId: selectedCategory?.id ?? null,
   };
 }
 
@@ -131,14 +181,16 @@ export default async function HomePage({
           process.env.NEXT_PUBLIC_SELLER_EMAIL ?? "seller@example.com"
         }
         categories={catalog.categories}
+        categoryRecords={catalog.categoryRecords}
         subcategories={catalog.subcategories}
         total={catalog.total}
         page={catalog.page}
         totalPages={catalog.totalPages}
         pageSize={catalog.pageSize}
-        initialSearch=""
-        initialCategory="All"
-        initialSubcategory="All"
+        initialSearch={catalog.search}
+        initialCategory={catalog.category || "All"}
+        initialSubcategory={catalog.subcategory || "All"}
+        selectedCategoryId={catalog.selectedCategoryId}
         visitorCount={catalog.visitorCount}
         totalCostumes={catalog.totalCostumes}
       />

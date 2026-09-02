@@ -13,6 +13,7 @@ async function main() {
       include: {
         sizes: { orderBy: { id: "asc" } },
         images: { orderBy: [{ isMain: "desc" }, { sortOrder: "asc" }, { id: "asc" }] },
+        categoryRef: true,
       },
     }),
     fs
@@ -28,7 +29,7 @@ async function main() {
 
   const output = dresses.map((dress) => ({
     id: dress.id,
-    category: dress.category,
+    category: dress.categoryRef.name,
     subcategory: dress.subcategory,
     characterName: dress.characterName,
     description: dress.description,

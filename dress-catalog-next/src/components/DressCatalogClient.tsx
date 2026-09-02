@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import type { DressDto } from "@/lib/dress-types";
+import type { CategoryDto, DressDto } from "@/lib/dress-types";
 import DressCard from "./DressCard";
 import DressDetailsModal from "./DressDetailsModal";
 import SearchFilters, { type SearchSuggestion } from "./SearchFilters";
@@ -14,6 +14,7 @@ type Props = {
   sellerPhone: string;
   sellerEmail: string;
   categories: string[];
+  categoryRecords: CategoryDto[];
   subcategories: string[];
   total: number;
   page: number;
@@ -22,6 +23,7 @@ type Props = {
   initialSearch: string;
   initialCategory: string;
   initialSubcategory: string;
+  selectedCategoryId: number | null;
   visitorCount: number;
   totalCostumes: number;
 };
@@ -102,6 +104,7 @@ export default function DressCatalogClient({
   sellerPhone,
   sellerEmail,
   categories,
+  categoryRecords,
   subcategories,
   total,
   page,
@@ -110,6 +113,7 @@ export default function DressCatalogClient({
   initialSearch,
   initialCategory,
   initialSubcategory,
+  selectedCategoryId,
   visitorCount,
   totalCostumes,
 }: Props) {
@@ -131,6 +135,12 @@ export default function DressCatalogClient({
       dresses.map((dress) => [dress.id, dress.sizes[0]?.size ?? ""]),
     ),
   );
+
+  const isCategoryView =
+    selectedCategoryId !== null ||
+    selectedCategory !== "All" ||
+    searchText.trim() !== "" ||
+    selectedSubcategory !== "All";
 
   const shopName = process.env.NEXT_PUBLIC_SHOP_NAME || "Jain Fancy Dresses";
   const whatsappContactLink = `https://wa.me/${sellerPhone}?text=${encodeURIComponent(
@@ -182,12 +192,6 @@ export default function DressCatalogClient({
       window.removeEventListener("jfd-dresses", goDresses as EventListener);
       window.removeEventListener("jfd-contact", goContact as EventListener);
     };
-  }, []);
-
-  useEffect(() => {
-    if (window.location.search) {
-      window.history.replaceState({}, "", window.location.pathname);
-    }
   }, []);
 
   function navigate(
@@ -346,6 +350,20 @@ export default function DressCatalogClient({
     return () => window.cancelAnimationFrame(frame);
   }, [initialCategory, initialSubcategory, initialSearch, page]);
 
+  function openCategory(categoryId: number) {
+    categoryScrollYRef.current = window.scrollY;
+    setSuggestions([]);
+    router.push(`${pathname}?categoryId=${categoryId}&page=1`, { scroll: false });
+  }
+
+  function backToCategories() {
+    setSuggestions([]);
+    setSearchText("");
+    setSelectedCategory("All");
+    setSelectedSubcategory("All");
+    router.push(pathname, { scroll: false });
+  }
+
   function selectedSizeFor(dress: DressDto) {
     return (
       dress.sizes.find((size) => size.size === selectedSizes[dress.id]) ??
@@ -360,7 +378,7 @@ export default function DressCatalogClient({
   function links(dress: DressDto) {
     const selected = selectedSizeFor(dress);
     const message = `Hello, I am interested in this dress.
-Category: ${dress.category}
+Category: ${dress.categoryRef.name}
 Subcategory: ${dress.subcategory ?? ""}
 Character Name: ${dress.characterName}
 Selected Size: ${selected?.size ?? ""}
@@ -479,152 +497,239 @@ Price: \u20B9${selected?.price ?? ""}`;
       </section>
 
       <section id="catalog" className="w-full px-4 py-10 md:px-8 md:py-14">
-        <div className="mb-7">
-          <div className="mx-auto max-w-7xl">
-            <p className="text-sm font-bold uppercase tracking-[0.2em] text-pink-600">
-              Explore Collection
-            </p>
-            <h2 className="mt-1 text-3xl font-black tracking-tight text-slate-950 md:text-4xl">
-              Find the perfect costume
-            </h2>
-            <p className="mt-2 text-sm text-slate-500 md:text-base">
-              Browse by category, subcategory, character and description.
-            </p>
-          </div>
-
-          <div className="relative z-10 mt-10 w-full rounded-[2rem] border border-white/80 bg-white/90 p-4 shadow-xl backdrop-blur">
-            <SearchFilters
-              categories={categories}
-              subcategories={subcategories}
-              searchText={searchText}
-              selectedCategory={selectedCategory}
-              selectedSubcategory={selectedSubcategory}
-              suggestions={suggestions}
-              suggestionsLoading={suggestionsLoading}
-              onSearchTextChange={handleSearch}
-              onSearchSubmit={() => submitSearch()}
-              onSuggestionSelect={handleSuggestionSelect}
-              onSelectedCategoryChange={handleCategory}
-              onSelectedSubcategoryChange={handleSubcategory}
-            />
-          </div>
-
-          <div className="mt-5 inline-flex rounded-full bg-white px-4 py-2 text-sm font-bold text-slate-600 shadow-sm ring-1 ring-slate-100">
-            {firstItem}-{lastItem} of {total} dresses
-          </div>
-        </div>
-
-        {dresses.length === 0 ? (
-          <div className="rounded-[2rem] border border-dashed border-pink-200 bg-white px-6 py-16 text-center shadow-sm">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-pink-50 text-3xl">
-              &#128269;
-            </div>
-            <h3 className="mt-5 text-xl font-black text-slate-900">
-              No dresses found
-            </h3>
-            <p className="mt-2 text-sm text-slate-500">
-              Try another search term or select a different category.
-            </p>
-            <button
-              type="button"
-              onClick={() => navigate("", "All", "All", 1)}
-              className="mt-5 rounded-full bg-pink-600 px-5 py-2.5 text-sm font-bold text-white shadow-md transition hover:bg-pink-700"
-            >
-              Clear Filters
-            </button>
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
-            {dresses.map((dress) => {
-              const selected = selectedSizeFor(dress);
-              return (
-                <div
-                  key={dress.id}
-                  className="group transition duration-300 hover:-translate-y-1"
-                >
-                  <DressCard
-                    dress={dress}
-                    selectedSize={selected?.size ?? ""}
-                    selectedPrice={selected?.price ?? 0}
-                    onSizeChange={(size) => updateSize(dress.id, size)}
-                    onView={() => {
-                      resetFilters();
-                      window.setTimeout(() => {
-                        setSelectedDress(dress);
-                      }, 50);
-                    }}
-                    contactLinks={links(dress)}
-                  />
+        <div className="mx-auto max-w-7xl">
+          {!isCategoryView ? (
+            <>
+              <div className="mb-8 text-center">
+                <p className="text-sm font-bold uppercase tracking-[0.2em] text-pink-600">
+                  Explore Collection
+                </p>
+                <h2 className="mt-1 text-3xl font-black tracking-tight text-slate-950 md:text-4xl">
+                  Browse by category
+                </h2>
+                <p className="mx-auto mt-2 max-w-2xl text-sm text-slate-500 md:text-base">
+                  Choose a category to view all available dresses in that collection.
+                </p>
+                <div className="mt-5 inline-flex rounded-full bg-white px-4 py-2 text-sm font-bold text-slate-600 shadow-sm ring-1 ring-slate-100">
+                  {total === 0 ? "No categories" : `${firstItem}-${lastItem} of ${total} categories`}
                 </div>
-              );
-            })}
-          </div>
-        )}
+              </div>
 
-        {totalPages > 1 && (
-          <nav
-            className="mt-10 flex flex-wrap items-center justify-center gap-2"
-            aria-label="Dress catalog pagination"
-          >
-            <button
-              type="button"
-              disabled={page <= 1}
-              onClick={() =>
-                navigate(
-                  searchText,
-                  selectedCategory,
-                  selectedSubcategory,
-                  page - 1,
-                )
-              }
-              className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700 shadow-sm transition hover:border-pink-300 hover:bg-pink-50 disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              &#8592; Previous
-            </button>
-            {pageNumbers.map((number, index) => {
-              const previous = pageNumbers[index - 1];
-              const showGap = previous && number - previous > 1;
-              return (
-                <span key={number} className="flex items-center gap-2">
-                  {showGap && <span className="px-1 text-slate-400">&#8230;</span>}
+              {categoryRecords.length === 0 ? (
+                <div className="rounded-[2rem] border border-dashed border-pink-200 bg-white px-6 py-16 text-center shadow-sm">
+                  <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-pink-50 text-3xl">
+                    &#128142;
+                  </div>
+                  <h3 className="mt-5 text-xl font-black text-slate-900">
+                    No categories available
+                  </h3>
+                  <p className="mt-2 text-sm text-slate-500">
+                    Categories added through Category Master will appear here.
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+                  {categoryRecords.map((category) => (
+                    <button
+                      key={category.id}
+                      type="button"
+                      onClick={() => openCategory(category.id)}
+                      className="group overflow-hidden rounded-[1.75rem] border border-white bg-white text-left shadow-md ring-1 ring-slate-100 transition duration-300 hover:-translate-y-1 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-pink-100"
+                    >
+                      <div className="relative aspect-[4/5] w-full overflow-hidden bg-gradient-to-br from-pink-50 to-purple-50">
+                        <Image
+                          src={category.posterUrl || "/images/placeholder-dress.svg"}
+                          alt={`${category.name} category poster`}
+                          fill
+                          sizes="(max-width: 640px) 45vw, (max-width: 1024px) 25vw, 180px"
+                          className="object-cover transition duration-500 group-hover:scale-105"
+                        />
+                        <div className="absolute inset-x-3 bottom-3 rounded-2xl bg-white/92 px-3 py-2.5 text-center shadow-sm backdrop-blur">
+                          <p className="truncate text-sm font-black text-slate-900">
+                            {category.name}
+                          </p>
+                        </div>
+                      </div>
+                      {category.description && (
+                        <p className="line-clamp-2 px-4 py-3 text-xs leading-5 text-slate-500">
+                          {category.description}
+                        </p>
+                      )}
+                      <div className="px-4 pb-4 text-xs font-black text-pink-600">
+                        View dresses &#8594;
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {totalPages > 1 && (
+                <nav
+                  className="mt-10 flex flex-wrap items-center justify-center gap-2"
+                  aria-label="Category pagination"
+                >
                   <button
                     type="button"
-                    onClick={() =>
-                      navigate(
-                        searchText,
-                        selectedCategory,
-                        selectedSubcategory,
-                        number,
-                      )
-                    }
-                    className={`h-10 min-w-10 rounded-full px-3 text-sm font-black transition ${
-                      page === number
-                        ? "bg-pink-600 text-white shadow-md"
-                        : "border border-slate-200 bg-white text-slate-700 hover:border-pink-300 hover:bg-pink-50"
-                    }`}
+                    disabled={page <= 1}
+                    onClick={() => navigate("", "All", "All", page - 1)}
+                    className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700 shadow-sm transition hover:border-pink-300 hover:bg-pink-50 disabled:cursor-not-allowed disabled:opacity-40"
                   >
-                    {number}
+                    &#8592; Previous
                   </button>
-                </span>
-              );
-            })}
-            <button
-              type="button"
-              disabled={page >= totalPages}
-              onClick={() =>
-                navigate(
-                  searchText,
-                  selectedCategory,
-                  selectedSubcategory,
-                  page + 1,
-                )
-              }
-              className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700 shadow-sm transition hover:border-pink-300 hover:bg-pink-50 disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              Next &#8594;
-            </button>
-          </nav>
-        )}
+                  {pageNumbers.map((number, index) => {
+                    const previous = pageNumbers[index - 1];
+                    const showGap = previous && number - previous > 1;
+                    return (
+                      <span key={number} className="flex items-center gap-2">
+                        {showGap && <span className="px-1 text-slate-400">&#8230;</span>}
+                        <button
+                          type="button"
+                          onClick={() => navigate("", "All", "All", number)}
+                          className={`h-10 min-w-10 rounded-full px-3 text-sm font-black transition ${
+                            page === number
+                              ? "bg-pink-600 text-white shadow-md"
+                              : "border border-slate-200 bg-white text-slate-700 hover:border-pink-300 hover:bg-pink-50"
+                          }`}
+                        >
+                          {number}
+                        </button>
+                      </span>
+                    );
+                  })}
+                  <button
+                    type="button"
+                    disabled={page >= totalPages}
+                    onClick={() => navigate("", "All", "All", page + 1)}
+                    className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700 shadow-sm transition hover:border-pink-300 hover:bg-pink-50 disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    Next &#8594;
+                  </button>
+                </nav>
+              )}
+            </>
+          ) : (
+            <>
+              <div className="mb-8">
+                <button
+                  type="button"
+                  onClick={backToCategories}
+                  className="mb-5 inline-flex items-center gap-2 rounded-full border border-pink-100 bg-white px-4 py-2 text-sm font-black text-pink-700 shadow-sm transition hover:border-pink-300 hover:bg-pink-50"
+                >
+                  &#8592; All Categories
+                </button>
+                <p className="text-sm font-bold uppercase tracking-[0.2em] text-pink-600">
+                  Category Collection
+                </p>
+                <h2 className="mt-1 text-3xl font-black tracking-tight text-slate-950 md:text-4xl">
+                  {selectedCategory || "Dresses"}
+                </h2>
+                <p className="mt-2 text-sm text-slate-500 md:text-base">
+                  {firstItem}-{lastItem} of {total} dresses · sorted alphabetically
+                </p>
+              </div>
+
+              <div className="relative z-10 mb-7 w-full rounded-[2rem] border border-white/80 bg-white/90 p-4 shadow-xl backdrop-blur">
+                <SearchFilters
+                  categories={categories}
+                  subcategories={subcategories}
+                  searchText={searchText}
+                  selectedCategory={selectedCategory}
+                  selectedSubcategory={selectedSubcategory}
+                  suggestions={suggestions}
+                  suggestionsLoading={suggestionsLoading}
+                  onSearchTextChange={handleSearch}
+                  onSearchSubmit={() => submitSearch()}
+                  onSuggestionSelect={handleSuggestionSelect}
+                  onSelectedCategoryChange={handleCategory}
+                  onSelectedSubcategoryChange={handleSubcategory}
+                />
+              </div>
+
+              {dresses.length === 0 ? (
+                <div className="rounded-[2rem] border border-dashed border-pink-200 bg-white px-6 py-16 text-center shadow-sm">
+                  <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-pink-50 text-3xl">
+                    &#128269;
+                  </div>
+                  <h3 className="mt-5 text-xl font-black text-slate-900">
+                    No dresses found
+                  </h3>
+                  <p className="mt-2 text-sm text-slate-500">
+                    This category does not have any matching dresses yet.
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+                  {dresses.map((dress) => {
+                    const selected = selectedSizeFor(dress);
+                    return (
+                      <div
+                        key={dress.id}
+                        className="group transition duration-300 hover:-translate-y-1"
+                      >
+                        <DressCard
+                          dress={dress}
+                          selectedSize={selected?.size ?? ""}
+                          selectedPrice={selected?.price ?? 0}
+                          onSizeChange={(size) => updateSize(dress.id, size)}
+                          onView={() => {
+                            window.setTimeout(() => {
+                              setSelectedDress(dress);
+                            }, 50);
+                          }}
+                          contactLinks={links(dress)}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {totalPages > 1 && (
+                <nav
+                  className="mt-10 flex flex-wrap items-center justify-center gap-2"
+                  aria-label="Dress catalog pagination"
+                >
+                  <button
+                    type="button"
+                    disabled={page <= 1}
+                    onClick={() => navigate(searchText, selectedCategory, selectedSubcategory, page - 1)}
+                    className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700 shadow-sm transition hover:border-pink-300 hover:bg-pink-50 disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    &#8592; Previous
+                  </button>
+                  {pageNumbers.map((number, index) => {
+                    const previous = pageNumbers[index - 1];
+                    const showGap = previous && number - previous > 1;
+                    return (
+                      <span key={number} className="flex items-center gap-2">
+                        {showGap && <span className="px-1 text-slate-400">&#8230;</span>}
+                        <button
+                          type="button"
+                          onClick={() => navigate(searchText, selectedCategory, selectedSubcategory, number)}
+                          className={`h-10 min-w-10 rounded-full px-3 text-sm font-black transition ${
+                            page === number
+                              ? "bg-pink-600 text-white shadow-md"
+                              : "border border-slate-200 bg-white text-slate-700 hover:border-pink-300 hover:bg-pink-50"
+                          }`}
+                        >
+                          {number}
+                        </button>
+                      </span>
+                    );
+                  })}
+                  <button
+                    type="button"
+                    disabled={page >= totalPages}
+                    onClick={() => navigate(searchText, selectedCategory, selectedSubcategory, page + 1)}
+                    className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700 shadow-sm transition hover:border-pink-300 hover:bg-pink-50 disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    Next &#8594;
+                  </button>
+                </nav>
+              )}
+            </>
+          )}
+        </div>
       </section>
 
       <section className="px-4 pb-12 md:px-8">

@@ -186,7 +186,7 @@ export default function DressDetailsModal({
 
           <div className="flex flex-col">
             <p className="text-xs font-black uppercase tracking-[0.2em] text-pink-600">
-              {dress.category}
+              {dress.categoryRef.name}
               {dress.subcategory ? ` · ${dress.subcategory}` : ""}
             </p>
 

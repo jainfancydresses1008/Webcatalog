@@ -13,9 +13,18 @@ export type DressImageDto = {
   sortOrder: number;
 };
 
+export type CategoryDto = {
+  id: number;
+  name: string;
+  description: string | null;
+  posterUrl: string | null;
+  publicId: string | null;
+};
+
 export type DressDto = {
   id: number;
-  category: string;
+  categoryId: number;
+  categoryRef: CategoryDto;
   subcategory: string | null;
   characterName: string;
   description: string;

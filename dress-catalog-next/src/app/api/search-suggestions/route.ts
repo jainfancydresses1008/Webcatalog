@@ -15,30 +15,42 @@ export async function GET(request: Request) {
 
   try {
     const [characters, categories, subcategories] = await Promise.all([
+      // Character suggestions
       prisma.dress.findMany({
         where: {
           isActive: true,
-          OR: [{ characterName: contains }, { description: contains }],
+          OR: [
+            { characterName: contains },
+            { description: contains },
+          ],
         },
         select: {
           characterName: true,
-          category: true,
           subcategory: true,
+          categoryRef: {
+            select: {
+              name: true,
+            },
+          },
         },
         distinct: ["characterName"],
         orderBy: { characterName: "asc" },
         take: 6,
       }),
-      prisma.dress.findMany({
+
+      // Category suggestions
+      prisma.category.findMany({
         where: {
-          isActive: true,
-          category: contains,
+          name: contains,
         },
-        select: { category: true },
-        distinct: ["category"],
-        orderBy: { category: "asc" },
+        select: {
+          name: true,
+        },
+        orderBy: { name: "asc" },
         take: 5,
       }),
+
+      // Subcategory suggestions
       prisma.dress.findMany({
         where: {
           isActive: true,
@@ -46,7 +58,11 @@ export async function GET(request: Request) {
         },
         select: {
           subcategory: true,
-          category: true,
+          categoryRef: {
+            select: {
+              name: true,
+            },
+          },
         },
         distinct: ["subcategory"],
         orderBy: { subcategory: "asc" },
@@ -60,28 +76,31 @@ export async function GET(request: Request) {
         .map((item) => ({
           type: "character" as const,
           value: item.characterName,
-          category: item.category,
+          category: item.categoryRef.name,
           subcategory: item.subcategory,
         })),
+
       ...categories
-        .filter((item) => item.category)
+        .filter((item) => item.name)
         .map((item) => ({
           type: "category" as const,
-          value: item.category,
+          value: item.name,
         })),
+
       ...subcategories
         .filter((item) => item.subcategory)
         .map((item) => ({
           type: "subcategory" as const,
           value: item.subcategory as string,
-          category: item.category,
+          category: item.categoryRef.name,
         })),
     ];
 
-    const seen = new Set<string>();
     const suggestions = Array.from(
       new Map(
-        rawSuggestions.map((item) => [`${item.type}-${item.value}`, item]),
+        rawSuggestions.map(
+          (item) => [`${item.type}-${item.value}`, item],
+        ),
       ).values(),
     );
 

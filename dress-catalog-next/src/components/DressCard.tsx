@@ -77,7 +77,7 @@ export default function DressCard({
 
       <div className="p-4">
         <p className="text-[11px] font-black uppercase tracking-wider text-pink-600">
-          {dress.category}
+          {dress.categoryRef.name}
           {dress.subcategory ? ` · ${dress.subcategory}` : ""}
         </p>
 

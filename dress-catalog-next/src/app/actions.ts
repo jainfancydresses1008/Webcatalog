@@ -31,9 +31,106 @@ async function getImageAssetFromForm(formData: FormData) {
   };
 }
 
+export async function createCategory(formData: FormData) {
+  const session = await requireAdminSession();
+  const name = String(formData.get("name") ?? "").trim();
+  const description = String(formData.get("description") ?? "").trim();
+  const enteredPosterUrl = String(formData.get("posterUrl") ?? "").trim();
+  const posterFile = formData.get("posterFile");
+
+  if (!name) throw new Error("Category name is required.");
+
+  const existing = await prisma.category.findFirst({
+    where: { name: { equals: name, mode: "insensitive" } },
+  });
+  if (existing) throw new Error(`CATEGORY_EXISTS: ${existing.name} already exists.`);
+
+  let posterUrl = enteredPosterUrl || null;
+  let publicId = getCloudinaryPublicIdFromUrl(enteredPosterUrl);
+
+  if (posterFile instanceof File && posterFile.size > 0) {
+    const asset = await uploadImageAssetToCloudinary(
+      posterFile,
+      "dress-catalog/categories",
+    );
+    posterUrl = asset.secure_url;
+    publicId = asset.public_id;
+  }
+
+  const category = await prisma.category.create({
+    data: { name, description: description || null, posterUrl, publicId },
+  });
+
+  await writeAuditLog({
+    adminEmail: session.email,
+    action: "CREATE_CATEGORY",
+    entity: "Category",
+    entityId: category.id,
+    details: { name, description, posterUrl, publicId },
+  });
+
+  revalidatePath("/");
+  revalidatePath("/admin/categories");
+  revalidatePath("/admin/add");
+}
+
+export async function updateCategory(formData: FormData) {
+  const session = await requireAdminSession();
+  const categoryId = Number(formData.get("categoryId"));
+  const name = String(formData.get("name") ?? "").trim();
+  const description = String(formData.get("description") ?? "").trim();
+  const enteredPosterUrl = String(formData.get("posterUrl") ?? "").trim();
+  const posterFile = formData.get("posterFile");
+
+  if (!categoryId || !name) throw new Error("Category ID and name are required.");
+
+  const existing = await prisma.category.findUnique({ where: { id: categoryId } });
+  if (!existing) throw new Error("Category not found.");
+
+  const duplicate = await prisma.category.findFirst({
+    where: {
+      id: { not: categoryId },
+      name: { equals: name, mode: "insensitive" },
+    },
+  });
+  if (duplicate) throw new Error(`CATEGORY_EXISTS: ${duplicate.name} already exists.`);
+
+  let posterUrl = enteredPosterUrl || null;
+  let publicId = getCloudinaryPublicIdFromUrl(enteredPosterUrl);
+
+  if (posterFile instanceof File && posterFile.size > 0) {
+    const asset = await uploadImageAssetToCloudinary(
+      posterFile,
+      "dress-catalog/categories",
+    );
+    posterUrl = asset.secure_url;
+    publicId = asset.public_id;
+  } else if (!enteredPosterUrl && existing.posterUrl) {
+    posterUrl = existing.posterUrl;
+    publicId = existing.publicId;
+  }
+
+  const category = await prisma.category.update({
+    where: { id: categoryId },
+    data: { name, description: description || null, posterUrl, publicId },
+  });
+
+  await writeAuditLog({
+    adminEmail: session.email,
+    action: "UPDATE_CATEGORY",
+    entity: "Category",
+    entityId: category.id,
+    details: { name, description, posterUrl, publicId },
+  });
+
+  revalidatePath("/");
+  revalidatePath("/admin/categories");
+  revalidatePath("/admin/add");
+}
+
 export async function createDress(formData: FormData) {
   const session = await requireAdminSession();
-  const category = String(formData.get("category") ?? "").trim(),
+  const categoryId = Number(formData.get("categoryId")),
     subcategory = String(formData.get("subcategory") ?? "").trim(),
     characterName = String(formData.get("characterName") ?? "").trim(),
     description = String(formData.get("description") ?? "").trim();
@@ -52,7 +149,7 @@ export async function createDress(formData: FormData) {
     .map((url) => ({ url, publicId: getCloudinaryPublicIdFromUrl(url) }));
   const sizes = parseCsv(formData.get("sizes"));
   const prices = parseCsv(formData.get("prices")).map(Number);
-  if (!category || !characterName || !description)
+  if (!categoryId || !characterName || !description)
     throw new Error("Category, character name & description are required.");
   if (
     !sizes.length ||
@@ -61,9 +158,18 @@ export async function createDress(formData: FormData) {
   )
     throw new Error("Sizes and prices must have the same count.");
   const all = [...(mainImage ? [mainImage] : []), ...uploaded, ...galleryUrls];
+
+  const categoryRef = await prisma.category.findUnique({
+    where: { id: categoryId },
+  });
+
+  if (!categoryRef)
+    throw new Error(
+      "CATEGORY_NOT_FOUND: The selected category does not exist.",
+    );
   const dress = await prisma.dress.create({
     data: {
-      category,
+      categoryId,
       subcategory,
       characterName,
       description,
@@ -86,7 +192,12 @@ export async function createDress(formData: FormData) {
     action: "CREATE_DRESS",
     entity: "Dress",
     entityId: dress.id,
-    details: { characterName, category, imageCount: all.length },
+    details: {
+      characterName,
+      categoryId,
+      categoryName: categoryRef.name,
+      imageCount: all.length,
+    },
   });
   revalidatePath("/");
   revalidatePath("/admin/manage");
@@ -96,14 +207,14 @@ export async function createDress(formData: FormData) {
 export async function updateDressDetails(formData: FormData) {
   const session = await requireAdminSession();
   const dressId = Number(formData.get("dressId"));
-  const category = String(formData.get("category") ?? "").trim();
+  const categoryId = Number(formData.get("categoryId"));
   const subcategory = String(formData.get("subcategory") ?? "").trim();
   const characterName = String(formData.get("characterName") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim();
   const isActive = formData.get("isActive") === "on";
   const sizes = parseCsv(formData.get("sizes"));
   const prices = parseCsv(formData.get("prices")).map(Number);
-  if (!dressId || !category || !characterName || !description)
+  if (!dressId || !categoryId || !characterName || !description)
     throw new Error(
       "Dress id, category, character name and description are required.",
     );
@@ -113,13 +224,22 @@ export async function updateDressDetails(formData: FormData) {
     prices.some(Number.isNaN)
   )
     throw new Error("Sizes and prices must have the same count.");
+
   const before = await prisma.dress.findUnique({ where: { id: dressId } });
   if (!before) throw new Error("Dress not found.");
+  const categoryRef = await prisma.category.findUnique({
+    where: { id: categoryId },
+  });
+
+  if (!categoryRef)
+    throw new Error(
+      "CATEGORY_NOT_FOUND: The selected category does not exist.",
+    );
   await prisma.$transaction([
     prisma.dress.update({
       where: { id: dressId },
       data: {
-        category,
+        categoryId,
         subcategory,
         characterName,
         description,
@@ -141,7 +261,12 @@ export async function updateDressDetails(formData: FormData) {
     action: "UPDATE_DRESS",
     entity: "Dress",
     entityId: dressId,
-    details: { characterName, category, isActive },
+    details: {
+      characterName,
+      categoryId,
+      categoryName: categoryRef.name,
+      isActive,
+    },
   });
   revalidatePath("/");
   revalidatePath("/admin/manage");
@@ -280,7 +405,7 @@ export async function deleteDress(formData: FormData) {
   if (!dressId) throw new Error("Dress id is required.");
   const dress = await prisma.dress.findUnique({
     where: { id: dressId },
-    include: { images: true },
+    include: { images: true, categoryRef: true },
   });
   if (!dress) throw new Error("Dress not found.");
   if (!dress.isActive && dress.deletedAt)
@@ -294,11 +419,11 @@ export async function deleteDress(formData: FormData) {
     action: "SOFT_DELETE_DRESS",
     entity: "Dress",
     entityId: dressId,
-    details: {
+    details: JSON.stringify({
       characterName: dress.characterName,
-      category: dress.category,
+      category: dress.categoryRef.name,
       imageCount: dress.images.length,
-    },
+    }),
   });
   revalidatePath("/");
   revalidatePath("/admin/manage");

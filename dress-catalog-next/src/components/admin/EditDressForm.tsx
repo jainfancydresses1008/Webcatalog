@@ -1,18 +1,20 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import type { DressDto } from "@/lib/dress-types";
+import type { CategoryDto, DressDto } from "@/lib/dress-types";
 
 type Props = {
   dress: DressDto & {
     isActive?: boolean;
   };
   updateDressDetailsAction: (formData: FormData) => Promise<void>;
+  categories: Pick<CategoryDto, "id" | "name">[];
 };
 
 export default function EditDressForm({
   dress,
   updateDressDetailsAction,
+  categories,
 }: Props) {
   const [message, setMessage] = useState("");
   const [isPending, startTransition] = useTransition();
@@ -76,11 +78,10 @@ export default function EditDressForm({
             Category
           </label>
 
-          <input
-            id="category"
-            name="category"
-            defaultValue={dress.category}
-            placeholder="Enter category"
+          <select
+            id="categoryId"
+            name="categoryId"
+            defaultValue={dress.categoryId}
             required
             className="
               w-full
@@ -92,12 +93,17 @@ export default function EditDressForm({
               text-slate-900
               outline-none
               transition
-              placeholder:text-slate-400
               focus:border-pink-500
               focus:ring-4
               focus:ring-pink-100
             "
-          />
+          >
+            {categories.map((category) => (
+              <option key={category.id} value={category.id}>
+                {category.name}
+              </option>
+            ))}
+          </select>
         </div>
         {/* ================= SUB CATEGORY ================= */}
 

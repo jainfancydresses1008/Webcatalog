@@ -10,6 +10,7 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:seed": "tsx prisma/seed.ts",
+	"migrate:categories": "tsx scripts/migrate-categories.ts",
     "prisma:studio": "prisma studio",
     "backup": "tsx scripts/backup.ts",
     "export:data": "tsx scripts/export-data.ts",

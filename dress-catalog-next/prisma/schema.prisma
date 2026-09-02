@@ -9,7 +9,8 @@ datasource db {
 
 model Dress {
   id            Int          @id @default(autoincrement())
-  category      String
+  categoryId    Int
+  categoryRef   Category    @relation(fields: [categoryId], references: [id])
   subcategory   String?
   characterName String
   description   String
@@ -21,9 +22,8 @@ model Dress {
   sizes         DressSize[]
   images        DressImage[]
 
-  @@index([category])
+
   @@index([subcategory])
-  @@index([category, subcategory])
   @@index([characterName])
   @@index([isActive])
   @@index([deletedAt])
@@ -82,5 +82,19 @@ model AdminAuditLog {
 model SiteStats {
   id           Int      @id @default(1)
   visitorCount Int      @default(0)
+  updatedAt    DateTime @updatedAt
+}
+
+model Category {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  description String?
+  posterUrl   String?
+  publicId    String?
+  createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  dresses Dress[]
+
+  @@index([name])
 }

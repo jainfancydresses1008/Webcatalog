@@ -1,11 +1,15 @@
 "use client";
 
 import { type ChangeEvent, type FormEvent, useRef, useState, useTransition } from "react";
+import type { CategoryDto } from "@/lib/dress-types";
 
-type Props = { createDressAction: (formData: FormData) => Promise<void> };
+type Props = {
+  createDressAction: (formData: FormData) => Promise<void>;
+  categories: Pick<CategoryDto, "id" | "name">[];
+};
 type ImageItem = { id: string; file: File; isMain: boolean };
 
-export default function AdminDressForm({ createDressAction }: Props) {
+export default function AdminDressForm({ createDressAction, categories }: Props) {
   const formRef = useRef<HTMLFormElement>(null);
   const pickerRef = useRef<HTMLInputElement>(null);
   const mainFileRef = useRef<HTMLInputElement>(null);
@@ -115,7 +119,14 @@ export default function AdminDressForm({ createDressAction }: Props) {
         <h3 className="text-xl font-black text-slate-950">Dress Details</h3>
         <p className="mt-1 text-sm text-slate-500">Enter the information that will appear in the catalog.</p>
         <div className="mt-5 grid gap-4 md:grid-cols-2">
-          <input name="category" placeholder="Category" required className="rounded-2xl border border-slate-200 bg-slate-50 p-3.5 outline-none focus:border-pink-400 focus:bg-white focus:ring-4 focus:ring-pink-100" />
+          <select name="categoryId" required defaultValue="" className="rounded-2xl border border-slate-200 bg-slate-50 p-3.5 outline-none focus:border-pink-400 focus:bg-white focus:ring-4 focus:ring-pink-100">
+            <option value="" disabled>Select Category</option>
+            {categories.map((category) => (
+              <option key={category.id} value={category.id}>
+                {category.name}
+              </option>
+            ))}
+          </select>
           <input name="subcategory" placeholder="Subcategory" className="rounded-2xl border border-slate-200 bg-slate-50 p-3.5 outline-none focus:border-pink-400 focus:bg-white focus:ring-4 focus:ring-pink-100" />
           <input name="characterName" placeholder="Character Name" required className="rounded-2xl border border-slate-200 bg-slate-50 p-3.5 outline-none focus:border-pink-400 focus:bg-white focus:ring-4 focus:ring-pink-100 md:col-span-2" />
           <textarea name="description" placeholder="Description" required className="min-h-28 rounded-2xl border border-slate-200 bg-slate-50 p-3.5 outline-none focus:border-pink-400 focus:bg-white focus:ring-4 focus:ring-pink-100 md:col-span-2" />
