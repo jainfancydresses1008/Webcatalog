@@ -130,22 +130,17 @@ export default function DressCatalogClient({
   const categoryScrollYRef = useRef<number | null>(null);
   const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
   const [suggestionsLoading, setSuggestionsLoading] = useState(false);
-  const [searchSubmitted, setSearchSubmitted] = useState(Boolean(initialSearch?.trim()));
-  const [isPending, startTransition] = useTransition();
   const [selectedSizes, setSelectedSizes] = useState<Record<number, string>>(
     Object.fromEntries(
       dresses.map((dress) => [dress.id, dress.sizes[0]?.size ?? ""]),
     ),
   );
 
-  // A typed search is only a draft until the user submits it.
-  // This keeps the search box usable on the home/category page.
   const isCategoryView =
     selectedCategoryId !== null ||
     selectedCategory !== "All" ||
-    selectedSubcategory !== "All" ||
-    searchSubmitted ||
-    Boolean(initialSearch?.trim());
+    searchText.trim() !== "" ||
+    selectedSubcategory !== "All";
 
   const shopName = process.env.NEXT_PUBLIC_SHOP_NAME || "Jain Fancy Dresses";
   const whatsappContactLink = `https://wa.me/${sellerPhone}?text=${encodeURIComponent(
@@ -161,10 +156,7 @@ export default function DressCatalogClient({
 
   function resetFilters() {
     clearFilterState();
-    setSearchSubmitted(false);
-    startTransition(() => {
-      router.replace("/", { scroll: false });
-    });
+    router.replace("/", { scroll: false });
   }
 
   function scrollToSection(id: string) {
@@ -227,9 +219,7 @@ export default function DressCatalogClient({
     }
 
     const query = params.toString();
-    startTransition(() => {
-      router.push(query ? `${pathname}?${query}` : pathname, { scroll: false });
-    });
+    router.push(query ? `${pathname}?${query}` : pathname, { scroll: false });
   }
 
   function handleSearch(value: string) {
@@ -249,7 +239,6 @@ export default function DressCatalogClient({
     }
 
     setSearchText(value);
-    setSearchSubmitted(Boolean(trimmedValue));
     setSuggestions([]);
     navigate(value, selectedCategory, selectedSubcategory, 1);
   }
@@ -259,7 +248,6 @@ export default function DressCatalogClient({
 
     categoryScrollYRef.current = window.scrollY;
     setSearchText(nextSearch);
-    setSearchSubmitted(true);
     setSuggestions([]);
 
     if (suggestion.type === "category") {
@@ -288,15 +276,6 @@ export default function DressCatalogClient({
 
     navigate(nextSearch, selectedCategory, selectedSubcategory, 1);
   }
-
-  // Keep local controls synchronized with the server-rendered URL state after
-  // a navigation, while still allowing the user to type freely before submit.
-  useEffect(() => {
-    setSelectedCategory(initialCategory || "All");
-    setSelectedSubcategory(initialSubcategory || "All");
-    setSearchText(initialSearch || "");
-    setSearchSubmitted(Boolean(initialSearch?.trim()));
-  }, [initialCategory, initialSubcategory, initialSearch, selectedCategoryId]);
 
   useEffect(() => {
     const query = searchText.trim();
@@ -347,11 +326,9 @@ export default function DressCatalogClient({
   function handleCategory(value: string) {
     categoryScrollYRef.current = window.scrollY;
     setSuggestions([]);
-    setSearchText("");
-    setSearchSubmitted(false);
     setSelectedCategory(value);
     setSelectedSubcategory("All");
-    navigate("", value, "All", 1);
+    navigate(searchText, value, "All", 1);
   }
 
   function handleSubcategory(value: string) {
@@ -376,20 +353,15 @@ export default function DressCatalogClient({
   function openCategory(categoryId: number) {
     categoryScrollYRef.current = window.scrollY;
     setSuggestions([]);
-    startTransition(() => {
-      router.push(`${pathname}?categoryId=${categoryId}&page=1`, { scroll: false });
-    });
+    router.push(`${pathname}?categoryId=${categoryId}&page=1`, { scroll: false });
   }
 
   function backToCategories() {
     setSuggestions([]);
     setSearchText("");
-    setSearchSubmitted(false);
     setSelectedCategory("All");
     setSelectedSubcategory("All");
-    startTransition(() => {
-      router.push(pathname, { scroll: false });
-    });
+    router.push(pathname, { scroll: false });
   }
 
   function selectedSizeFor(dress: DressDto) {
@@ -573,34 +545,34 @@ Price: \u20B9${selected?.price ?? ""}`;
                   </p>
                 </div>
               ) : (
-                <div className="grid grid-cols-2 gap-5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4">
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                   {categoryRecords.map((category) => (
                     <button
                       key={category.id}
                       type="button"
                       onClick={() => openCategory(category.id)}
-                      className="group overflow-hidden rounded-[2rem] border border-white bg-white text-left shadow-lg ring-1 ring-slate-100 transition duration-300 hover:-translate-y-1 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-pink-100"
+                      className="group overflow-hidden rounded-[1.75rem] border border-white bg-white text-left shadow-md ring-1 ring-slate-100 transition duration-300 hover:-translate-y-1 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-pink-100"
                     >
-                      <div className="relative aspect-[3/4] w-full overflow-hidden bg-gradient-to-br from-pink-50 to-purple-50">
+                      <div className="relative aspect-[4/5] w-full overflow-hidden bg-gradient-to-br from-pink-50 to-purple-50">
                         <Image
                           src={category.posterUrl || "/images/placeholder-dress.svg"}
                           alt={`${category.name} category poster`}
                           fill
-                          sizes="(max-width: 640px) 45vw, (max-width: 1024px) 25vw, 180px"
+                          sizes="(max-width: 640px) 92vw, (max-width: 1024px) 45vw, (max-width: 1280px) 30vw, 25vw"
                           className="object-cover transition duration-500 group-hover:scale-105"
                         />
                         <div className="absolute inset-x-3 bottom-3 rounded-2xl bg-white/92 px-3 py-2.5 text-center shadow-sm backdrop-blur">
-                          <p className="truncate text-base font-black text-slate-900">
+                          <p className="text-base font-black leading-tight text-slate-900 sm:text-lg">
                             {category.name}
                           </p>
                         </div>
                       </div>
                       {category.description && (
-                        <p className="line-clamp-3 px-4 py-3 text-sm leading-6 text-slate-500">
+                        <p className="line-clamp-3 min-h-[4.5rem] px-5 py-4 text-sm leading-6 text-slate-500">
                           {category.description}
                         </p>
                       )}
-                      <div className="px-4 pb-4 text-xs font-black text-pink-600">
+                      <div className="px-5 pb-5 text-sm font-black text-pink-600">
                         View dresses &#8594;
                       </div>
                     </button>
@@ -673,17 +645,7 @@ Price: \u20B9${selected?.price ?? ""}`;
                 </p>
               </div>
 
-              {isPending ? (
-                <div className="rounded-[2rem] border border-slate-100 bg-white px-6 py-16 text-center shadow-sm">
-                  <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-pink-100 border-t-pink-600" />
-                  <h3 className="mt-5 text-xl font-black text-slate-900">
-                    Loading dresses...
-                  </h3>
-                  <p className="mt-2 text-sm text-slate-500">
-                    Please wait while we load this collection.
-                  </p>
-                </div>
-              ) : dresses.length === 0 ? (
+              {dresses.length === 0 ? (
                 <div className="rounded-[2rem] border border-dashed border-pink-200 bg-white px-6 py-16 text-center shadow-sm">
                   <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-pink-50 text-3xl">
                     &#128269;

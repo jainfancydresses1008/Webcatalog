@@ -573,15 +573,15 @@ Price: \u20B9${selected?.price ?? ""}`;
                   </p>
                 </div>
               ) : (
-                <div className="grid grid-cols-2 gap-5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4">
+                <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
                   {categoryRecords.map((category) => (
                     <button
                       key={category.id}
                       type="button"
                       onClick={() => openCategory(category.id)}
-                      className="group overflow-hidden rounded-[2rem] border border-white bg-white text-left shadow-lg ring-1 ring-slate-100 transition duration-300 hover:-translate-y-1 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-pink-100"
+                      className="group overflow-hidden rounded-[1.75rem] border border-white bg-white text-left shadow-md ring-1 ring-slate-100 transition duration-300 hover:-translate-y-1 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-pink-100"
                     >
-                      <div className="relative aspect-[3/4] w-full overflow-hidden bg-gradient-to-br from-pink-50 to-purple-50">
+                      <div className="relative aspect-[4/5] w-full overflow-hidden bg-gradient-to-br from-pink-50 to-purple-50">
                         <Image
                           src={category.posterUrl || "/images/placeholder-dress.svg"}
                           alt={`${category.name} category poster`}
@@ -590,13 +590,13 @@ Price: \u20B9${selected?.price ?? ""}`;
                           className="object-cover transition duration-500 group-hover:scale-105"
                         />
                         <div className="absolute inset-x-3 bottom-3 rounded-2xl bg-white/92 px-3 py-2.5 text-center shadow-sm backdrop-blur">
-                          <p className="truncate text-base font-black text-slate-900">
+                          <p className="truncate text-sm font-black text-slate-900">
                             {category.name}
                           </p>
                         </div>
                       </div>
                       {category.description && (
-                        <p className="line-clamp-3 px-4 py-3 text-sm leading-6 text-slate-500">
+                        <p className="line-clamp-2 px-4 py-3 text-xs leading-5 text-slate-500">
                           {category.description}
                         </p>
                       )}
