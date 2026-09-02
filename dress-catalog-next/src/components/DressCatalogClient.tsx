@@ -35,7 +35,6 @@ const heroImages = [
   { src: "/images/hero/fairy.svg", title: "Fairy" },
 ];
 
-
 type GoogleReview = {
   id: string;
   reviewerName: string;
@@ -130,7 +129,9 @@ export default function DressCatalogClient({
   const categoryScrollYRef = useRef<number | null>(null);
   const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
   const [suggestionsLoading, setSuggestionsLoading] = useState(false);
-  const [searchSubmitted, setSearchSubmitted] = useState(Boolean(initialSearch?.trim()));
+  const [searchSubmitted, setSearchSubmitted] = useState(
+    Boolean(initialSearch?.trim()),
+  );
   const [isPending, startTransition] = useTransition();
   const [selectedSizes, setSelectedSizes] = useState<Record<number, string>>(
     Object.fromEntries(
@@ -149,7 +150,7 @@ export default function DressCatalogClient({
 
   const shopName = process.env.NEXT_PUBLIC_SHOP_NAME || "Jain Fancy Dresses";
   const whatsappContactLink = `https://wa.me/${sellerPhone}?text=${encodeURIComponent(
-    "Hello, I am interested in your fancy dress collection."
+    "Hello, I am interested in your fancy dress collection.",
   )}`;
 
   function clearFilterState() {
@@ -377,7 +378,9 @@ export default function DressCatalogClient({
     categoryScrollYRef.current = window.scrollY;
     setSuggestions([]);
     startTransition(() => {
-      router.push(`${pathname}?categoryId=${categoryId}&page=1`, { scroll: false });
+      router.push(`${pathname}?categoryId=${categoryId}&page=1`, {
+        scroll: false,
+      });
     });
   }
 
@@ -443,9 +446,9 @@ Price: \u20B9${selected?.price ?? ""}`;
         <div className="relative mx-auto max-w-7xl px-4 pb-12 pt-4 md:px-8 md:pb-16">
           <div className="mb-6 overflow-hidden rounded-full bg-gradient-to-r from-pink-600 via-fuchsia-600 to-purple-700 px-4 py-2 text-white shadow-lg">
             <div className="animate-marquee whitespace-nowrap text-center text-sm font-black uppercase tracking-[0.18em]">
-              New school event collection available &#10024; 1000+ costumes for every
-              occasion &#10024; Wholesale and bulk orders available &#10024; Best quality at
-              affordable prices &#10024;
+              New school event collection available &#10024; 1000+ costumes for
+              every occasion &#10024; Wholesale and bulk orders available
+              &#10024; Best quality at affordable prices &#10024;
             </div>
           </div>
 
@@ -553,10 +556,13 @@ Price: \u20B9${selected?.price ?? ""}`;
                   Browse by category
                 </h2>
                 <p className="mx-auto mt-2 max-w-2xl text-sm text-slate-500 md:text-base">
-                  Choose a category to view all available dresses in that collection.
+                  Choose a category to view all available dresses in that
+                  collection.
                 </p>
                 <div className="mt-5 inline-flex rounded-full bg-white px-4 py-2 text-sm font-bold text-slate-600 shadow-sm ring-1 ring-slate-100">
-                  {total === 0 ? "No categories" : `${firstItem}-${lastItem} of ${total} categories`}
+                  {total === 0
+                    ? "No categories"
+                    : `${firstItem}-${lastItem} of ${total} categories`}
                 </div>
               </div>
 
@@ -583,20 +589,23 @@ Price: \u20B9${selected?.price ?? ""}`;
                     >
                       <div className="relative aspect-[3/4] w-full overflow-hidden bg-gradient-to-br from-pink-50 to-purple-50">
                         <Image
-                          src={category.posterUrl || "/images/placeholder-dress.svg"}
+                          src={
+                            category.posterUrl ||
+                            "/images/placeholder-dress.svg"
+                          }
                           alt={`${category.name} category poster`}
                           fill
                           sizes="(max-width: 640px) 45vw, (max-width: 1024px) 25vw, 180px"
                           className="object-cover transition duration-500 group-hover:scale-105"
                         />
                         <div className="absolute inset-x-3 bottom-3 rounded-2xl bg-white/92 px-3 py-2.5 text-center shadow-sm backdrop-blur">
-                          <p className="truncate text-base font-black text-slate-900">
+                          <p className="text-sm font-black leading-5 text-slate-900 break-words">
                             {category.name}
                           </p>
                         </div>
                       </div>
                       {category.description && (
-                        <p className="line-clamp-3 px-4 py-3 text-sm leading-6 text-slate-500">
+                        <p className="line-clamp-3 px-4 py-3 text-xs leading-5 text-slate-500">
                           {category.description}
                         </p>
                       )}
@@ -626,7 +635,9 @@ Price: \u20B9${selected?.price ?? ""}`;
                     const showGap = previous && number - previous > 1;
                     return (
                       <span key={number} className="flex items-center gap-2">
-                        {showGap && <span className="px-1 text-slate-400">&#8230;</span>}
+                        {showGap && (
+                          <span className="px-1 text-slate-400">&#8230;</span>
+                        )}
                         <button
                           type="button"
                           onClick={() => navigate("", "All", "All", number)}
@@ -669,7 +680,8 @@ Price: \u20B9${selected?.price ?? ""}`;
                   {selectedCategory || "Dresses"}
                 </h2>
                 <p className="mt-2 text-sm text-slate-500 md:text-base">
-                  {firstItem}-{lastItem} of {total} dresses · sorted alphabetically
+                  {firstItem}-{lastItem} of {total} dresses · sorted
+                  alphabetically
                 </p>
               </div>
 
@@ -730,7 +742,14 @@ Price: \u20B9${selected?.price ?? ""}`;
                   <button
                     type="button"
                     disabled={page <= 1}
-                    onClick={() => navigate(searchText, selectedCategory, selectedSubcategory, page - 1)}
+                    onClick={() =>
+                      navigate(
+                        searchText,
+                        selectedCategory,
+                        selectedSubcategory,
+                        page - 1,
+                      )
+                    }
                     className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700 shadow-sm transition hover:border-pink-300 hover:bg-pink-50 disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     &#8592; Previous
@@ -740,10 +759,19 @@ Price: \u20B9${selected?.price ?? ""}`;
                     const showGap = previous && number - previous > 1;
                     return (
                       <span key={number} className="flex items-center gap-2">
-                        {showGap && <span className="px-1 text-slate-400">&#8230;</span>}
+                        {showGap && (
+                          <span className="px-1 text-slate-400">&#8230;</span>
+                        )}
                         <button
                           type="button"
-                          onClick={() => navigate(searchText, selectedCategory, selectedSubcategory, number)}
+                          onClick={() =>
+                            navigate(
+                              searchText,
+                              selectedCategory,
+                              selectedSubcategory,
+                              number,
+                            )
+                          }
                           className={`h-10 min-w-10 rounded-full px-3 text-sm font-black transition ${
                             page === number
                               ? "bg-pink-600 text-white shadow-md"
@@ -758,7 +786,14 @@ Price: \u20B9${selected?.price ?? ""}`;
                   <button
                     type="button"
                     disabled={page >= totalPages}
-                    onClick={() => navigate(searchText, selectedCategory, selectedSubcategory, page + 1)}
+                    onClick={() =>
+                      navigate(
+                        searchText,
+                        selectedCategory,
+                        selectedSubcategory,
+                        page + 1,
+                      )
+                    }
                     className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700 shadow-sm transition hover:border-pink-300 hover:bg-pink-50 disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     Next &#8594;
@@ -802,7 +837,11 @@ Price: \u20B9${selected?.price ?? ""}`;
                   strokeWidth="2.5"
                   aria-hidden="true"
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14M13 6l6 6-6 6" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M5 12h14M13 6l6 6-6 6"
+                  />
                 </svg>
               </span>
             </button>
@@ -842,9 +881,7 @@ Price: \u20B9${selected?.price ?? ""}`;
 
             <div className="flex items-center gap-4 rounded-[1.5rem] border border-pink-100 bg-white px-5 py-4 shadow-lg shadow-pink-100/40">
               <div className="text-center">
-                <div className="text-3xl font-black text-slate-950">
-                  4.8
-                </div>
+                <div className="text-3xl font-black text-slate-950">4.8</div>
 
                 <div className="mt-1 flex justify-center gap-0.5 text-amber-400">
                   {[1, 2, 3, 4, 5].map((star) => (
@@ -868,9 +905,7 @@ Price: \u20B9${selected?.price ?? ""}`;
               <div className="h-12 w-px bg-slate-100" />
 
               <div>
-                <p className="text-xl font-black text-slate-900">
-                  100+
-                </p>
+                <p className="text-xl font-black text-slate-900">100+</p>
                 <p className="text-xs font-semibold text-slate-400">
                   customer reviews
                 </p>
@@ -993,8 +1028,10 @@ Price: \u20B9${selected?.price ?? ""}`;
         </div>
       </section>
 
-
-      <footer id="contact" className="border-t border-pink-100 bg-gradient-to-b from-white to-pink-50/60">
+      <footer
+        id="contact"
+        className="border-t border-pink-100 bg-gradient-to-b from-white to-pink-50/60"
+      >
         <div className="mx-auto max-w-7xl px-4 py-12 md:px-8 md:py-14">
           <div className="mb-8 rounded-[2rem] border border-pink-100 bg-white/90 p-6 shadow-xl shadow-pink-100/50 backdrop-blur md:p-8">
             <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
@@ -1016,7 +1053,8 @@ Price: \u20B9${selected?.price ?? ""}`;
                     Let&apos;s find the perfect costume
                   </h2>
                   <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
-                    Contact us for school events, annual functions, parties, competitions and bulk requirements.
+                    Contact us for school events, annual functions, parties,
+                    competitions and bulk requirements.
                   </p>
                 </div>
               </div>
@@ -1027,13 +1065,28 @@ Price: \u20B9${selected?.price ?? ""}`;
                   className="group flex items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3 transition hover:-translate-y-0.5 hover:border-green-200 hover:bg-green-50"
                 >
                   <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-green-100 text-green-700">
-                    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.12.9.33 1.78.62 2.63a2 2 0 0 1-.45 2.11L8 9.73a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.85.29 1.73.5 2.63.62A2 2 0 0 1 22 16.92Z" />
+                    <svg
+                      viewBox="0 0 24 24"
+                      className="h-5 w-5"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      aria-hidden="true"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.12.9.33 1.78.62 2.63a2 2 0 0 1-.45 2.11L8 9.73a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.85.29 1.73.5 2.63.62A2 2 0 0 1 22 16.92Z"
+                      />
                     </svg>
                   </span>
                   <span className="min-w-0">
-                    <span className="block text-xs font-bold text-slate-500">Call us</span>
-                    <span className="block truncate text-sm font-black text-slate-900 group-hover:text-green-700">{sellerPhone}</span>
+                    <span className="block text-xs font-bold text-slate-500">
+                      Call us
+                    </span>
+                    <span className="block truncate text-sm font-black text-slate-900 group-hover:text-green-700">
+                      {sellerPhone}
+                    </span>
                   </span>
                 </a>
 
@@ -1044,14 +1097,33 @@ Price: \u20B9${selected?.price ?? ""}`;
                   className="group flex items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3 transition hover:-translate-y-0.5 hover:border-emerald-200 hover:bg-emerald-50"
                 >
                   <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
-                    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M20 11.5a8.5 8.5 0 0 1-12.75 7.36L4 20l1.14-3.03A8.5 8.5 0 1 1 20 11.5Z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M8.6 8.7c.2-.45.42-.46.78-.47h.48c.2 0 .39.07.49.3l.66 1.55c.1.22.08.4-.08.58l-.5.58c-.13.14-.16.3-.07.47.3.58 1.12 1.55 2.2 2.12.18.1.33.08.46-.07l.55-.65c.15-.18.34-.22.56-.12l1.49.7c.23.1.3.3.27.53-.1.72-.67 1.28-1.36 1.47-.47.13-1.1.08-1.92-.23-1.07-.4-2.35-1.25-3.6-2.5-1.25-1.25-2.1-2.53-2.5-3.6-.3-.82-.36-1.45-.23-1.92.11-.41.33-.66.51-.69Z" />
+                    <svg
+                      viewBox="0 0 24 24"
+                      className="h-5 w-5"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      aria-hidden="true"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M20 11.5a8.5 8.5 0 0 1-12.75 7.36L4 20l1.14-3.03A8.5 8.5 0 1 1 20 11.5Z"
+                      />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M8.6 8.7c.2-.45.42-.46.78-.47h.48c.2 0 .39.07.49.3l.66 1.55c.1.22.08.4-.08.58l-.5.58c-.13.14-.16.3-.07.47.3.58 1.12 1.55 2.2 2.12.18.1.33.08.46-.07l.55-.65c.15-.18.34-.22.56-.12l1.49.7c.23.1.3.3.27.53-.1.72-.67 1.28-1.36 1.47-.47.13-1.1.08-1.92-.23-1.07-.4-2.35-1.25-3.6-2.5-1.25-1.25-2.1-2.53-2.5-3.6-.3-.82-.36-1.45-.23-1.92.11-.41.33-.66.51-.69Z"
+                      />
                     </svg>
                   </span>
                   <span className="min-w-0">
-                    <span className="block text-xs font-bold text-slate-500">WhatsApp us</span>
-                    <span className="block truncate text-sm font-black text-slate-900 group-hover:text-emerald-700">Chat with us on WhatsApp</span>
+                    <span className="block text-xs font-bold text-slate-500">
+                      WhatsApp us
+                    </span>
+                    <span className="block truncate text-sm font-black text-slate-900 group-hover:text-emerald-700">
+                      Chat with us on WhatsApp
+                    </span>
                   </span>
                 </a>
 
@@ -1060,14 +1132,33 @@ Price: \u20B9${selected?.price ?? ""}`;
                   className="group flex items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3 transition hover:-translate-y-0.5 hover:border-purple-200 hover:bg-purple-50"
                 >
                   <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-purple-100 text-purple-700">
-                    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2Z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" d="m22 6-10 7L2 6" />
+                    <svg
+                      viewBox="0 0 24 24"
+                      className="h-5 w-5"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      aria-hidden="true"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2Z"
+                      />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="m22 6-10 7L2 6"
+                      />
                     </svg>
                   </span>
                   <span className="min-w-0">
-                    <span className="block text-xs font-bold text-slate-500">Email us</span>
-                    <span className="block truncate text-sm font-black text-slate-900 group-hover:text-purple-700">{sellerEmail}</span>
+                    <span className="block text-xs font-bold text-slate-500">
+                      Email us
+                    </span>
+                    <span className="block truncate text-sm font-black text-slate-900 group-hover:text-purple-700">
+                      {sellerEmail}
+                    </span>
                   </span>
                 </a>
 
@@ -1078,14 +1169,29 @@ Price: \u20B9${selected?.price ?? ""}`;
                   className="group flex items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3 transition hover:-translate-y-0.5 hover:border-pink-200 hover:bg-pink-50"
                 >
                   <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-pink-100 text-pink-700 shadow-sm">
-                    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z" />
+                    <svg
+                      viewBox="0 0 24 24"
+                      className="h-5 w-5"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      aria-hidden="true"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z"
+                      />
                       <circle cx="12" cy="10" r="2.5" />
                     </svg>
                   </span>
                   <span className="min-w-0">
-                    <span className="block text-xs font-bold text-slate-500">Find us on Maps</span>
-                    <span className="block truncate text-sm font-black text-slate-900 group-hover:text-pink-600">Open in Google Maps</span>
+                    <span className="block text-xs font-bold text-slate-500">
+                      Find us on Maps
+                    </span>
+                    <span className="block truncate text-sm font-black text-slate-900 group-hover:text-pink-600">
+                      Open in Google Maps
+                    </span>
                   </span>
                   <span
                     className="text-slate-400 transition group-hover:translate-x-1 group-hover:text-pink-600"
@@ -1098,7 +1204,11 @@ Price: \u20B9${selected?.price ?? ""}`;
                       stroke="currentColor"
                       strokeWidth="2.5"
                     >
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14M13 6l6 6-6 6" />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M5 12h14M13 6l6 6-6 6"
+                      />
                     </svg>
                   </span>
                 </a>
@@ -1108,7 +1218,9 @@ Price: \u20B9${selected?.price ?? ""}`;
 
           <div className="grid gap-8 md:grid-cols-2">
             <div>
-              <h3 className="text-xs font-black uppercase tracking-[0.2em] text-pink-600">Browse</h3>
+              <h3 className="text-xs font-black uppercase tracking-[0.2em] text-pink-600">
+                Browse
+              </h3>
               <div className="mt-4 space-y-3 text-sm font-semibold text-slate-600">
                 <button
                   type="button"
@@ -1125,7 +1237,9 @@ Price: \u20B9${selected?.price ?? ""}`;
                   onClick={() => {
                     resetFilters();
                     setTimeout(() => {
-                      document.getElementById("catalog")?.scrollIntoView({ behavior: "smooth" });
+                      document
+                        .getElementById("catalog")
+                        ?.scrollIntoView({ behavior: "smooth" });
                     }, 100);
                   }}
                   className="block transition hover:translate-x-1 hover:text-pink-600"
@@ -1136,9 +1250,12 @@ Price: \u20B9${selected?.price ?? ""}`;
             </div>
 
             <div>
-              <h3 className="text-xs font-black uppercase tracking-[0.2em] text-pink-600">Need help?</h3>
+              <h3 className="text-xs font-black uppercase tracking-[0.2em] text-pink-600">
+                Need help?
+              </h3>
               <p className="mt-4 text-sm leading-6 text-slate-500">
-                Share the character, size and event requirement for faster assistance.
+                Share the character, size and event requirement for faster
+                assistance.
               </p>
               <p className="mt-3 text-xs font-semibold text-slate-400">
                 Quick response for school events and bulk orders.
@@ -1147,8 +1264,12 @@ Price: \u20B9${selected?.price ?? ""}`;
           </div>
 
           <div className="mt-10 flex flex-col gap-3 border-t border-pink-100 pt-5 text-center text-xs text-slate-400 sm:flex-row sm:items-center sm:justify-between sm:text-left">
-            <span>&#169; {new Date().getFullYear()} {shopName}. All rights reserved.</span>
-            <span className="font-semibold text-slate-400">Made for memorable celebrations &#10024;</span>
+            <span>
+              &#169; {new Date().getFullYear()} {shopName}. All rights reserved.
+            </span>
+            <span className="font-semibold text-slate-400">
+              Made for memorable celebrations &#10024;
+            </span>
           </div>
         </div>
       </footer>
