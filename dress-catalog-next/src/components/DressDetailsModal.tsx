@@ -91,16 +91,26 @@ export default function DressDetailsModal({
           <div>
             <div className="relative aspect-[3/4] overflow-hidden rounded-3xl bg-slate-100">
               {selectedImage ? (
-                <Image
-                  src={selectedImage.url}
-                  alt={selectedImage.altText ?? dress.characterName}
-                  fill
-                  priority
-                  draggable={false}
-                  onContextMenu={(event) => event.preventDefault()}
-                  className="select-none object-cover"
-                  sizes="(max-width: 768px) 100vw, 50vw"
-                />
+                <>
+                  <Image
+                    src={selectedImage.url}
+                    alt={selectedImage.altText ?? dress.characterName}
+                    fill
+                    priority
+                    draggable={false}
+                    onContextMenu={(event) => event.preventDefault()}
+                    className="select-none object-cover"
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                  />
+                  <Image
+                    src="/watermark/jain-fancy-dresses-watermark.png"
+                    alt=""
+                    fill
+                    aria-hidden="true"
+                    className="pointer-events-none object-contain opacity-40 mix-blend-multiply"
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                  />
+                </>
               ) : (
                 <div className="flex h-full items-center justify-center text-sm font-semibold text-slate-400">
                   No image available
@@ -148,15 +158,26 @@ export default function DressDetailsModal({
                         : "ring-transparent hover:ring-pink-200"
                     }`}
                   >
-                    <Image
-                      src={image.url}
-                      alt={image.altText ?? `Image ${index + 1}`}
-                      fill
-                      draggable={false}
-                      onContextMenu={(event) => event.preventDefault()}
-                      className="select-none object-cover"
-                      sizes="80px"
-                    />
+                    <>
+                      <Image
+                        src={image.url}
+                        alt={image.altText ?? `Image ${index + 1}`}
+                        fill
+                        draggable={false}
+                        onContextMenu={(event) => event.preventDefault()}
+                        className="select-none object-cover"
+                        sizes="80px"
+                      />
+                      {/* Watermark overlay */}
+                      <Image
+                        src="/watermark/jain-fancy-dresses-watermark.png"
+                        alt=""
+                        aria-hidden="true"
+                        fill
+                        className="pointer-events-none object-contain opacity-40 mix-blend-multiply"
+                        sizes="(max-width: 768px) 100vw, 50vw"
+                      />
+                    </>
                   </button>
                 ))}
               </div>

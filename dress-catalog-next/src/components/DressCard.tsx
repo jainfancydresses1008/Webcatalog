@@ -40,15 +40,27 @@ export default function DressCard({
       >
         <div className="relative aspect-[3/4] overflow-hidden bg-slate-100">
           {mainImage ? (
-            <Image
-              src={mainImage.url}
-              alt={mainImage.altText ?? dress.characterName}
-              fill
-              draggable={false}
-              onContextMenu={(event) => event.preventDefault()}
-              className="select-none object-cover transition duration-500 group-hover:scale-105"
-              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 16vw"
-            />
+            <>
+              <Image
+                src={mainImage.url}
+                alt={mainImage.altText ?? dress.characterName}
+                fill
+                draggable={false}
+                onContextMenu={(event) => event.preventDefault()}
+                className="select-none object-cover transition duration-500 group-hover:scale-105"
+                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 16vw"
+              />
+              {/* Watermark overlay */}
+
+              <Image
+                src="/watermark/jain-fancy-dresses-watermark.png"
+                alt=""
+                fill
+                aria-hidden="true"
+                className="pointer-events-none object-contain opacity-40 mix-blend-multiply"
+                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 16vw"
+              />
+            </>
           ) : (
             <div className="flex h-full items-center justify-center text-xs font-bold text-slate-400">
               No image
