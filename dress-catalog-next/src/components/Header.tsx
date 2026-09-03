@@ -3,12 +3,41 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+
+type SearchSuggestion = {
+  type: "character" | "category" | "subcategory";
+  value: string;
+  category?: string;
+  subcategory?: string | null;
+};
+
+function cleanFilterValue(value?: string | null) {
+  if (!value || value.trim() === "") return "All";
+  return value;
+}
+
+function dedupeSuggestions(items: SearchSuggestion[]) {
+  return Array.from(
+    new Map(
+      items.map((item) => [
+        `${item.type}-${item.value.trim().toLowerCase()}`,
+        item,
+      ]),
+    ).values(),
+  );
+}
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [searchText, setSearchText] = useState("");
+  const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
+  const [suggestionsLoading, setSuggestionsLoading] = useState(false);
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
   const router = useRouter();
+  const pathname = usePathname();
   const menuRef = useRef<HTMLDivElement>(null);
+  const searchRef = useRef<HTMLDivElement>(null);
   const shopName = process.env.NEXT_PUBLIC_SHOP_NAME || "Jain Fancy Dresses";
   const tagline =
     process.env.NEXT_PUBLIC_SHOP_TAGLINE ||
@@ -19,9 +48,20 @@ export default function Header() {
   );
 
   useEffect(() => {
+    const currentSearch = new URLSearchParams(window.location.search).get("search") || "";
+    setSearchText(currentSearch);
+  }, [pathname]);
+
+  useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+      const target = event.target as Node;
+
+      if (menuRef.current && !menuRef.current.contains(target)) {
         setMenuOpen(false);
+      }
+
+      if (searchRef.current && !searchRef.current.contains(target)) {
+        setIsSearchFocused(false);
       }
     }
 
@@ -32,9 +72,142 @@ export default function Header() {
     };
   }, []);
 
+  useEffect(() => {
+    const query = searchText.trim();
+
+    if (!query) {
+      setSuggestions([]);
+      setSuggestionsLoading(false);
+      return;
+    }
+
+    const controller = new AbortController();
+
+    const timer = window.setTimeout(async () => {
+      try {
+        setSuggestionsLoading(true);
+
+        const response = await fetch(
+          `/api/search-suggestions?q=${encodeURIComponent(query)}`,
+          {
+            signal: controller.signal,
+            cache: "no-store",
+          },
+        );
+
+        if (!response.ok) {
+          setSuggestions([]);
+          return;
+        }
+
+        const data = (await response.json()) as {
+          suggestions?: SearchSuggestion[];
+        };
+
+        setSuggestions(dedupeSuggestions(data.suggestions ?? []));
+      } catch (error) {
+        if ((error as Error).name !== "AbortError") {
+          setSuggestions([]);
+        }
+      } finally {
+        setSuggestionsLoading(false);
+      }
+    }, 220);
+
+    return () => {
+      window.clearTimeout(timer);
+      controller.abort();
+    };
+  }, [searchText]);
+
+  function navigateSearch(
+    nextSearch: string,
+    nextCategory = "All",
+    nextSubcategory = "All",
+  ) {
+    const params = new URLSearchParams();
+
+    if (nextSearch.trim()) {
+      params.set("search", nextSearch.trim());
+    }
+
+    if (nextCategory && nextCategory !== "All") {
+      params.set("category", nextCategory);
+    }
+
+    if (nextSubcategory && nextSubcategory !== "All") {
+      params.set("subcategory", nextSubcategory);
+    }
+
+    const query = params.toString();
+    const target = query ? `${pathname}?${query}` : pathname;
+
+    setSuggestions([]);
+    setIsSearchFocused(false);
+    router.push(target, { scroll: false });
+
+    window.setTimeout(() => {
+      document.getElementById("catalog")?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 150);
+  }
+
+  function handleSearchSubmit() {
+    const trimmed = searchText.trim();
+    if (!trimmed) return;
+
+    const exactSuggestion = suggestions.find(
+      (suggestion) =>
+        suggestion.value.trim().toLowerCase() === trimmed.toLowerCase(),
+    );
+
+    if (exactSuggestion) {
+      handleSuggestionSelect(exactSuggestion);
+      return;
+    }
+
+    navigateSearch(trimmed);
+  }
+
+  function handleSuggestionSelect(suggestion: SearchSuggestion) {
+    const nextSearch = suggestion.value;
+
+    if (suggestion.type === "category") {
+      navigateSearch(nextSearch, suggestion.value, "All");
+      return;
+    }
+
+    if (suggestion.type === "subcategory") {
+      navigateSearch(
+        nextSearch,
+        cleanFilterValue(suggestion.category),
+        suggestion.value,
+      );
+      return;
+    }
+
+    navigateSearch(
+      nextSearch,
+      cleanFilterValue(suggestion.category),
+      cleanFilterValue(suggestion.subcategory),
+    );
+  }
+
+  function handleSearchChange(value: string) {
+    setSearchText(value);
+    setIsSearchFocused(true);
+  }
+
+  const showSuggestions =
+    isSearchFocused &&
+    searchText.trim().length > 0 &&
+    (suggestionsLoading || suggestions.length > 0);
+
   return (
     <header className="sticky top-0 z-50 border-b border-pink-100/80 bg-white/95 shadow-[0_8px_30px_rgba(15,23,42,0.06)] backdrop-blur-xl">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3.5 md:px-8">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3.5 md:gap-4 md:px-8">
         <button
           type="button"
           className="group flex min-w-0 items-center gap-3 rounded-2xl px-1.5 py-1 text-left transition hover:bg-pink-50/60"
@@ -110,14 +283,137 @@ export default function Header() {
           </button>
         </nav>
 
-        <div className="flex shrink-0 items-center gap-2">
+        <div className="flex min-w-0 shrink-0 items-center gap-2">
+          {/* SEARCH */}
+          <div className="relative hidden sm:block" ref={searchRef}>
+            <div className="relative flex h-11 w-[210px] items-center rounded-full border border-pink-100 bg-white shadow-sm transition focus-within:border-pink-300 focus-within:ring-4 focus-within:ring-pink-100 md:w-[270px]">
+              <svg
+                viewBox="0 0 24 24"
+                className="ml-3 h-5 w-5 shrink-0 text-pink-500"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                aria-hidden="true"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M9 3H5a2 2 0 0 0-2 2v4"
+                />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M15 3h4a2 2 0 0 1 2 2v4"
+                />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M21 15v4a2 2 0 0 1-2 2h-4"
+                />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M9 21H5a2 2 0 0 1-2-2v-4"
+                />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+
+              <input
+                id="header-dress-search"
+                value={searchText}
+                onFocus={() => setIsSearchFocused(true)}
+                onChange={(event) => handleSearchChange(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    event.preventDefault();
+                    handleSearchSubmit();
+                  }
+
+                  if (event.key === "Escape") {
+                    setIsSearchFocused(false);
+                    setSearchText("");
+                    setSuggestions([]);
+                  }
+                }}
+                autoComplete="off"
+                placeholder="Search Dresses..."
+                aria-label="Search Dresses"
+                className="min-w-0 flex-1 bg-transparent px-2.5 text-sm font-semibold text-slate-800 outline-none placeholder:text-slate-400"
+              />
+
+              {searchText.trim() && (
+                <button
+                  type="button"
+                  aria-label="Clear search"
+                  title="Clear search"
+                  onClick={() => {
+                    setSearchText("");
+                    setSuggestions([]);
+                    setIsSearchFocused(false);
+                  }}
+                  className="mr-2 rounded-full px-2 py-1 text-xs font-bold text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
+
+            {showSuggestions && (
+              <div className="absolute right-0 top-full z-[70] mt-2 w-[min(90vw,360px)] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
+                {suggestionsLoading ? (
+                  <div className="px-4 py-4 text-sm text-slate-500">
+                    Looking for matches...
+                  </div>
+                ) : (
+                  <div className="max-h-80 overflow-y-auto py-2">
+                    {suggestions.map((suggestion, index) => (
+                      <button
+                        key={`${suggestion.type}-${suggestion.value}-${suggestion.category ?? ""}-${suggestion.subcategory ?? ""}-${index}`}
+                        type="button"
+                        onMouseDown={(event) => event.preventDefault()}
+                        onClick={() => handleSuggestionSelect(suggestion)}
+                        className="flex w-full items-center gap-3 px-4 py-3 text-left transition hover:bg-pink-50"
+                      >
+                        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-sm">
+                          {suggestion.type === "character"
+                            ? "👗"
+                            : suggestion.type === "category"
+                              ? "▦"
+                              : "✦"}
+                        </span>
+
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate text-sm font-bold text-slate-800">
+                            {suggestion.value}
+                          </span>
+                          <span className="block truncate text-xs text-slate-400">
+                            {suggestion.type === "character"
+                              ? [suggestion.category, suggestion.subcategory]
+                                  .filter(Boolean)
+                                  .join(" • ") || "Character"
+                              : suggestion.type === "category"
+                                ? "Category"
+                                : `Subcategory${suggestion.category ? ` • ${suggestion.category}` : ""}`}
+                          </span>
+                        </span>
+
+                        <span className="text-slate-300">→</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* WHATSAPP */}
           <a
             href={`https://wa.me/${sellerPhone}?text=${whatsappMessage}`}
             target="_blank"
             rel="noreferrer"
             aria-label="Chat with us on WhatsApp"
             title="Chat with us on WhatsApp"
-            className="hidden h-11 w-11 items-center justify-center rounded-full border border-emerald-200 bg-emerald-50 text-emerald-600 shadow-sm transition hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-emerald-100 hover:text-emerald-700 hover:shadow-md sm:inline-flex"
+            className="hidden h-11 w-11 items-center justify-center rounded-full border border-emerald-200 bg-emerald-50 text-emerald-600 shadow-sm transition hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-emerald-100 hover:text-emerald-700 sm:inline-flex"
           >
             <svg
               viewBox="0 0 24 24"
