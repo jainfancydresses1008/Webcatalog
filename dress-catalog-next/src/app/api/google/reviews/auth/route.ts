@@ -10,8 +10,9 @@ export async function GET() {
     );
   }
 
-  const redirectUri =
-    "http://localhost:3000/api/google/reviews/callback";
+const redirectUri =
+  process.env.GOOGLE_REDIRECT_URI ||
+  "http://localhost:3000/api/google/reviews/callback";
 
   const params = new URLSearchParams({
     client_id: clientId,

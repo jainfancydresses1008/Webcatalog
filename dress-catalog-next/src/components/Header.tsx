@@ -470,6 +470,14 @@ export default function Header() {
                   Admin Login
                 </Link>
 
+                <Link
+                  href="/privacy-policy"
+                  onClick={() => setMenuOpen(false)}
+                  className="block rounded-2xl px-4 py-3 text-sm font-black text-slate-800 transition hover:bg-pink-50 hover:text-pink-700"
+                >
+                  Privacy Policy
+                </Link>
+
                 <button
                   type="button"
                   onClick={() => {

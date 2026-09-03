@@ -35,8 +35,9 @@ export async function GET(request: Request) {
     );
   }
 
-  const redirectUri =
-    "http://localhost:3000/api/google/reviews/callback";
+const redirectUri =
+  process.env.GOOGLE_REDIRECT_URI ||
+  "http://localhost:3000/api/google/reviews/callback";
 
   const tokenResponse = await fetch(
     "https://oauth2.googleapis.com/token",
