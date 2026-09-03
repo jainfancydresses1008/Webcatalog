@@ -618,19 +618,6 @@ Price: \u20B9${selected?.price ?? ""}`;
                           sizes="(max-width: 640px) 45vw, (max-width: 1024px) 25vw, 180px"
                           className="object-cover transition duration-500 group-hover:scale-105"
                         />
-                        <div className="absolute inset-x-3 bottom-3 rounded-2xl bg-white/92 px-3 py-2.5 text-center shadow-sm backdrop-blur">
-                          <p className="text-sm font-black leading-5 text-slate-900 break-words">
-                            {category.name}
-                          </p>
-                        </div>
-                      </div>
-                      {category.description && (
-                        <p className="line-clamp-3 px-4 py-3 text-xs leading-5 text-slate-500">
-                          {category.description}
-                        </p>
-                      )}
-                      <div className="px-4 pb-4 text-xs font-black text-pink-600">
-                        View dresses &#8594;
                       </div>
                     </button>
                   ))}
