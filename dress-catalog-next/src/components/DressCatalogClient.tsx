@@ -237,6 +237,39 @@ export default function DressCatalogClient({
 
     const query = params.toString();
 
+    // When paging the Category Master cards on the home/catalog page,
+    // explicitly reset to the top of the category-card section.
+    const isCategoryCardsPage =
+      selectedCategoryId === null &&
+      !searchText.trim() &&
+      !initialSearch?.trim() &&
+      selectedCategory === "All" &&
+      selectedSubcategory === "All" &&
+      nextSearch.trim() === "" &&
+      nextCategory === "All" &&
+      nextSubcategory === "All";
+
+    if (isCategoryCardsPage && nextPage !== page) {
+      // Category Master pagination: return to the first row of category cards.
+      scrollToCatalogRef.current = true;
+    }
+
+    // Dress pagination: when moving between dress pages, return to the
+    // first row of the newly loaded dress cards instead of preserving the
+    // current scroll position (which may be down near Reviews).
+    const isDressCardsPage =
+      !isCategoryCardsPage &&
+      (selectedCategoryId !== null ||
+        selectedCategory !== "All" ||
+        selectedSubcategory !== "All" ||
+        searchSubmitted ||
+        Boolean(initialSearch?.trim())) &&
+      nextPage !== page;
+
+    if (isDressCardsPage) {
+      scrollToCatalogRef.current = true;
+    }
+
     startTransition(() => {
       router.push(
         query ? `${pathname}?${query}` : pathname,
@@ -405,45 +438,62 @@ export default function DressCatalogClient({
   }
 
   useEffect(() => {
-    if (scrollToCatalogRef.current) {
-      const frame = window.requestAnimationFrame(() => {
-        document.getElementById("catalog")?.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
+    if (!scrollToCatalogRef.current) return;
+
+    let frame = 0;
+    let attempts = 0;
+
+    const tryScroll = () => {
+      attempts += 1;
+
+      // If the new page contains dress cards, scroll to their actual grid.
+      // Otherwise (Category Master pagination), scroll to the catalog section.
+      const targetId = dresses.length > 0 ? "dress-grid" : "catalog";
+      const target = document.getElementById(targetId);
+
+      if (target) {
+        const headerOffset = 90;
+        const top =
+          target.getBoundingClientRect().top +
+          window.scrollY -
+          headerOffset;
+
+        window.scrollTo({
+          top: Math.max(0, top),
+          left: 0,
+          behavior: "auto",
         });
 
         scrollToCatalogRef.current = false;
-      });
+        return;
+      }
 
-      return () => window.cancelAnimationFrame(frame);
-    }
+      if (attempts < 30) {
+        frame = window.requestAnimationFrame(tryScroll);
+      } else {
+        scrollToCatalogRef.current = false;
+      }
+    };
 
-    const savedScrollY = categoryScrollYRef.current;
-
-    if (savedScrollY === null) return;
-
-    const frame = window.requestAnimationFrame(() => {
-      window.scrollTo({
-        top: savedScrollY,
-        left: 0,
-        behavior: "auto",
-      });
-
-      categoryScrollYRef.current = null;
-    });
+    frame = window.requestAnimationFrame(tryScroll);
 
     return () => window.cancelAnimationFrame(frame);
-  }, [
-    initialCategory,
-    initialSubcategory,
-    initialSearch,
-    page,
-  ]);
+  }, [selectedCategoryId, page, categoryRecords.length, dresses.length, isPending]);
 
   function openCategory(categoryId: number) {
     setSuggestions([]);
 
+    // Mark this navigation so the effect above controls the final scroll
+    // position after the new category has rendered.
     scrollToCatalogRef.current = true;
+
+    // Remove focus from the old category card. Otherwise the browser can
+    // restore/adjust the scroll position to keep that disappearing button
+    // focused.
+    const activeElement = document.activeElement;
+    if (activeElement instanceof HTMLElement) {
+      activeElement.blur();
+    }
 
     startTransition(() => {
       router.push(
@@ -817,7 +867,10 @@ Price: ₹${selected?.price ?? ""}`;
               ) : (
 
                 /* DRESS CARDS */
-                <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+                <div
+                  id="dress-grid"
+                  className="grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6"
+                >
 
                   {dresses.map((dress) => {
                     const selected =
