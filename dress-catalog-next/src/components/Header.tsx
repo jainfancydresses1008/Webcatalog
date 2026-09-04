@@ -207,7 +207,15 @@ export default function Header() {
   function openMobileSearch() {
     setMobileSearchOpen(true);
     setIsSearchFocused(true);
-    window.setTimeout(() => mobileSearchInputRef.current?.focus(), 50);
+
+    // Focus from the search-icon click itself. This lets mobile Chrome
+    // open the keyboard reliably in both portrait and landscape.
+    mobileSearchInputRef.current?.focus({ preventScroll: true });
+
+    // Fallback after React has committed the layout.
+    window.requestAnimationFrame(() => {
+      mobileSearchInputRef.current?.focus({ preventScroll: true });
+    });
   }
 
   const showSuggestions =
@@ -556,12 +564,18 @@ export default function Header() {
           </div>
         </div>
 
-        {/* MOBILE SEARCH BOX: DIRECTLY UNDER THE HEADER ROW */}
-        {mobileSearchOpen && (
-          <div className="mt-2 lg:hidden">
-            {renderSearchBox(true)}
-          </div>
-        )}
+        {/* MOBILE SEARCH BOX: ALWAYS MOUNTED SO THE INPUT CAN RECEIVE
+            FOCUS FROM THE SEARCH-ICON CLICK ON LANDSCAPE PHONES. */}
+        <div
+          className={`mt-2 overflow-visible transition-[max-height,opacity] duration-200 lg:hidden ${
+            mobileSearchOpen
+              ? "max-h-24 opacity-100"
+              : "pointer-events-none max-h-0 opacity-0"
+          }`}
+          aria-hidden={!mobileSearchOpen}
+        >
+          {renderSearchBox(true)}
+        </div>
 
         {/* MOBILE NAVIGATION */}
         <nav className="mt-2 flex items-center justify-center gap-1 overflow-x-auto rounded-2xl border border-slate-100 bg-slate-50/80 p-1 text-xs font-bold text-slate-600 shadow-sm lg:hidden">
