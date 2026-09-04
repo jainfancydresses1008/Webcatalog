@@ -145,6 +145,17 @@ export default function Header() {
     const query = params.toString();
     const target = query ? `${pathname}?${query}` : pathname;
 
+    // Explicitly release focus before navigating so the on-screen keyboard
+    // closes immediately after the user selects a search result.
+    const activeElement = document.activeElement;
+    if (activeElement instanceof HTMLInputElement || activeElement instanceof HTMLTextAreaElement) {
+      activeElement.blur();
+    }
+    mobileSearchInputRef.current?.blur();
+
+    // Clear the search field as soon as a search result is selected, while
+    // also closing the suggestions and mobile search UI.
+    setSearchText("");
     setSuggestions([]);
     setIsSearchFocused(false);
     setMobileSearchOpen(false);
