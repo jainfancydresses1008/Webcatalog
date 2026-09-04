@@ -207,7 +207,7 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-pink-100/80 bg-white/95 shadow-[0_8px_30px_rgba(15,23,42,0.06)] backdrop-blur-xl">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3.5 md:gap-4 md:px-8">
+      <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-2 px-3 py-2.5 sm:flex-nowrap sm:gap-3 sm:px-4 sm:py-3.5 md:gap-4 md:px-8">
         <button
           type="button"
           className="group flex min-w-0 items-center gap-3 rounded-2xl px-1.5 py-1 text-left transition hover:bg-pink-50/60"
@@ -230,7 +230,7 @@ export default function Header() {
             />
           </div>
           <div className="min-w-0 leading-tight">
-            <p className="truncate text-lg font-black tracking-tight text-slate-950 md:text-2xl">
+            <p className="truncate text-base font-black tracking-tight text-slate-950 sm:text-lg md:text-2xl">
               {shopName}
             </p>
             <p className="hidden truncate text-xs font-semibold text-slate-500 sm:block">
@@ -283,10 +283,10 @@ export default function Header() {
           </button>
         </nav>
 
-        <div className="flex min-w-0 shrink-0 items-center gap-2">
+        <div className="contents sm:flex sm:min-w-0 sm:shrink-0 sm:items-center sm:gap-2">
           {/* SEARCH */}
-          <div className="relative hidden sm:block" ref={searchRef}>
-            <div className="relative flex h-11 w-[210px] items-center rounded-full border border-pink-100 bg-white shadow-sm transition focus-within:border-pink-300 focus-within:ring-4 focus-within:ring-pink-100 md:w-[270px]">
+          <div className="order-3 relative min-w-0 flex-1 sm:order-none sm:flex-none" ref={searchRef}>
+            <div className="relative flex h-10 w-full items-center rounded-full border border-pink-100 bg-white shadow-sm transition focus-within:border-pink-300 focus-within:ring-4 focus-within:ring-pink-100 sm:h-11 sm:w-[210px] md:w-[270px]">
               <svg
                 viewBox="0 0 24 24"
                 className="ml-3 h-5 w-5 shrink-0 text-pink-500"
@@ -413,7 +413,7 @@ export default function Header() {
             rel="noreferrer"
             aria-label="Chat with us on WhatsApp"
             title="Chat with us on WhatsApp"
-            className="hidden h-11 w-11 items-center justify-center rounded-full border border-emerald-200 bg-emerald-50 text-emerald-600 shadow-sm transition hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-emerald-100 hover:text-emerald-700 sm:inline-flex"
+            className="order-3 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-emerald-200 bg-emerald-50 text-emerald-600 shadow-sm transition hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-emerald-100 hover:text-emerald-700 sm:order-none sm:h-11 sm:w-11"
           >
             <svg
               viewBox="0 0 24 24"
@@ -436,7 +436,7 @@ export default function Header() {
             </svg>
           </a>
 
-          <div className="relative" ref={menuRef}>
+          <div className="relative order-2 sm:order-none" ref={menuRef}>
             <button
               type="button"
               onClick={() => setMenuOpen((current) => !current)}
