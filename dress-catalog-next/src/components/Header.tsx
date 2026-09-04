@@ -362,7 +362,7 @@ export default function Header() {
         <div className="flex items-center justify-between gap-2 md:gap-4">
           <button
             type="button"
-            className="group flex min-w-0 flex-1 items-center gap-2 rounded-2xl px-1 py-1 text-left transition hover:bg-pink-50/60 sm:gap-3 sm:px-1.5"
+            className="group flex min-w-0 shrink-0 items-center gap-2 rounded-2xl px-1 py-1 text-left transition hover:bg-pink-50/60 sm:gap-3 sm:px-1.5 lg:max-w-[250px]"
             onClick={() => {
               if (window.location.pathname === "/") {
                 window.dispatchEvent(new CustomEvent("jfd-home"));
@@ -392,7 +392,7 @@ export default function Header() {
           </button>
 
           {/* DESKTOP NAV */}
-          <nav className="hidden items-center gap-1 rounded-full border border-slate-100 bg-slate-50/80 p-1 text-sm font-bold text-slate-600 shadow-sm md:flex">
+          <nav className="hidden items-center gap-1 rounded-full border border-slate-100 bg-slate-50/80 p-1 text-sm font-bold text-slate-600 shadow-sm lg:flex">
             <button
               type="button"
               className="rounded-full bg-white px-4 py-2 text-pink-600 shadow-sm"
@@ -435,7 +435,7 @@ export default function Header() {
           </nav>
 
           {/* DESKTOP SEARCH */}
-          <div className="hidden items-center gap-2 sm:flex">
+          <div className="hidden min-w-0 flex-1 items-center justify-end gap-2 lg:flex">
             {renderSearchBox()}
           </div>
 
@@ -445,7 +445,7 @@ export default function Header() {
             onClick={openMobileSearch}
             aria-label="Open dress search"
             title="Search Dresses"
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-pink-200 bg-white text-pink-600 shadow-sm transition hover:bg-pink-50 sm:hidden"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-pink-200 bg-white text-pink-600 shadow-sm transition hover:bg-pink-50 lg:hidden"
           >
             <svg
               viewBox="0 0 24 24"
@@ -495,7 +495,7 @@ export default function Header() {
           </a>
 
           {/* SECURE MENU */}
-          <div className="relative shrink-0" ref={menuRef}>
+          <div className="relative z-30 shrink-0" ref={menuRef}>
             <button
               type="button"
               onClick={() => setMenuOpen((current) => !current)}
@@ -564,7 +564,7 @@ export default function Header() {
         )}
 
         {/* MOBILE NAVIGATION */}
-        <nav className="mt-2 flex items-center justify-center gap-1 overflow-x-auto rounded-2xl border border-slate-100 bg-slate-50/80 p-1 text-xs font-bold text-slate-600 shadow-sm md:hidden">
+        <nav className="mt-2 flex items-center justify-center gap-1 overflow-x-auto rounded-2xl border border-slate-100 bg-slate-50/80 p-1 text-xs font-bold text-slate-600 shadow-sm lg:hidden">
           <button
             type="button"
             className="shrink-0 rounded-xl bg-white px-4 py-2 text-pink-600 shadow-sm"

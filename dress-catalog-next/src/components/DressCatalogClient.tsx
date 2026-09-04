@@ -830,7 +830,7 @@ Price: ₹${selected?.price ?? ""}`;
                 </p>
               </div>
 
-              {/* LOADING */}
+              {/* LOADING / NO SEARCH RESULTS */}
               {isPending ? (
                 <div className="rounded-[2rem] border border-slate-100 bg-white px-6 py-16 text-center shadow-sm">
 
@@ -845,9 +845,9 @@ Price: ₹${selected?.price ?? ""}`;
                   </p>
 
                 </div>
-              ) : dresses.length === 0 ? (
+              ) : searchSubmitted && dresses.length === 0 ? (
 
-                /* NO DRESSES */
+                /* NO SEARCH RESULTS */
                 <div className="rounded-[2rem] border border-dashed border-pink-200 bg-white px-6 py-16 text-center shadow-sm">
 
                   <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-pink-50 text-3xl">
@@ -859,8 +859,22 @@ Price: ₹${selected?.price ?? ""}`;
                   </h3>
 
                   <p className="mt-2 text-sm text-slate-500">
-                    This category does not have any matching dresses yet.
+                    We could not find any dresses matching “{searchText.trim()}”.
+                    Try another dress name, character, category or subcategory.
                   </p>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSearchText("");
+                      setSearchSubmitted(false);
+                      setSuggestions([]);
+                      navigate("", "All", "All", 1);
+                    }}
+                    className="mt-5 rounded-full bg-pink-600 px-5 py-2.5 text-sm font-black text-white shadow-sm transition hover:bg-pink-700"
+                  >
+                    Clear Search
+                  </button>
 
                 </div>
 
