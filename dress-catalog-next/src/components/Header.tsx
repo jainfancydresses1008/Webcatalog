@@ -10,6 +10,7 @@ type SearchSuggestion = {
   value: string;
   category?: string;
   subcategory?: string | null;
+  categoryId?: number;
 };
 
 function cleanFilterValue(value?: string | null) {
@@ -127,14 +128,20 @@ export default function Header() {
     nextSearch: string,
     nextCategory = "All",
     nextSubcategory = "All",
+    nextCategoryId?: number,
+    hardNavigate = false,
   ) {
     const params = new URLSearchParams();
 
+    // A selected suggestion is a navigation target, not a text search.
+    // Callers pass an empty nextSearch so the full category collection opens.
     if (nextSearch.trim()) {
       params.set("search", nextSearch.trim());
     }
 
-    if (nextCategory && nextCategory !== "All") {
+    if (nextCategoryId && Number.isFinite(nextCategoryId)) {
+      params.set("categoryId", String(nextCategoryId));
+    } else if (nextCategory && nextCategory !== "All") {
       params.set("category", nextCategory);
     }
 
@@ -145,28 +152,42 @@ export default function Header() {
     const query = params.toString();
     const target = query ? `${pathname}?${query}` : pathname;
 
-    // Explicitly release focus before navigating so the on-screen keyboard
-    // closes immediately after the user selects a search result.
+    // Do this synchronously before route navigation. PointerDown calls this
+    // before the mobile browser can move focus, which reliably dismisses the
+    // keyboard in both portrait and landscape orientations.
     const activeElement = document.activeElement;
-    if (activeElement instanceof HTMLInputElement || activeElement instanceof HTMLTextAreaElement) {
+    if (activeElement instanceof HTMLElement) {
       activeElement.blur();
     }
     mobileSearchInputRef.current?.blur();
 
-    // Clear the search field as soon as a search result is selected, while
-    // also closing the suggestions and mobile search UI.
     setSearchText("");
     setSuggestions([]);
+    setSuggestionsLoading(false);
     setIsSearchFocused(false);
     setMobileSearchOpen(false);
+
+    // For a selected suggestion, use a real browser navigation. This avoids
+    // any stale App Router/client state and guarantees the server receives
+    // the categoryId/category URL, so the complete category collection opens.
+    if (hardNavigate) {
+      window.location.assign(target);
+      return;
+    }
+
     router.push(target, { scroll: false });
 
     window.setTimeout(() => {
+      mobileSearchInputRef.current?.blur();
+      const stillFocused = document.activeElement;
+      if (stillFocused instanceof HTMLElement) {
+        stillFocused.blur();
+      }
       document.getElementById("catalog")?.scrollIntoView({
         behavior: "smooth",
         block: "start",
       });
-    }, 150);
+    }, 100);
   }
 
   function handleSearchSubmit() {
@@ -187,26 +208,37 @@ export default function Header() {
   }
 
   function handleSuggestionSelect(suggestion: SearchSuggestion) {
-    const nextSearch = suggestion.value;
-
-    if (suggestion.type === "category") {
-      navigateSearch(nextSearch, suggestion.value, "All");
+    if (suggestion.type === "character") {
+      // Selecting a dress/character means: open ALL dresses in its category.
+      // Do not put the selected character into ?search=..., otherwise only
+      // that dress (or matching description) would be shown.
+      navigateSearch(
+        "",
+        cleanFilterValue(suggestion.category),
+        "All",
+        suggestion.categoryId,
+        true,
+      );
       return;
     }
 
-    if (suggestion.type === "subcategory") {
+    if (suggestion.type === "category") {
       navigateSearch(
-        nextSearch,
-        cleanFilterValue(suggestion.category),
+        "",
         suggestion.value,
+        "All",
+        suggestion.categoryId,
+        true,
       );
       return;
     }
 
     navigateSearch(
-      nextSearch,
+      "",
       cleanFilterValue(suggestion.category),
-      cleanFilterValue(suggestion.subcategory),
+      suggestion.value,
+      suggestion.categoryId,
+      true,
     );
   }
 
@@ -336,8 +368,11 @@ export default function Header() {
                   <button
                     key={`${suggestion.type}-${suggestion.value}-${suggestion.category ?? ""}-${suggestion.subcategory ?? ""}-${index}`}
                     type="button"
-                    onMouseDown={(event) => event.preventDefault()}
-                    onClick={() => handleSuggestionSelect(suggestion)}
+                    onPointerDown={(event) => {
+                      event.preventDefault();
+                      handleSuggestionSelect(suggestion);
+                    }}
+                    onClick={(event) => event.preventDefault()}
                     className="flex w-full items-center gap-3 px-4 py-3 text-left transition hover:bg-pink-50"
                   >
                     <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-sm">
@@ -381,7 +416,7 @@ export default function Header() {
         <div className="flex items-center justify-between gap-2 md:gap-4">
           <button
             type="button"
-            className="group flex min-w-0 shrink-0 items-center gap-2 rounded-2xl px-1 py-1 text-left transition hover:bg-pink-50/60 sm:gap-3 sm:px-1.5 lg:max-w-[250px]"
+            className="group flex min-w-0 shrink-0 items-center gap-2 rounded-2xl px-1 py-1 text-left transition hover:bg-pink-50/60 sm:gap-3 sm:px-1.5 lg:w-[340px] lg:max-w-none"
             onClick={() => {
               if (window.location.pathname === "/") {
                 window.dispatchEvent(new CustomEvent("jfd-home"));
@@ -401,17 +436,17 @@ export default function Header() {
               />
             </div>
             <div className="min-w-0 leading-tight">
-              <p className="truncate text-base font-black tracking-tight text-slate-950 sm:text-lg md:text-2xl">
+              <p className="whitespace-nowrap text-base font-black tracking-tight text-slate-950 sm:text-lg md:text-2xl">
                 {shopName}
               </p>
-              <p className="hidden truncate text-xs font-semibold text-slate-500 sm:block">
+              <p className="hidden whitespace-nowrap text-xs font-semibold text-slate-500 sm:block">
                 {tagline}
               </p>
             </div>
           </button>
 
           {/* DESKTOP NAV */}
-          <nav className="hidden items-center gap-1 rounded-full border border-slate-100 bg-slate-50/80 p-1 text-sm font-bold text-slate-600 shadow-sm lg:flex">
+          <nav className="hidden items-center gap-1 rounded-full border border-slate-100 bg-slate-50/80 p-1 text-sm font-bold text-slate-600 shadow-sm lg:ml-4 lg:flex">
             <button
               type="button"
               className="rounded-full bg-white px-4 py-2 text-pink-600 shadow-sm"

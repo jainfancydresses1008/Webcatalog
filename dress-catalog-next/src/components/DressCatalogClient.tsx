@@ -7,7 +7,6 @@ import type { CategoryDto, DressDto } from "@/lib/dress-types";
 import DressCard from "./DressCard";
 import DressDetailsModal from "./DressDetailsModal";
 import type { SearchSuggestion } from "./SearchFilters";
-import VisitorCounter from "./VisitorCounter";
 
 type Props = {
   dresses: DressDto[];
@@ -24,8 +23,6 @@ type Props = {
   initialCategory: string;
   initialSubcategory: string;
   selectedCategoryId: number | null;
-  visitorCount: number;
-  totalCostumes: number;
 };
 
 type GoogleReview = {
@@ -106,8 +103,6 @@ export default function DressCatalogClient({
   initialCategory,
   initialSubcategory,
   selectedCategoryId,
-  visitorCount,
-  totalCostumes,
 }: Props) {
   const router = useRouter();
   const pathname = usePathname();
@@ -237,39 +232,6 @@ export default function DressCatalogClient({
 
     const query = params.toString();
 
-    // When paging the Category Master cards on the home/catalog page,
-    // explicitly reset to the top of the category-card section.
-    const isCategoryCardsPage =
-      selectedCategoryId === null &&
-      !searchText.trim() &&
-      !initialSearch?.trim() &&
-      selectedCategory === "All" &&
-      selectedSubcategory === "All" &&
-      nextSearch.trim() === "" &&
-      nextCategory === "All" &&
-      nextSubcategory === "All";
-
-    if (isCategoryCardsPage && nextPage !== page) {
-      // Category Master pagination: return to the first row of category cards.
-      scrollToCatalogRef.current = true;
-    }
-
-    // Dress pagination: when moving between dress pages, return to the
-    // first row of the newly loaded dress cards instead of preserving the
-    // current scroll position (which may be down near Reviews).
-    const isDressCardsPage =
-      !isCategoryCardsPage &&
-      (selectedCategoryId !== null ||
-        selectedCategory !== "All" ||
-        selectedSubcategory !== "All" ||
-        searchSubmitted ||
-        Boolean(initialSearch?.trim())) &&
-      nextPage !== page;
-
-    if (isDressCardsPage) {
-      scrollToCatalogRef.current = true;
-    }
-
     startTransition(() => {
       router.push(
         query ? `${pathname}?${query}` : pathname,
@@ -332,12 +294,16 @@ export default function DressCatalogClient({
 
     if (suggestion.type === "character") {
       const nextCategory = cleanFilterValue(suggestion.category);
-      const nextSubcategory = cleanFilterValue(suggestion.subcategory);
 
+      // A character/dress selected from search is an entry point to its
+      // category, not a request to filter down to only that one dress.
+      // Show the complete category collection.
       setSelectedCategory(nextCategory);
-      setSelectedSubcategory(nextSubcategory);
+      setSelectedSubcategory("All");
+      setSearchText("");
+      setSearchSubmitted(false);
 
-      navigate(nextSearch, nextCategory, nextSubcategory, 1);
+      navigate("", nextCategory, "All", 1);
       return;
     }
 
@@ -438,62 +404,45 @@ export default function DressCatalogClient({
   }
 
   useEffect(() => {
-    if (!scrollToCatalogRef.current) return;
-
-    let frame = 0;
-    let attempts = 0;
-
-    const tryScroll = () => {
-      attempts += 1;
-
-      // If the new page contains dress cards, scroll to their actual grid.
-      // Otherwise (Category Master pagination), scroll to the catalog section.
-      const targetId = dresses.length > 0 ? "dress-grid" : "catalog";
-      const target = document.getElementById(targetId);
-
-      if (target) {
-        const headerOffset = 90;
-        const top =
-          target.getBoundingClientRect().top +
-          window.scrollY -
-          headerOffset;
-
-        window.scrollTo({
-          top: Math.max(0, top),
-          left: 0,
-          behavior: "auto",
+    if (scrollToCatalogRef.current) {
+      const frame = window.requestAnimationFrame(() => {
+        document.getElementById("catalog")?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
         });
 
         scrollToCatalogRef.current = false;
-        return;
-      }
+      });
 
-      if (attempts < 30) {
-        frame = window.requestAnimationFrame(tryScroll);
-      } else {
-        scrollToCatalogRef.current = false;
-      }
-    };
+      return () => window.cancelAnimationFrame(frame);
+    }
 
-    frame = window.requestAnimationFrame(tryScroll);
+    const savedScrollY = categoryScrollYRef.current;
+
+    if (savedScrollY === null) return;
+
+    const frame = window.requestAnimationFrame(() => {
+      window.scrollTo({
+        top: savedScrollY,
+        left: 0,
+        behavior: "auto",
+      });
+
+      categoryScrollYRef.current = null;
+    });
 
     return () => window.cancelAnimationFrame(frame);
-  }, [selectedCategoryId, page, categoryRecords.length, dresses.length, isPending]);
+  }, [
+    initialCategory,
+    initialSubcategory,
+    initialSearch,
+    page,
+  ]);
 
   function openCategory(categoryId: number) {
     setSuggestions([]);
 
-    // Mark this navigation so the effect above controls the final scroll
-    // position after the new category has rendered.
     scrollToCatalogRef.current = true;
-
-    // Remove focus from the old category card. Otherwise the browser can
-    // restore/adjust the scroll position to keep that disappearing button
-    // focused.
-    const activeElement = document.activeElement;
-    if (activeElement instanceof HTMLElement) {
-      activeElement.blur();
-    }
 
     startTransition(() => {
       router.push(
@@ -600,55 +549,6 @@ Price: ₹${selected?.price ?? ""}`;
           </div>
 
           {/* FULL WIDTH HERO CONTENT */}
-          <div className="w-full rounded-[2rem] border border-white/80 bg-white/75 px-5 py-7 text-center shadow-xl backdrop-blur md:px-10 md:py-9">
-
-            {/* LINE 1 */}
-            <h1 className="whitespace-nowrap text-3xl font-black leading-tight tracking-tight text-slate-950 sm:text-4xl md:text-5xl lg:text-6xl">
-              Fancy Dress{" "}
-              <span className="bg-gradient-to-r from-pink-600 via-fuchsia-600 to-purple-600 bg-clip-text text-transparent">
-                Collection
-              </span>
-            </h1>
-
-            {/* LINE 2 */}
-            <p className="mt-3 whitespace-nowrap text-sm font-semibold leading-6 text-slate-600 sm:text-base md:text-lg">
-              Beautiful costumes for school events, annual functions, theme parties, competitions and cultural celebrations.
-            </p>
-
-            {/* LINE 3 */}
-            <div className="mt-6 flex w-full flex-col items-stretch justify-center gap-3 sm:flex-row sm:gap-4">
-
-              {/* COSTUMES */}
-              <div className="flex flex-1 items-center justify-center gap-3 rounded-2xl border border-pink-100 bg-white/90 px-5 py-3 shadow-sm">
-                <div className="text-left">
-                  <p className="text-xl font-black text-pink-600">
-                    {totalCostumes}+
-                  </p>
-                  <p className="text-xs font-semibold text-slate-500">
-                    Costumes
-                  </p>
-                </div>
-              </div>
-
-              {/* CATEGORIES */}
-              <div className="flex flex-1 items-center justify-center gap-3 rounded-2xl border border-purple-100 bg-white/90 px-5 py-3 shadow-sm">
-                <div className="text-left">
-                  <p className="text-xl font-black text-purple-600">
-                    {Math.max(categories.length - 1, 0)}
-                  </p>
-                  <p className="text-xs font-semibold text-slate-500">
-                    Categories
-                  </p>
-                </div>
-              </div>
-
-              {/* VISITORS */}
-              <div className="flex flex-1 items-center justify-center rounded-2xl border border-pink-100 bg-white/90 px-5 py-3 shadow-sm">
-                <VisitorCounter initialCount={visitorCount} />
-              </div>
-
-            </div>
-          </div>
         </div>
       </section>
 
@@ -675,15 +575,9 @@ Price: ₹${selected?.price ?? ""}`;
                 </h2>
 
                 <p className="mx-auto mt-2 max-w-2xl text-sm text-slate-500 md:text-base">
-                  Choose a category to view all available dresses in that
+                  Select a category to view all available dresses in that
                   collection.
                 </p>
-
-                <div className="mt-5 inline-flex rounded-full bg-white px-4 py-2 text-sm font-bold text-slate-600 shadow-sm ring-1 ring-slate-100">
-                  {total === 0
-                    ? "No categories"
-                    : `${firstItem}-${lastItem} of ${total} categories`}
-                </div>
               </div>
 
               {/* NO CATEGORIES */}
@@ -830,7 +724,7 @@ Price: ₹${selected?.price ?? ""}`;
                 </p>
               </div>
 
-              {/* LOADING / NO SEARCH RESULTS */}
+              {/* LOADING */}
               {isPending ? (
                 <div className="rounded-[2rem] border border-slate-100 bg-white px-6 py-16 text-center shadow-sm">
 
@@ -845,9 +739,9 @@ Price: ₹${selected?.price ?? ""}`;
                   </p>
 
                 </div>
-              ) : searchSubmitted && dresses.length === 0 ? (
+              ) : dresses.length === 0 ? (
 
-                /* NO SEARCH RESULTS */
+                /* NO DRESSES */
                 <div className="rounded-[2rem] border border-dashed border-pink-200 bg-white px-6 py-16 text-center shadow-sm">
 
                   <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-pink-50 text-3xl">
@@ -859,32 +753,15 @@ Price: ₹${selected?.price ?? ""}`;
                   </h3>
 
                   <p className="mt-2 text-sm text-slate-500">
-                    We could not find any dresses matching “{searchText.trim()}”.
-                    Try another dress name, character, category or subcategory.
+                    This category does not have any matching dresses yet.
                   </p>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSearchText("");
-                      setSearchSubmitted(false);
-                      setSuggestions([]);
-                      navigate("", "All", "All", 1);
-                    }}
-                    className="mt-5 rounded-full bg-pink-600 px-5 py-2.5 text-sm font-black text-white shadow-sm transition hover:bg-pink-700"
-                  >
-                    Clear Search
-                  </button>
 
                 </div>
 
               ) : (
 
                 /* DRESS CARDS */
-                <div
-                  id="dress-grid"
-                  className="grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6"
-                >
+                <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
 
                   {dresses.map((dress) => {
                     const selected =

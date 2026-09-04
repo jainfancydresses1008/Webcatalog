@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import DressCatalogClient from "@/components/DressCatalogClient";
+import VisitorTracker from "@/components/VisitorTracker";
 
 export const dynamic = "force-dynamic";
 
@@ -71,17 +72,9 @@ async function getCatalog(searchParams: SearchParams) {
       : {}),
   };
 
-  const [categories, stats, totalCostumes] = await Promise.all([
-    prisma.category.findMany({
-      orderBy: { name: "asc" },
-    }),
-    prisma.siteStats.upsert({
-      where: { id: 1 },
-      create: { id: 1, visitorCount: 0 },
-      update: {},
-    }),
-    prisma.dress.count({ where: { isActive: true } }),
-  ]);
+  const categories = await prisma.category.findMany({
+    orderBy: { name: "asc" },
+  });
 
   // Home page: show only Category Master cards, alphabetically paginated.
   if (!effectiveCategoryId && (!category || category === "All") && !search && !subcategory) {
@@ -102,8 +95,6 @@ async function getCatalog(searchParams: SearchParams) {
       pageSize: PAGE_SIZE,
       categories: ["All", ...categories.map((item) => item.name)],
       subcategories: [],
-      visitorCount: stats.visitorCount,
-      totalCostumes,
       search: "",
       category: "",
       subcategory: "",
@@ -155,8 +146,6 @@ async function getCatalog(searchParams: SearchParams) {
     subcategories: subcategoryRows
       .map((item) => item.subcategory)
       .filter((value): value is string => Boolean(value)),
-    visitorCount: stats.visitorCount,
-    totalCostumes,
     search,
     category: selectedCategory?.name ?? category,
     subcategory,
@@ -174,7 +163,9 @@ export default async function HomePage({
     const catalog = await getCatalog(params);
 
     return (
-      <DressCatalogClient
+      <>
+        <VisitorTracker />
+        <DressCatalogClient
         dresses={catalog.dresses}
         sellerPhone={process.env.NEXT_PUBLIC_SELLER_PHONE ?? "919999999999"}
         sellerEmail={
@@ -191,9 +182,8 @@ export default async function HomePage({
         initialCategory={catalog.category || "All"}
         initialSubcategory={catalog.subcategory || "All"}
         selectedCategoryId={catalog.selectedCategoryId}
-        visitorCount={catalog.visitorCount}
-        totalCostumes={catalog.totalCostumes}
       />
+      </>
     );
   } catch (error) {
     console.error("Unable to load dress catalog", error);

@@ -29,6 +29,7 @@ export async function GET(request: Request) {
           subcategory: true,
           categoryRef: {
             select: {
+              id: true,
               name: true,
             },
           },
@@ -44,6 +45,7 @@ export async function GET(request: Request) {
           name: contains,
         },
         select: {
+          id: true,
           name: true,
         },
         orderBy: { name: "asc" },
@@ -60,6 +62,7 @@ export async function GET(request: Request) {
           subcategory: true,
           categoryRef: {
             select: {
+              id: true,
               name: true,
             },
           },
@@ -77,6 +80,7 @@ export async function GET(request: Request) {
           type: "character" as const,
           value: item.characterName,
           category: item.categoryRef.name,
+          categoryId: item.categoryRef.id,
           subcategory: item.subcategory,
         })),
 
@@ -85,6 +89,7 @@ export async function GET(request: Request) {
         .map((item) => ({
           type: "category" as const,
           value: item.name,
+          categoryId: item.id,
         })),
 
       ...subcategories
@@ -93,6 +98,7 @@ export async function GET(request: Request) {
           type: "subcategory" as const,
           value: item.subcategory as string,
           category: item.categoryRef.name,
+          categoryId: item.categoryRef.id,
         })),
     ];
 
