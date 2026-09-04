@@ -232,6 +232,22 @@ export default function DressCatalogClient({
 
     const query = params.toString();
 
+    // Category Master pagination: when moving between category-card pages,
+    // explicitly return to the catalog section after the new page renders.
+    const isCategoryCardsPage =
+      selectedCategoryId === null &&
+      !searchText.trim() &&
+      !initialSearch?.trim() &&
+      selectedCategory === "All" &&
+      selectedSubcategory === "All" &&
+      nextSearch.trim() === "" &&
+      nextCategory === "All" &&
+      nextSubcategory === "All";
+
+    if (isCategoryCardsPage && nextPage !== page) {
+      scrollToCatalogRef.current = true;
+    }
+
     startTransition(() => {
       router.push(
         query ? `${pathname}?${query}` : pathname,
@@ -404,45 +420,71 @@ export default function DressCatalogClient({
   }
 
   useEffect(() => {
-    if (scrollToCatalogRef.current) {
-      const frame = window.requestAnimationFrame(() => {
-        document.getElementById("catalog")?.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
+    if (!scrollToCatalogRef.current) return;
+
+    let frame = 0;
+    let attempts = 0;
+
+    const tryScroll = () => {
+      attempts += 1;
+
+      // Category-card pages scroll to the catalog section.
+      // Category dress pages scroll to the first row of the dress grid.
+      const targetId =
+        selectedCategoryId !== null ? "dress-grid" : "catalog";
+      const target = document.getElementById(targetId);
+
+      if (target) {
+        const headerOffset = 90;
+        const top =
+          target.getBoundingClientRect().top +
+          window.scrollY -
+          headerOffset;
+
+        window.scrollTo({
+          top: Math.max(0, top),
+          left: 0,
+          behavior: "auto",
         });
 
         scrollToCatalogRef.current = false;
-      });
+        return;
+      }
 
-      return () => window.cancelAnimationFrame(frame);
-    }
+      // Keep trying for a short time because the new server-rendered page
+      // may not have committed its cards on the first animation frame.
+      if (attempts < 30) {
+        frame = window.requestAnimationFrame(tryScroll);
+      } else {
+        scrollToCatalogRef.current = false;
+      }
+    };
 
-    const savedScrollY = categoryScrollYRef.current;
-
-    if (savedScrollY === null) return;
-
-    const frame = window.requestAnimationFrame(() => {
-      window.scrollTo({
-        top: savedScrollY,
-        left: 0,
-        behavior: "auto",
-      });
-
-      categoryScrollYRef.current = null;
-    });
+    frame = window.requestAnimationFrame(tryScroll);
 
     return () => window.cancelAnimationFrame(frame);
   }, [
-    initialCategory,
-    initialSubcategory,
-    initialSearch,
+    selectedCategoryId,
     page,
+    categoryRecords.length,
+    dresses.length,
+    isPending,
   ]);
 
   function openCategory(categoryId: number) {
     setSuggestions([]);
 
+    // Let the scroll effect below control the final position after the
+    // selected category has rendered.
     scrollToCatalogRef.current = true;
+
+    // Remove focus from the old category card. Otherwise the browser may
+    // restore/adjust the scroll position to keep that disappearing button
+    // focused during the client navigation.
+    const activeElement = document.activeElement;
+    if (activeElement instanceof HTMLElement) {
+      activeElement.blur();
+    }
 
     startTransition(() => {
       router.push(
