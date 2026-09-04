@@ -445,48 +445,6 @@ export default function Header() {
             </div>
           </button>
 
-          {/* DESKTOP NAV */}
-          <nav className="hidden items-center gap-1 rounded-full border border-slate-100 bg-slate-50/80 p-1 text-sm font-bold text-slate-600 shadow-sm lg:ml-4 lg:flex">
-            <button
-              type="button"
-              className="rounded-full bg-white px-4 py-2 text-pink-600 shadow-sm"
-              onClick={() => {
-                if (window.location.pathname === "/") {
-                  window.dispatchEvent(new CustomEvent("jfd-home"));
-                } else {
-                  router.push("/");
-                }
-              }}
-            >
-              Home
-            </button>
-            <button
-              type="button"
-              className="rounded-full px-4 py-2 transition hover:bg-white hover:text-pink-600 hover:shadow-sm"
-              onClick={() => {
-                if (window.location.pathname === "/") {
-                  window.dispatchEvent(new CustomEvent("jfd-dresses"));
-                } else {
-                  router.push("/#catalog");
-                }
-              }}
-            >
-              Dresses
-            </button>
-            <button
-              type="button"
-              className="rounded-full px-4 py-2 transition hover:bg-white hover:text-pink-600 hover:shadow-sm"
-              onClick={() => {
-                if (window.location.pathname === "/") {
-                  window.dispatchEvent(new CustomEvent("jfd-contact"));
-                } else {
-                  router.push("/#contact");
-                }
-              }}
-            >
-              Contact Us
-            </button>
-          </nav>
 
           {/* DESKTOP SEARCH */}
           <div className="hidden min-w-0 flex-1 items-center justify-end gap-2 lg:flex">
@@ -624,47 +582,6 @@ export default function Header() {
         </div>
 
         {/* MOBILE NAVIGATION */}
-        <nav className="mt-2 flex items-center justify-center gap-1 overflow-x-auto rounded-2xl border border-slate-100 bg-slate-50/80 p-1 text-xs font-bold text-slate-600 shadow-sm lg:hidden">
-          <button
-            type="button"
-            className="shrink-0 rounded-xl bg-white px-4 py-2 text-pink-600 shadow-sm"
-            onClick={() => {
-              if (window.location.pathname === "/") {
-                window.dispatchEvent(new CustomEvent("jfd-home"));
-              } else {
-                router.push("/");
-              }
-            }}
-          >
-            Home
-          </button>
-          <button
-            type="button"
-            className="shrink-0 rounded-xl px-4 py-2 transition hover:bg-white hover:text-pink-600 hover:shadow-sm"
-            onClick={() => {
-              if (window.location.pathname === "/") {
-                window.dispatchEvent(new CustomEvent("jfd-dresses"));
-              } else {
-                router.push("/#catalog");
-              }
-            }}
-          >
-            Dresses
-          </button>
-          <button
-            type="button"
-            className="shrink-0 rounded-xl px-4 py-2 transition hover:bg-white hover:text-pink-600 hover:shadow-sm"
-            onClick={() => {
-              if (window.location.pathname === "/") {
-                window.dispatchEvent(new CustomEvent("jfd-contact"));
-              } else {
-                router.push("/#contact");
-              }
-            }}
-          >
-            Contact Us
-          </button>
-        </nav>
       </div>
     </header>
   );

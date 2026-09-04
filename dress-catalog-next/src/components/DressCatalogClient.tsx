@@ -536,10 +536,10 @@ Price: ₹${selected?.price ?? ""}`;
 
         <div className="absolute left-1/2 top-32 h-64 w-64 -translate-x-1/2 rounded-full bg-yellow-200/25 blur-3xl" />
 
-        <div className="relative mx-auto w-full max-w-7xl px-4 pb-10 pt-4 md:px-8 md:pb-12">
+        <div className="relative mx-auto w-full max-w-7xl px-4 pb-2 pt-4 md:px-8 md:pb-3">
 
           {/* Announcement */}
-          <div className="mb-6 overflow-hidden rounded-full bg-gradient-to-r from-pink-600 via-fuchsia-600 to-purple-700 px-4 py-2 text-white shadow-lg">
+          <div className="mb-2 overflow-hidden rounded-full bg-gradient-to-r from-pink-600 via-fuchsia-600 to-purple-700 px-4 py-2 text-white shadow-lg">
             <div className="animate-marquee whitespace-nowrap text-center text-sm font-black uppercase tracking-[0.18em]">
               New school event collection available &#10024;
               1000+ costumes for every occasion &#10024;
@@ -558,7 +558,7 @@ Price: ₹${selected?.price ?? ""}`;
 
       <section
         id="catalog"
-        className="w-full px-4 py-10 md:px-8 md:py-14"
+        className="w-full px-4 pt-3 pb-10 md:px-8 md:pt-4 md:pb-14"
       >
         <div className="mx-auto max-w-7xl">
 
