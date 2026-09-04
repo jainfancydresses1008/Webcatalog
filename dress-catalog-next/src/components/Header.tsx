@@ -215,7 +215,7 @@ export default function Header() {
     searchText.trim().length > 0 &&
     (suggestionsLoading || suggestions.length > 0);
 
-  function SearchBox({ mobile = false }: { mobile?: boolean }) {
+  function renderSearchBox(mobile = false) {
     return (
       <div
         className={
@@ -436,7 +436,7 @@ export default function Header() {
 
           {/* DESKTOP SEARCH */}
           <div className="hidden items-center gap-2 sm:flex">
-            <SearchBox />
+            {renderSearchBox()}
           </div>
 
           {/* MOBILE SEARCH ICON */}
@@ -559,7 +559,7 @@ export default function Header() {
         {/* MOBILE SEARCH BOX: DIRECTLY UNDER THE HEADER ROW */}
         {mobileSearchOpen && (
           <div className="mt-2 sm:hidden">
-            <SearchBox mobile />
+            {renderSearchBox(true)}
           </div>
         )}
 
