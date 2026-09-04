@@ -558,7 +558,7 @@ export default function Header() {
 
         {/* MOBILE SEARCH BOX: DIRECTLY UNDER THE HEADER ROW */}
         {mobileSearchOpen && (
-          <div className="mt-2 sm:hidden">
+          <div className="mt-2 lg:hidden">
             {renderSearchBox(true)}
           </div>
         )}
