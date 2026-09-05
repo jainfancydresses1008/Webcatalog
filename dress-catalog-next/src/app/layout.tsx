@@ -5,12 +5,12 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://jainfancydresses.in"),
 
   title: {
-    default: "Jain Fancy Dresses | Fancy Dress Costumes in Ghaziabad",
+    default: "Jain Fancy Dresses | Fancy Dress Costumes for Kids",
     template: "%s | Jain Fancy Dresses",
   },
 
   description:
-    "Jain Fancy Dresses in Indirapuram, Ghaziabad offers fancy dress costumes for kids for school events, dance competitions, cultural programs, parties and special occasions, with rent and sale options.",
+    "Jain Fancy Dresses offers a wide range of fancy dress costumes for kids for school events, dance competitions, cultural programs, parties and special occasions, with rent and sale options across India.",
 
   alternates: {
     canonical: "https://jainfancydresses.in/",
@@ -30,9 +30,9 @@ export const metadata: Metadata = {
   ],
 
   openGraph: {
-    title: "Jain Fancy Dresses | Fancy Dress Costumes in Ghaziabad",
+    title: "Jain Fancy Dresses | Fancy Dress Costumes for Kids",
     description:
-      "Browse fancy dress costumes for kids in Indirapuram, Ghaziabad for school events, dance competitions, cultural programs, parties and special occasions.",
+      "Browse a wide range of fancy dress costumes for kids for school events, dance competitions, cultural programs, parties and special occasions, available for customers across India.",
     url: "https://jainfancydresses.in/",
     siteName: "Jain Fancy Dresses",
     type: "website",
@@ -49,9 +49,9 @@ export const metadata: Metadata = {
 
   twitter: {
     card: "summary_large_image",
-    title: "Jain Fancy Dresses | Fancy Dress Costumes in Ghaziabad",
+    title: "Jain Fancy Dresses | Fancy Dress Costumes for Kids",
     description:
-      "Fancy dress costumes for kids in Indirapuram, Ghaziabad for school events, competitions, parties and special occasions.",
+      "Fancy dress costumes for kids for school events, competitions, parties and special occasions, with options to rent or buy across India.",
     images: ["/images/logo_r.png"],
   },
 

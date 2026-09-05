@@ -6,9 +6,9 @@ import VisitorTracker from "@/components/VisitorTracker";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Fancy Dress Costumes for Kids in Ghaziabad",
+  title: "Fancy Dress Costumes for Kids",
   description:
-    "Browse fancy dress costumes for kids in Indirapuram, Ghaziabad for school events, dance competitions, cultural programs, parties and special occasions. Rent or buy from Jain Fancy Dresses.",
+    "Browse fancy dress costumes for kids for school events, dance competitions, cultural programs, parties and special occasions. Rent or buy from Jain Fancy Dresses across India.",
   alternates: {
     canonical: "https://jainfancydresses.in/",
   },
