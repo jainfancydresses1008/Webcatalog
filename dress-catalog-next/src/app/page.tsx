@@ -1,8 +1,18 @@
+import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import DressCatalogClient from "@/components/DressCatalogClient";
 import VisitorTracker from "@/components/VisitorTracker";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "Fancy Dress Costumes for Kids in Ghaziabad",
+  description:
+    "Browse fancy dress costumes for kids in Indirapuram, Ghaziabad for school events, dance competitions, cultural programs, parties and special occasions. Rent or buy from Jain Fancy Dresses.",
+  alternates: {
+    canonical: "https://jainfancydresses.in/",
+  },
+};
 
 const PAGE_SIZE = 12;
 
