@@ -468,6 +468,28 @@ export default function Header() {
               />
             </svg>
           </button>
+          {/* HOME */}
+          <Link
+            href="/"
+            aria-label="Go to Home"
+            title="Home"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-pink-200 bg-white text-pink-600 shadow-sm transition hover:-translate-y-0.5 hover:border-pink-300 hover:bg-pink-50 hover:text-pink-700 sm:h-11 sm:w-11"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              className="h-5 w-5 sm:h-6 sm:w-6"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="m3 10 9-7 9 7" />
+              <path d="M5 9.5V21h14V9.5" />
+              <path d="M9 21v-6h6v6" />
+            </svg>
+          </Link>
 
           {/* WHATSAPP */}
           <a
