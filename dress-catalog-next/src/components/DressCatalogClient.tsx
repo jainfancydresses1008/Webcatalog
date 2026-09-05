@@ -658,6 +658,16 @@ Price: ₹${selected?.price ?? ""}`;
                           sizes="(max-width: 640px) 45vw, (max-width: 1024px) 25vw, 180px"
                           className="object-cover transition duration-500 group-hover:scale-105"
                         />
+                        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/85 via-slate-950/35 to-transparent px-4 pb-4 pt-12 text-white">
+                          <p className="text-base font-black sm:text-lg">
+                            {category.name}
+                          </p>
+                          <p className="mt-1 text-xs font-bold text-white/90 sm:text-sm">
+                            {category.dressCount ?? 0} {
+                              (category.dressCount ?? 0) === 1 ? "Dress" : "Dresses"
+                            }
+                          </p>
+                        </div>
                       </div>
                     </button>
                   ))}

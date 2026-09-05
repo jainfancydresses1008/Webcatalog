@@ -1,3 +1,4 @@
+import Link from "next/link";
 import AdminShell from "@/components/admin/AdminShell";
 import CloudinaryAssetActions from "@/components/admin/CloudinaryAssetActions";
 import { requireAdminSession } from "@/lib/admin-auth";
@@ -6,8 +7,21 @@ import { listCloudinaryImages } from "@/lib/cloudinary";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminImagesPage() {
+type SearchParams = {
+  filter?: string;
+};
+
+export default async function AdminImagesPage({
+  searchParams,
+}: {
+  searchParams: Promise<SearchParams>;
+}) {
   await requireAdminSession();
+  const params = await searchParams;
+  const filter =
+    params.filter === "used" || params.filter === "unused"
+      ? params.filter
+      : "all";
 
   const [assets, dresses, images] = await Promise.all([
     listCloudinaryImages(),
@@ -46,9 +60,7 @@ export default async function AdminImagesPage() {
   );
 
   const referencedUrls = new Set(
-    images
-      .map((image) => image.url)
-      .filter(Boolean),
+    images.map((image) => image.url).filter(Boolean),
   );
 
   /*
@@ -66,6 +78,19 @@ export default async function AdminImagesPage() {
       !referencedUrls.has(asset.secure_url),
   );
 
+  const usedAssets = assets.filter(
+    (asset) =>
+      referencedPublicIds.has(asset.public_id) ||
+      referencedUrls.has(asset.secure_url),
+  );
+
+  const visibleAssets =
+    filter === "used"
+      ? usedAssets
+      : filter === "unused"
+        ? unreferencedAssets
+        : assets;
+
   return (
     <AdminShell>
       <section className="rounded-3xl bg-white p-5 shadow-sm">
@@ -74,52 +99,91 @@ export default async function AdminImagesPage() {
         </h2>
 
         <p className="mt-1 text-sm text-slate-500">
-          These are Cloudinary images that are not currently attached to any
-          dress. You can reuse an image without uploading it again.
+          Browse Cloudinary images and see which ones are currently used by the
+          catalog. You can reuse an image without uploading it again.
         </p>
 
-        {unreferencedAssets.length === 0 ? (
+        <div className="mt-5 flex flex-wrap items-center gap-2">
+          {[
+            ["all", `All (${assets.length})`],
+            ["used", `Used (${usedAssets.length})`],
+            ["unused", `Unused (${unreferencedAssets.length})`],
+          ].map(([value, label]) => (
+            <Link
+              key={value}
+              href={`/admin/images${value === "all" ? "" : `?filter=${value}`}`}
+              className={`rounded-full px-4 py-2 text-sm font-black transition ${filter === value ? "bg-pink-600 text-white" : "border border-slate-200 bg-white text-slate-700 hover:bg-pink-50"}`}
+            >
+              {label}
+            </Link>
+          ))}
+        </div>
+
+        <p className="mt-3 text-xs font-bold text-slate-500">
+          Showing {visibleAssets.length}{" "}
+          {visibleAssets.length === 1 ? "image" : "images"}
+        </p>
+
+        {visibleAssets.length === 0 ? (
           <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-8 text-center">
             <p className="font-bold text-slate-700">
-              No unreferenced Cloudinary images found.
+              {filter === "unused"
+                ? "No unreferenced Cloudinary images found."
+                : filter === "used"
+                  ? "No used Cloudinary images found."
+                  : "No Cloudinary images found."}
             </p>
 
             <p className="mt-1 text-sm text-slate-500">
-              All Cloudinary images are currently attached to dresses.
+              Try another image filter.
             </p>
           </div>
         ) : (
           <div className="mt-5 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {unreferencedAssets.map((asset) => (
-              <article
-                key={asset.public_id}
-                className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50"
-              >
-                <div className="aspect-[4/3] bg-slate-200">
-                  <img
-                    src={asset.secure_url}
-                    alt={asset.public_id}
-                    className="h-full w-full object-cover"
-                  />
-                </div>
+            {visibleAssets.map((asset) => {
+              const isUsed =
+                referencedPublicIds.has(asset.public_id) ||
+                referencedUrls.has(asset.secure_url);
 
-                <div className="space-y-3 p-4">
-                  <p className="break-all text-xs font-bold text-slate-700">
-                    {asset.public_id}
-                  </p>
+              return (
+                <article
+                  key={asset.public_id}
+                  className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50"
+                >
+                  <div className="bg-slate-200">
+                    <img
+                      src={asset.secure_url}
+                      alt={asset.public_id}
+                      className="block h-auto w-full"
+                    />
+                  </div>
 
-                  <span className="inline-flex rounded-full bg-amber-50 px-3 py-1 text-xs font-black text-amber-700">
-                    Unreferenced
-                  </span>
+                  <div className="space-y-3 p-4">
+                    <p className="break-all text-xs font-bold text-slate-700">
+                      {asset.public_id}
+                    </p>
 
-                  <CloudinaryAssetActions
-                    publicId={asset.public_id}
-                    url={asset.secure_url}
-                    dressOptions={dresses}
-                  />
-                </div>
-              </article>
-            ))}
+                    <span
+                      className={`inline-flex rounded-full px-3 py-1 text-xs font-black ${
+                        isUsed
+                          ? "bg-green-50 text-green-700"
+                          : "bg-amber-50 text-amber-700"
+                      }`}
+                    >
+                      {isUsed ? "Used" : "Unreferenced"}
+                    </span>
+
+                    {!isUsed && (
+                      <CloudinaryAssetActions
+                        publicId={asset.public_id}
+                        url={asset.secure_url}
+                        dressOptions={dresses}
+                      />
+                    )}
+                  </div>
+                </article>
+              );
+            })}
           </div>
         )}
       </section>

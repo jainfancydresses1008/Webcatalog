@@ -150,7 +150,9 @@ export default function Header() {
     }
 
     const query = params.toString();
-    const target = query ? `${pathname}?${query}` : pathname;
+
+    const basePath = pathname.startsWith("/admin") ? "/" : pathname;
+    const target = query ? `${basePath}?${query}` : basePath;
 
     // Do this synchronously before route navigation. PointerDown calls this
     // before the mobile browser can move focus, which reliably dismisses the
@@ -223,13 +225,7 @@ export default function Header() {
     }
 
     if (suggestion.type === "category") {
-      navigateSearch(
-        "",
-        suggestion.value,
-        "All",
-        suggestion.categoryId,
-        true,
-      );
+      navigateSearch("", suggestion.value, "All", suggestion.categoryId, true);
       return;
     }
 
@@ -270,9 +266,7 @@ export default function Header() {
     return (
       <div
         className={
-          mobile
-            ? "relative w-full"
-            : "relative hidden shrink-0 sm:block"
+          mobile ? "relative w-full" : "relative hidden shrink-0 sm:block"
         }
         ref={searchRef}
       >
@@ -444,7 +438,6 @@ export default function Header() {
               </p>
             </div>
           </button>
-
 
           {/* DESKTOP SEARCH */}
           <div className="hidden min-w-0 flex-1 items-center justify-end gap-2 lg:flex">

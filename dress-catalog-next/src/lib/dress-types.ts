@@ -19,6 +19,7 @@ export type CategoryDto = {
   description: string | null;
   posterUrl: string | null;
   publicId: string | null;
+  dressCount?: number;
 };
 
 export type DressDto = {

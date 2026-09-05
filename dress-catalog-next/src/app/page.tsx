@@ -74,6 +74,13 @@ async function getCatalog(searchParams: SearchParams) {
 
   const categories = await prisma.category.findMany({
     orderBy: { name: "asc" },
+    include: {
+      _count: {
+        select: {
+          dresses: { where: { isActive: true } },
+        },
+      },
+    },
   });
 
   // Home page: show only Category Master cards, alphabetically paginated.
@@ -81,10 +88,12 @@ async function getCatalog(searchParams: SearchParams) {
     const total = categories.length;
     const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
     const safePage = Math.min(page, totalPages);
-    const categoryRecords = categories.slice(
-      (safePage - 1) * PAGE_SIZE,
-      safePage * PAGE_SIZE,
-    );
+    const categoryRecords = categories
+      .slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE)
+      .map(({ _count, ...category }) => ({
+        ...category,
+        dressCount: _count.dresses,
+      }));
 
     return {
       dresses: [],
