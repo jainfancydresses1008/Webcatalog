@@ -59,6 +59,14 @@ export async function generateMetadata({
     description,
     alternates: { canonical },
     robots: { index: true, follow: true },
+    keywords: [
+      category.name,
+      `${category.name} fancy dress`,
+      `${category.name} fancy dress costumes`,
+      `${category.name} costumes for kids`,
+      `kids ${category.name} costume`,
+      `fancy dress for ${category.name}`,
+    ],
     openGraph: {
       title,
       description,
@@ -107,6 +115,27 @@ export default async function CategoryPage({
     name: `${category.name} Fancy Dress Costumes for Kids`,
     description,
     url: canonical,
+    breadcrumb: {
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        {
+          "@type": "ListItem",
+          position: 1,
+          name: "Home",
+          item: `${SITE_URL}/`,
+        },
+        {
+          "@type": "ListItem",
+          position: 2,
+          name: category.name,
+          item: canonical,
+        },
+      ],
+    },
+    about: {
+      "@type": "Thing",
+      name: `${category.name} fancy dress costumes for kids`,
+    },
     isPartOf: {
       "@type": "WebSite",
       name: "Jain Fancy Dresses",

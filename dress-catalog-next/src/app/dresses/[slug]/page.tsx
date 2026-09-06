@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { dressSlug } from "@/lib/dress-slug";
+import { categorySlug } from "@/lib/category-slug";
 import DressDetailsModal from "@/components/DressDetailsModal";
 
 const SITE_URL = "https://jainfancydresses.in";
@@ -62,6 +63,14 @@ export async function generateMetadata({
     description,
     alternates: { canonical },
     robots: { index: true, follow: true },
+    keywords: [
+      dress.characterName,
+      `${dress.characterName} fancy dress`,
+      `${dress.characterName} fancy dress costume`,
+      `${dress.characterName} costume for kids`,
+      `${dress.categoryRef.name} fancy dress`,
+      ...(dress.subcategory ? [`${dress.subcategory} fancy dress`] : []),
+    ],
     openGraph: {
       title,
       description,
@@ -111,6 +120,33 @@ export default async function DressPage({
     url: canonical,
     image: dress.images.map((image) => image.url),
     category: `${dress.categoryRef.name}${dress.subcategory ? ` > ${dress.subcategory}` : ""}`,
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": canonical,
+    },
+    breadcrumb: {
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        {
+          "@type": "ListItem",
+          position: 1,
+          name: "Home",
+          item: `${SITE_URL}/`,
+        },
+        {
+          "@type": "ListItem",
+          position: 2,
+          name: dress.categoryRef.name,
+          item: `${SITE_URL}/fancy-dresses/${categorySlug(dress.categoryRef.name)}`,
+        },
+        {
+          "@type": "ListItem",
+          position: 3,
+          name: dress.characterName,
+          item: canonical,
+        },
+      ],
+    },
     brand: {
       "@type": "Brand",
       name: "Jain Fancy Dresses",
