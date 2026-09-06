@@ -8,6 +8,11 @@ const SITE_URL = "https://jainfancydresses.in";
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [categories, dresses] = await Promise.all([
     prisma.category.findMany({
+      where: {
+        dresses: {
+          some: { isActive: true },
+        },
+      },
       orderBy: { id: "asc" },
       select: { name: true, updatedAt: true },
     }),

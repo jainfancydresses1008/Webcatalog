@@ -40,7 +40,7 @@ export async function generateMetadata({
   const { slug } = await params;
   const category = await getCategory(slug);
 
-  if (!category) {
+  if (!category || category.dresses.length === 0) {
     return {
       title: "Category Not Found",
       robots: { index: false, follow: true },
@@ -94,7 +94,7 @@ export default async function CategoryPage({
   const { slug } = await params;
   const category = await getCategory(slug);
 
-  if (!category) notFound();
+  if (!category || category.dresses.length === 0) notFound();
 
   const canonical = `${SITE_URL}/fancy-dresses/${categorySlug(category.name)}`;
   const description =
