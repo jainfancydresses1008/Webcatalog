@@ -48,9 +48,16 @@ export async function generateMetadata({
   }
 
   const title = `${category.name} Fancy Dress Costumes for Kids`;
+  const categoryNames = category.dresses
+    .slice(0, 3)
+    .map((dress) => dress.characterName.trim())
+    .filter(Boolean);
+  const examples = categoryNames.length
+    ? ` Includes ${categoryNames.join(", ")}.`
+    : "";
   const description = category.description?.trim()
-    ? `${category.description.trim()} Browse ${category.name.toLowerCase()} fancy dress costumes from Jain Fancy Dresses.`
-    : `Browse ${category.name.toLowerCase()} fancy dress costumes for kids from Jain Fancy Dresses. Suitable for school events, fancy dress competitions, cultural programs and special occasions.`;
+    ? `${category.description.trim()} Browse ${category.name.toLowerCase()} fancy dress costumes for kids from Jain Fancy Dresses.${examples}`
+    : `Browse ${category.name.toLowerCase()} fancy dress costumes for kids from Jain Fancy Dresses. Suitable for school events, fancy dress competitions, cultural programs, dance performances, annual functions and special occasions.${examples}`;
   const canonical = `${SITE_URL}/fancy-dresses/${categorySlug(category.name)}`;
   const mainImage = category.dresses[0]?.images[0];
 
@@ -59,14 +66,6 @@ export async function generateMetadata({
     description,
     alternates: { canonical },
     robots: { index: true, follow: true },
-    keywords: [
-      category.name,
-      `${category.name} fancy dress`,
-      `${category.name} fancy dress costumes`,
-      `${category.name} costumes for kids`,
-      `kids ${category.name} costume`,
-      `fancy dress for ${category.name}`,
-    ],
     openGraph: {
       title,
       description,
@@ -115,6 +114,11 @@ export default async function CategoryPage({
     name: `${category.name} Fancy Dress Costumes for Kids`,
     description,
     url: canonical,
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": canonical,
+      url: canonical,
+    },
     breadcrumb: {
       "@type": "BreadcrumbList",
       itemListElement: [

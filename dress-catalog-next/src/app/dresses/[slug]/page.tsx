@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { categorySlug } from "@/lib/category-slug";
 import { dressSlug } from "@/lib/dress-slug";
 import DressDetailsPageClient from "@/components/DressDetailsPageClient";
 
@@ -51,9 +52,12 @@ export async function generateMetadata({
   }
 
   const title = `${dress.characterName} Fancy Dress Costume for Kids`;
+  const context = [dress.categoryRef.name, dress.subcategory]
+    .filter((value): value is string => Boolean(value?.trim()))
+    .join(" | ");
   const description = dress.description?.trim()
-    ? `${dress.description.trim()} Browse this ${dress.categoryRef.name.toLowerCase()} fancy dress costume from Jain Fancy Dresses.`
-    : `${dress.characterName} fancy dress costume for kids from Jain Fancy Dresses. Suitable for school events, fancy dress competitions, cultural programs and special occasions.`;
+    ? `${dress.description.trim()}${context ? ` Browse this ${context.toLowerCase()} fancy dress costume for kids from Jain Fancy Dresses.` : " Browse this fancy dress costume for kids from Jain Fancy Dresses."}`
+    : `${dress.characterName} fancy dress costume for kids${context ? ` in ${context.toLowerCase()}` : ""} from Jain Fancy Dresses. Suitable for school events, fancy dress competitions, cultural programs, dance performances and special occasions.`;
   const canonical = `${SITE_URL}/dresses/${slug}`;
   const mainImage = dress.images.find((image) => image.isMain) ?? dress.images[0];
 
@@ -100,12 +104,16 @@ export default async function DressPage({
   const canonical = `${SITE_URL}/dresses/${slug}`;
   const mainImage = dress.images.find((image) => image.isMain) ?? dress.images[0];
 
+  const categoryCanonical = `${SITE_URL}/fancy-dresses/${categorySlug(dress.categoryRef.name)}`;
   const dressJsonLd = {
     "@context": "https://schema.org",
     "@type": "Product",
+    "@id": `${canonical}#product`,
     name: dress.characterName,
     description: dress.description,
     url: canonical,
+    mainEntityOfPage: canonical,
+    sku: String(dress.id),
     image: dress.images.map((image) => image.url),
     category: `${dress.categoryRef.name}${dress.subcategory ? ` > ${dress.subcategory}` : ""}`,
     brand: {
@@ -121,11 +129,40 @@ export default async function DressPage({
     } : {}),
   };
 
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: `${SITE_URL}/`,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: dress.categoryRef.name,
+        item: categoryCanonical,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: dress.characterName,
+        item: canonical,
+      },
+    ],
+  };
+
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(dressJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
       <DressDetailsPageClient
         dress={dress}

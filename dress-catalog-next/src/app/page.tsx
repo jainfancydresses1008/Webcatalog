@@ -6,11 +6,35 @@ import VisitorTracker from "@/components/VisitorTracker";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Fancy Dress Costumes for Kids",
+  title: "Kids Fancy Dress Costumes",
   description:
-    "Browse fancy dress costumes for kids for school events, dance competitions, cultural programs, parties and special occasions. Rent or buy from Jain Fancy Dresses across India.",
+    "Browse kids fancy dress costumes for school events, fancy dress competitions, dance performances, cultural programs, annual functions and special occasions. Rent or buy across India.",
   alternates: {
     canonical: "https://jainfancydresses.in/",
+  },
+  openGraph: {
+    title: "Kids Fancy Dress Costumes | Jain Fancy Dresses",
+    description:
+      "Browse kids fancy dress costumes for school events, competitions, dance performances, cultural programs and special occasions. Rent or buy across India.",
+    url: "https://jainfancydresses.in/",
+    siteName: "Jain Fancy Dresses",
+    type: "website",
+    locale: "en_IN",
+    images: [
+      {
+        url: "/images/logo_r.png",
+        width: 1536,
+        height: 1024,
+        alt: "Jain Fancy Dresses - Kids Fancy Dress Costumes",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Kids Fancy Dress Costumes | Jain Fancy Dresses",
+    description:
+      "Kids fancy dress costumes for school events, competitions, cultural programs, dance performances and special occasions, with rent or buy options across India.",
+    images: ["/images/logo_r.png"],
   },
 };
 
