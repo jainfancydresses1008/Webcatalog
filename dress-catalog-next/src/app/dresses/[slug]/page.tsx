@@ -2,8 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { dressSlug } from "@/lib/dress-slug";
-import { categorySlug } from "@/lib/category-slug";
-import DressDetailsModal from "@/components/DressDetailsModal";
+import DressDetailsPageClient from "@/components/DressDetailsPageClient";
 
 const SITE_URL = "https://jainfancydresses.in";
 
@@ -63,14 +62,6 @@ export async function generateMetadata({
     description,
     alternates: { canonical },
     robots: { index: true, follow: true },
-    keywords: [
-      dress.characterName,
-      `${dress.characterName} fancy dress`,
-      `${dress.characterName} fancy dress costume`,
-      `${dress.characterName} costume for kids`,
-      `${dress.categoryRef.name} fancy dress`,
-      ...(dress.subcategory ? [`${dress.subcategory} fancy dress`] : []),
-    ],
     openGraph: {
       title,
       description,
@@ -104,9 +95,6 @@ export default async function DressPage({
 
   if (!dress) notFound();
 
-  const selectedSize = dress.sizes[0];
-  const message = `Hello, I am interested in this dress.\nCategory: ${dress.categoryRef.name}\nSubcategory: ${dress.subcategory ?? ""}\nCharacter Name: ${dress.characterName}\nSelected Size: ${selectedSize?.size ?? ""}\nPrice: ₹${selectedSize?.price ?? ""}`;
-  const encodedMessage = encodeURIComponent(message);
   const sellerPhone = process.env.NEXT_PUBLIC_SELLER_PHONE ?? "919999999999";
   const sellerEmail = process.env.NEXT_PUBLIC_SELLER_EMAIL ?? "seller@example.com";
   const canonical = `${SITE_URL}/dresses/${slug}`;
@@ -120,33 +108,6 @@ export default async function DressPage({
     url: canonical,
     image: dress.images.map((image) => image.url),
     category: `${dress.categoryRef.name}${dress.subcategory ? ` > ${dress.subcategory}` : ""}`,
-    mainEntityOfPage: {
-      "@type": "WebPage",
-      "@id": canonical,
-    },
-    breadcrumb: {
-      "@type": "BreadcrumbList",
-      itemListElement: [
-        {
-          "@type": "ListItem",
-          position: 1,
-          name: "Home",
-          item: `${SITE_URL}/`,
-        },
-        {
-          "@type": "ListItem",
-          position: 2,
-          name: dress.categoryRef.name,
-          item: `${SITE_URL}/fancy-dresses/${categorySlug(dress.categoryRef.name)}`,
-        },
-        {
-          "@type": "ListItem",
-          position: 3,
-          name: dress.characterName,
-          item: canonical,
-        },
-      ],
-    },
     brand: {
       "@type": "Brand",
       name: "Jain Fancy Dresses",
@@ -166,16 +127,10 @@ export default async function DressPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(dressJsonLd) }}
       />
-      <DressDetailsModal
+      <DressDetailsPageClient
         dress={dress}
-        selectedSize={selectedSize?.size ?? ""}
-        onSizeChange={() => {}}
-        onClose={() => {}}
-        contactLinks={{
-          whatsapp: `https://wa.me/${sellerPhone}?text=${encodedMessage}`,
-          email: `mailto:${sellerEmail}?subject=${encodeURIComponent(`Dress Inquiry - ${dress.characterName}`)}&body=${encodedMessage}`,
-          sms: `sms:+${sellerPhone}?body=${encodedMessage}`,
-        }}
+        sellerPhone={sellerPhone}
+        sellerEmail={sellerEmail}
       />
     </>
   );
