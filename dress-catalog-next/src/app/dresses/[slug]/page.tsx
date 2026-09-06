@@ -105,6 +105,26 @@ export default async function DressPage({
   const mainImage = dress.images.find((image) => image.isMain) ?? dress.images[0];
 
   const categoryCanonical = `${SITE_URL}/fancy-dresses/${categorySlug(dress.categoryRef.name)}`;
+
+  // The dress page visibly shows a price for each available size.
+  // Use an AggregateOffer so the Product structured data reflects the
+  // actual range of prices shown on the page.
+  const prices = dress.sizes
+    .map((size) => size.price)
+    .filter((price): price is number => Number.isFinite(price) && price >= 0);
+
+  const productOffers =
+    prices.length > 0
+      ? {
+          "@type": "AggregateOffer",
+          lowPrice: Math.min(...prices),
+          highPrice: Math.max(...prices),
+          priceCurrency: "INR",
+          offerCount: prices.length,
+          availability: "https://schema.org/InStock",
+        }
+      : null;
+
   const dressJsonLd = {
     "@context": "https://schema.org",
     "@type": "Product",
@@ -120,6 +140,7 @@ export default async function DressPage({
       "@type": "Brand",
       name: "Jain Fancy Dresses",
     },
+    ...(productOffers ? { offers: productOffers } : {}),
     ...(mainImage ? {
       subjectOf: {
         "@type": "ImageObject",
@@ -156,10 +177,12 @@ export default async function DressPage({
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(dressJsonLd) }}
-      />
+      {productOffers && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(dressJsonLd) }}
+        />
+      )}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
