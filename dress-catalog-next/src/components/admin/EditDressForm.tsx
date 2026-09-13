@@ -3,10 +3,13 @@
 import { useState, useTransition } from "react";
 import type { CategoryDto, DressDto } from "@/lib/dress-types";
 
+type AdminDress = DressDto & {
+  isActive?: boolean;
+  sizes: Array<DressDto["sizes"][number] & { purchasePrice: number }>;
+};
+
 type Props = {
-  dress: DressDto & {
-    isActive?: boolean;
-  };
+  dress: AdminDress;
   updateDressDetailsAction: (formData: FormData) => Promise<void>;
   categories: Pick<CategoryDto, "id" | "name">[];
 };
@@ -20,7 +23,7 @@ export default function EditDressForm({
   const [isPending, startTransition] = useTransition();
 
   const defaultSizes = dress.sizes.map((item) => item.size).join(", ");
-
+  const defaultPurchasePrices = dress.sizes.map((item) => item.purchasePrice).join(", ");
   const defaultPrices = dress.sizes.map((item) => item.price).join(", ");
 
   function submit(formData: FormData) {
@@ -57,7 +60,7 @@ export default function EditDressForm({
         </h2>
 
         <p className="mt-1 text-sm text-slate-500">
-          Update the category, character, description, sizes and prices.
+          Update the category, character, description, sizes, purchase rates and selling rates.
         </p>
       </div>
 
@@ -242,13 +245,29 @@ export default function EditDressForm({
           </p>
         </div>
 
+        {/* ================= PURCHASE RATES ================= */}
+        <div>
+          <label htmlFor="purchasePrices" className="mb-2 block text-sm font-black text-slate-700">
+            Purchase Rates <span className="text-amber-600">(Admin only)</span>
+          </label>
+          <input
+            id="purchasePrices"
+            name="purchasePrices"
+            defaultValue={defaultPurchasePrices}
+            placeholder="Example: 500, 600, 700"
+            required
+            className="w-full rounded-2xl border border-amber-200 bg-amber-50/50 p-4 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-amber-500 focus:bg-white focus:ring-4 focus:ring-amber-100"
+          />
+          <p className="mt-2 text-xs font-medium text-slate-400">Enter purchase rates in the same order as the sizes.</p>
+        </div>
+
         {/* ================= PRICES ================= */}
         <div>
           <label
             htmlFor="prices"
             className="mb-2 block text-sm font-black text-slate-700"
           >
-            Prices
+            Selling Rates
           </label>
 
           <input
@@ -275,7 +294,7 @@ export default function EditDressForm({
           />
 
           <p className="mt-2 text-xs font-medium text-slate-400">
-            Enter prices in the same order as the sizes.
+            Enter selling rates in the same order as the sizes.
           </p>
         </div>
 

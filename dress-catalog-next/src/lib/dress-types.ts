@@ -2,6 +2,7 @@ export type DressSizeDto = {
   id: number;
   size: string;
   price: number;
+  purchasePrice: number;
 };
 
 export type DressImageDto = {

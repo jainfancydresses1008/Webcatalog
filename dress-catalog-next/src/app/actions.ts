@@ -148,15 +148,20 @@ export async function createDress(formData: FormData) {
     .filter(Boolean)
     .map((url) => ({ url, publicId: getCloudinaryPublicIdFromUrl(url) }));
   const sizes = parseCsv(formData.get("sizes"));
+  const purchasePrices = parseCsv(formData.get("purchasePrices")).map(Number);
   const prices = parseCsv(formData.get("prices")).map(Number);
   if (!categoryId || !characterName || !description)
     throw new Error("Category, character name & description are required.");
   if (
     !sizes.length ||
+    sizes.length !== purchasePrices.length ||
     sizes.length !== prices.length ||
-    prices.some(Number.isNaN)
+    purchasePrices.some((value) => Number.isNaN(value) || value < 0) ||
+    prices.some((value) => Number.isNaN(value) || value < 0)
   )
-    throw new Error("Sizes and prices must have the same count.");
+    throw new Error(
+      "Sizes, purchase rates and selling rates must have the same count and valid non-negative numbers.",
+    );
   const all = [...(mainImage ? [mainImage] : []), ...uploaded, ...galleryUrls];
 
   const categoryRef = await prisma.category.findUnique({
@@ -174,7 +179,11 @@ export async function createDress(formData: FormData) {
       characterName,
       description,
       sizes: {
-        create: sizes.map((size, index) => ({ size, price: prices[index] })),
+        create: sizes.map((size, index) => ({
+          size,
+          purchasePrice: purchasePrices[index],
+          price: prices[index],
+        })),
       },
       images: {
         create: all.map((image, index) => ({
@@ -201,6 +210,7 @@ export async function createDress(formData: FormData) {
   });
   revalidatePath("/");
   revalidatePath("/admin/manage");
+  revalidatePath("/admin/price-chart");
   redirect(`/admin/edit/${dress.id}`);
 }
 
@@ -213,6 +223,7 @@ export async function updateDressDetails(formData: FormData) {
   const description = String(formData.get("description") ?? "").trim();
   const isActive = formData.get("isActive") === "on";
   const sizes = parseCsv(formData.get("sizes"));
+  const purchasePrices = parseCsv(formData.get("purchasePrices")).map(Number);
   const prices = parseCsv(formData.get("prices")).map(Number);
   if (!dressId || !categoryId || !characterName || !description)
     throw new Error(
@@ -220,10 +231,14 @@ export async function updateDressDetails(formData: FormData) {
     );
   if (
     !sizes.length ||
+    sizes.length !== purchasePrices.length ||
     sizes.length !== prices.length ||
-    prices.some(Number.isNaN)
+    purchasePrices.some((value) => Number.isNaN(value) || value < 0) ||
+    prices.some((value) => Number.isNaN(value) || value < 0)
   )
-    throw new Error("Sizes and prices must have the same count.");
+    throw new Error(
+      "Sizes, purchase rates and selling rates must have the same count and valid non-negative numbers.",
+    );
 
   const before = await prisma.dress.findUnique({ where: { id: dressId } });
   if (!before) throw new Error("Dress not found.");
@@ -252,6 +267,7 @@ export async function updateDressDetails(formData: FormData) {
       data: sizes.map((size, index) => ({
         dressId,
         size,
+        purchasePrice: purchasePrices[index],
         price: prices[index],
       })),
     }),
@@ -271,6 +287,7 @@ export async function updateDressDetails(formData: FormData) {
   revalidatePath("/");
   revalidatePath("/admin/manage");
   revalidatePath(`/admin/edit/${dressId}`);
+  revalidatePath("/admin/price-chart");
 }
 
 export async function replaceDressImage(formData: FormData) {

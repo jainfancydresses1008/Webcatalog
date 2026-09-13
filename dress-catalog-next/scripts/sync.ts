@@ -23,7 +23,7 @@ type LocalDress = {
   isActive?: boolean;
   deletedAt?: string | null;
   deletedBy?: string | null;
-  sizes: Array<{ id?: number; size: string; price: number }>;
+  sizes: Array<{ id?: number; size: string; purchasePrice?: number; price: number }>;
   images: LocalImage[];
 };
 
@@ -124,6 +124,7 @@ async function syncDress(local: LocalDress) {
       data: local.sizes.map((size) => ({
         dressId: dress.id,
         size: size.size,
+        purchasePrice: size.purchasePrice ?? 0,
         price: size.price,
       })),
     });
@@ -271,6 +272,7 @@ async function main() {
         sizes: fresh.sizes.map((size) => ({
           id: size.id,
           size: size.size,
+          purchasePrice: size.purchasePrice,
           price: size.price,
         })),
         images: fresh.images.map((image) => ({

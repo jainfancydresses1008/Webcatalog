@@ -18,7 +18,7 @@ type LocalDress = {
   isActive?: boolean;
   deletedAt?: string | null;
   deletedBy?: string | null;
-  sizes: Array<{ size: string; price: number; id?: number }>;
+  sizes: Array<{ size: string; purchasePrice?: number; price: number; id?: number }>;
   images: LocalImage[];
 };
 
@@ -51,6 +51,7 @@ function main() {
     if (!Array.isArray(dress.sizes) || dress.sizes.length === 0) errors.push(`${label}: at least one size is required.`);
     for (const size of dress.sizes ?? []) {
       if (!size.size?.trim()) errors.push(`${label}: size name cannot be empty.`);
+      if (size.purchasePrice !== undefined && (!Number.isInteger(size.purchasePrice) || size.purchasePrice < 0)) errors.push(`${label}: purchasePrice must be a non-negative integer.`);
       if (!Number.isInteger(size.price) || size.price < 0) errors.push(`${label}: price must be a non-negative integer.`);
     }
 

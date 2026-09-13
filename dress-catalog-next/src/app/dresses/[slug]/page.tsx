@@ -20,7 +20,10 @@ async function getDress(slug: string) {
     where: { id, isActive: true },
     include: {
       categoryRef: true,
-      sizes: { orderBy: { id: "asc" } },
+      sizes: {
+        select: { id: true, size: true, price: true, purchasePrice: true, },
+        orderBy: { id: "asc" },
+      },
       images: {
         orderBy: [{ isMain: "desc" }, { sortOrder: "asc" }],
       },
@@ -59,7 +62,8 @@ export async function generateMetadata({
     ? `${dress.description.trim()}${context ? ` Browse this ${context.toLowerCase()} fancy dress costume for kids from Jain Fancy Dresses.` : " Browse this fancy dress costume for kids from Jain Fancy Dresses."}`
     : `${dress.characterName} fancy dress costume for kids${context ? ` in ${context.toLowerCase()}` : ""} from Jain Fancy Dresses. Suitable for school events, fancy dress competitions, cultural programs, dance performances and special occasions.`;
   const canonical = `${SITE_URL}/dresses/${slug}`;
-  const mainImage = dress.images.find((image) => image.isMain) ?? dress.images[0];
+  const mainImage =
+    dress.images.find((image) => image.isMain) ?? dress.images[0];
 
   return {
     title,
@@ -73,12 +77,16 @@ export async function generateMetadata({
       siteName: "Jain Fancy Dresses",
       type: "website",
       locale: "en_IN",
-      ...(mainImage ? {
-        images: [{
-          url: mainImage.url,
-          alt: mainImage.altText ?? dress.characterName,
-        }],
-      } : {}),
+      ...(mainImage
+        ? {
+            images: [
+              {
+                url: mainImage.url,
+                alt: mainImage.altText ?? dress.characterName,
+              },
+            ],
+          }
+        : {}),
     },
     twitter: {
       card: "summary_large_image",
@@ -100,9 +108,11 @@ export default async function DressPage({
   if (!dress) notFound();
 
   const sellerPhone = process.env.NEXT_PUBLIC_SELLER_PHONE ?? "919999999999";
-  const sellerEmail = process.env.NEXT_PUBLIC_SELLER_EMAIL ?? "seller@example.com";
+  const sellerEmail =
+    process.env.NEXT_PUBLIC_SELLER_EMAIL ?? "seller@example.com";
   const canonical = `${SITE_URL}/dresses/${slug}`;
-  const mainImage = dress.images.find((image) => image.isMain) ?? dress.images[0];
+  const mainImage =
+    dress.images.find((image) => image.isMain) ?? dress.images[0];
 
   const categoryCanonical = `${SITE_URL}/fancy-dresses/${categorySlug(dress.categoryRef.name)}`;
 
@@ -141,13 +151,15 @@ export default async function DressPage({
       name: "Jain Fancy Dresses",
     },
     ...(productOffers ? { offers: productOffers } : {}),
-    ...(mainImage ? {
-      subjectOf: {
-        "@type": "ImageObject",
-        contentUrl: mainImage.url,
-        caption: mainImage.altText ?? dress.characterName,
-      },
-    } : {}),
+    ...(mainImage
+      ? {
+          subjectOf: {
+            "@type": "ImageObject",
+            contentUrl: mainImage.url,
+            caption: mainImage.altText ?? dress.characterName,
+          },
+        }
+      : {}),
   };
 
   const breadcrumbJsonLd = {

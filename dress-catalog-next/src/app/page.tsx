@@ -154,7 +154,7 @@ async function getCatalog(searchParams: SearchParams) {
       take: PAGE_SIZE,
       include: {
         categoryRef: true,
-        sizes: { orderBy: { id: "asc" } },
+        sizes: { select: { id: true, size: true, price: true, purchasePrice: true, }, orderBy: { id: "asc" } },
         images: {
           orderBy: [{ isMain: "desc" }, { sortOrder: "asc" }],
         },

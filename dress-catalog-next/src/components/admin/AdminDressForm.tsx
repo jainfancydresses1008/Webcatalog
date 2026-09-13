@@ -117,7 +117,7 @@ export default function AdminDressForm({ createDressAction, categories }: Props)
 
       <section className="rounded-3xl border border-slate-100 bg-white p-5 shadow-sm md:p-6">
         <h3 className="text-xl font-black text-slate-950">Dress Details</h3>
-        <p className="mt-1 text-sm text-slate-500">Enter the information that will appear in the catalog.</p>
+        <p className="mt-1 text-sm text-slate-500">Enter the information that will appear in the catalog and the internal size-wise purchase rates.</p>
         <div className="mt-5 grid gap-4 md:grid-cols-2">
           <select name="categoryId" required defaultValue="" className="rounded-2xl border border-slate-200 bg-slate-50 p-3.5 outline-none focus:border-pink-400 focus:bg-white focus:ring-4 focus:ring-pink-100">
             <option value="" disabled>Select Category</option>
@@ -131,7 +131,9 @@ export default function AdminDressForm({ createDressAction, categories }: Props)
           <input name="characterName" placeholder="Character Name" required className="rounded-2xl border border-slate-200 bg-slate-50 p-3.5 outline-none focus:border-pink-400 focus:bg-white focus:ring-4 focus:ring-pink-100 md:col-span-2" />
           <textarea name="description" placeholder="Description" required className="min-h-28 rounded-2xl border border-slate-200 bg-slate-50 p-3.5 outline-none focus:border-pink-400 focus:bg-white focus:ring-4 focus:ring-pink-100 md:col-span-2" />
           <input name="sizes" defaultValue="S, M, L" placeholder="Sizes: S, M, L" required className="rounded-2xl border border-slate-200 bg-slate-50 p-3.5 outline-none focus:border-pink-400 focus:bg-white focus:ring-4 focus:ring-pink-100" />
-          <input name="prices" defaultValue="1000, 1200, 1400" placeholder="Prices: 1000, 1200, 1400" required className="rounded-2xl border border-slate-200 bg-slate-50 p-3.5 outline-none focus:border-pink-400 focus:bg-white focus:ring-4 focus:ring-pink-100" />
+          <input name="purchasePrices" defaultValue="500, 600, 700" placeholder="Purchase Rates: 500, 600, 700" required className="rounded-2xl border border-slate-200 bg-slate-50 p-3.5 outline-none focus:border-pink-400 focus:bg-white focus:ring-4 focus:ring-pink-100" />
+          <input name="prices" defaultValue="1000, 1200, 1400" placeholder="Selling Rates: 1000, 1200, 1400" required className="rounded-2xl border border-slate-200 bg-slate-50 p-3.5 outline-none focus:border-pink-400 focus:bg-white focus:ring-4 focus:ring-pink-100" />
+          <p className="text-xs font-semibold text-amber-600 md:col-span-2">Enter purchase rates and selling rates in the same order as the sizes. Purchase rates are for admin use only.</p>
         </div>
       </section>
 

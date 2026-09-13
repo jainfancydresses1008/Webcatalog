@@ -32,8 +32,9 @@ model Dress {
 model DressSize {
   id      Int    @id @default(autoincrement())
   size    String
-  price   Int
-  dressId Int
+  price         Int
+  purchasePrice Int      @default(0)
+  dressId       Int
   dress   Dress  @relation(fields: [dressId], references: [id], onDelete: Cascade)
 
   @@index([dressId])

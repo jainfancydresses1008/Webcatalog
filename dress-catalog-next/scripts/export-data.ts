@@ -36,7 +36,7 @@ async function main() {
     isActive: dress.isActive,
     deletedAt: dress.deletedAt,
     deletedBy: dress.deletedBy,
-    sizes: dress.sizes.map((size) => ({ id: size.id, size: size.size, price: size.price })),
+    sizes: dress.sizes.map((size) => ({ id: size.id, size: size.size, purchasePrice: size.purchasePrice, price: size.price })),
     images: dress.images.map((image) => ({
       id: image.id,
       url: image.url,

@@ -42,7 +42,7 @@ export async function GET(request: Request) {
       take: PAGE_SIZE,
       include: {
         categoryRef: true,
-        sizes: { orderBy: { id: "asc" } },
+        sizes: { select: { id: true, size: true, price: true }, orderBy: { id: "asc" } },
         images: {
           orderBy: [{ isMain: "desc" }, { sortOrder: "asc" }],
         },
