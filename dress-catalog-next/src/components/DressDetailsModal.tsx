@@ -87,9 +87,9 @@ export default function DressDetailsModal({
           ×
         </button>
 
-        <div className="grid gap-6 p-4 sm:p-6 md:grid-cols-2 md:p-8">
-          <div>
-            <div className="relative aspect-[3/4] overflow-hidden rounded-3xl bg-slate-100">
+        <div className="grid min-w-0 gap-6 p-4 sm:p-6 md:grid-cols-2 md:p-8">
+          <div className="min-w-0">
+            <div className="relative aspect-[3/4] w-full overflow-hidden rounded-3xl bg-slate-100">
               {selectedImage ? (
                 <>
                   <Image
