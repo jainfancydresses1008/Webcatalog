@@ -77,7 +77,7 @@ export default function DressDetailsModal({
         if (event.target === event.currentTarget) onClose();
       }}
     >
-      <div className="relative max-h-[94vh] w-full max-w-5xl overflow-y-auto rounded-[2rem] bg-white shadow-2xl">
+      <div className="relative max-h-[94vh] w-full max-w-5xl overflow-x-hidden overflow-y-auto rounded-[2rem] bg-white shadow-2xl">
         <button
           type="button"
           onClick={onClose}
