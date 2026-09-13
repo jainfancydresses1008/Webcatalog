@@ -171,6 +171,9 @@ export default function EditDressForm({
               focus:ring-pink-100
             "
           />
+          <p className="mt-2 text-xs font-medium text-slate-400">
+            Selling Rate is the customer price for each size. Enter rates in the same order as the sizes.
+          </p>
         </div>
 
         {/* ================= DESCRIPTION ================= */}
@@ -248,7 +251,7 @@ export default function EditDressForm({
         {/* ================= PURCHASE RATES ================= */}
         <div>
           <label htmlFor="purchasePrices" className="mb-2 block text-sm font-black text-slate-700">
-            Purchase Rates <span className="text-amber-600">(Admin only)</span>
+            Purchase Rates <span className="text-amber-600">(Your Cost / Admin only)</span>
           </label>
           <input
             id="purchasePrices"
@@ -258,7 +261,7 @@ export default function EditDressForm({
             required
             className="w-full rounded-2xl border border-amber-200 bg-amber-50/50 p-4 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-amber-500 focus:bg-white focus:ring-4 focus:ring-amber-100"
           />
-          <p className="mt-2 text-xs font-medium text-slate-400">Enter purchase rates in the same order as the sizes.</p>
+          <p className="mt-2 text-xs font-medium text-slate-400">Purchase Rate is your cost for each size. Enter rates in the same order as the sizes.</p>
         </div>
 
         {/* ================= PRICES ================= */}
@@ -267,7 +270,7 @@ export default function EditDressForm({
             htmlFor="prices"
             className="mb-2 block text-sm font-black text-slate-700"
           >
-            Selling Rates
+            Selling Rates <span className="text-emerald-600">(Customer Price)</span>
           </label>
 
           <input

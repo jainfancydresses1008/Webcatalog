@@ -130,10 +130,66 @@ export default function AdminDressForm({ createDressAction, categories }: Props)
           <input name="subcategory" placeholder="Subcategory" className="rounded-2xl border border-slate-200 bg-slate-50 p-3.5 outline-none focus:border-pink-400 focus:bg-white focus:ring-4 focus:ring-pink-100" />
           <input name="characterName" placeholder="Character Name" required className="rounded-2xl border border-slate-200 bg-slate-50 p-3.5 outline-none focus:border-pink-400 focus:bg-white focus:ring-4 focus:ring-pink-100 md:col-span-2" />
           <textarea name="description" placeholder="Description" required className="min-h-28 rounded-2xl border border-slate-200 bg-slate-50 p-3.5 outline-none focus:border-pink-400 focus:bg-white focus:ring-4 focus:ring-pink-100 md:col-span-2" />
-          <input name="sizes" defaultValue="S, M, L" placeholder="Sizes: S, M, L" required className="rounded-2xl border border-slate-200 bg-slate-50 p-3.5 outline-none focus:border-pink-400 focus:bg-white focus:ring-4 focus:ring-pink-100" />
-          <input name="purchasePrices" defaultValue="500, 600, 700" placeholder="Purchase Rates: 500, 600, 700" required className="rounded-2xl border border-slate-200 bg-slate-50 p-3.5 outline-none focus:border-pink-400 focus:bg-white focus:ring-4 focus:ring-pink-100" />
-          <input name="prices" defaultValue="1000, 1200, 1400" placeholder="Selling Rates: 1000, 1200, 1400" required className="rounded-2xl border border-slate-200 bg-slate-50 p-3.5 outline-none focus:border-pink-400 focus:bg-white focus:ring-4 focus:ring-pink-100" />
-          <p className="text-xs font-semibold text-amber-600 md:col-span-2">Enter purchase rates and selling rates in the same order as the sizes. Purchase rates are for admin use only.</p>
+          <div>
+            <label
+              htmlFor="sizes"
+              className="mb-2 block text-sm font-black text-slate-700"
+            >
+              Available Sizes
+            </label>
+            <input
+              id="sizes"
+              name="sizes"
+              defaultValue="S, M, L"
+              placeholder="Example: S, M, L"
+              required
+              className="w-full rounded-2xl border border-slate-200 bg-slate-50 p-3.5 outline-none focus:border-pink-400 focus:bg-white focus:ring-4 focus:ring-pink-100"
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="purchasePrices"
+              className="mb-2 block text-sm font-black text-slate-700"
+            >
+              Purchase Rate <span className="text-amber-600">(Your Cost)</span>
+            </label>
+            <input
+              id="purchasePrices"
+              name="purchasePrices"
+              defaultValue="500, 600, 700"
+              placeholder="Example: 500, 600, 700"
+              required
+              className="w-full rounded-2xl border border-amber-200 bg-amber-50/50 p-3.5 text-slate-900 outline-none focus:border-amber-500 focus:bg-white focus:ring-4 focus:ring-amber-100"
+            />
+            <p className="mt-2 text-xs font-medium text-slate-400">
+              Enter one purchase rate for each size, in the same order.
+            </p>
+          </div>
+
+          <div>
+            <label
+              htmlFor="prices"
+              className="mb-2 block text-sm font-black text-slate-700"
+            >
+              Selling Rate <span className="text-emerald-600">(Customer Price)</span>
+            </label>
+            <input
+              id="prices"
+              name="prices"
+              defaultValue="1000, 1200, 1400"
+              placeholder="Example: 1000, 1200, 1400"
+              required
+              className="w-full rounded-2xl border border-emerald-200 bg-emerald-50/50 p-3.5 text-slate-900 outline-none focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-100"
+            />
+            <p className="mt-2 text-xs font-medium text-slate-400">
+              Enter one selling rate for each size, in the same order.
+            </p>
+          </div>
+
+          <p className="text-xs font-semibold text-amber-600 md:col-span-2">
+            Purchase Rate = your cost. Selling Rate = customer price. Keep both lists in the same order as the sizes.
+          </p>
         </div>
       </section>
 
