@@ -21,12 +21,18 @@ export type CloudinaryImageAsset = {
 export async function uploadImageAssetToCloudinary(
   file: File,
   folder = "dress-catalog",
+  options?: { publicId?: string },
 ): Promise<CloudinaryImageAsset> {
   const bytes = await file.arrayBuffer();
   const buffer = Buffer.from(bytes);
   return new Promise((resolve, reject) => {
     const uploadStream = cloudinary.uploader.upload_stream(
-      { folder, resource_type: "image" },
+      {
+        resource_type: "image",
+        ...(options?.publicId
+          ? { public_id: options.publicId, overwrite: true }
+          : { folder }),
+      },
       (error, result) => {
         if (error) {
           console.error("CLOUDINARY_UPLOAD_ERROR:", error);

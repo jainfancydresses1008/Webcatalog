@@ -102,6 +102,7 @@ export async function updateCategory(formData: FormData) {
     const asset = await uploadImageAssetToCloudinary(
       posterFile,
       "dress-catalog/categories",
+      existing.publicId ? { publicId: existing.publicId } : undefined,
     );
     posterUrl = asset.secure_url;
     publicId = asset.public_id;
