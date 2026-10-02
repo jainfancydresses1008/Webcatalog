@@ -23,7 +23,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }),
   ]);
 
-  return [
+  const entries: MetadataRoute.Sitemap = [
     {
       url: `${SITE_URL}/`,
       lastModified: new Date(),
@@ -43,4 +43,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     })),
   ];
+
+  return entries.filter((entry) => Boolean(entry.url));
 }
