@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Header from "@/components/Header";
 import "./globals.css";
 export const metadata: Metadata = {
-  metadataBase: new URL("https://jainfancydresses.in"),
+  metadataBase: new URL("https://www.jainfancydresses.in"),
 
   title: {
     default: "Jain Fancy Dresses | Fancy Dress Costumes for Kids",
@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     "Jain Fancy Dresses offers a wide range of fancy dress costumes for kids for school events, dance competitions, cultural programs, parties and special occasions, with rent and sale options across India.",
 
   alternates: {
-    canonical: "https://jainfancydresses.in/",
+    canonical: "https://www.jainfancydresses.in/",
   },
 
   keywords: [
@@ -33,7 +33,7 @@ export const metadata: Metadata = {
     title: "Jain Fancy Dresses | Fancy Dress Costumes for Kids",
     description:
       "Browse a wide range of fancy dress costumes for kids for school events, dance competitions, cultural programs, parties and special occasions, available for customers across India.",
-    url: "https://jainfancydresses.in/",
+    url: "https://www.jainfancydresses.in/",
     siteName: "Jain Fancy Dresses",
     type: "website",
     locale: "en_IN",
@@ -83,10 +83,10 @@ export default function RootLayout({
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "ClothingStore",
-              "@id": "https://jainfancydresses.in/#business",
+              "@id": "https://www.jainfancydresses.in/#business",
               name: "Jain Fancy Dresses",
-              url: "https://jainfancydresses.in/",
-              image: "https://jainfancydresses.in/images/logo_r.png",
+              url: "https://www.jainfancydresses.in/",
+              image: "https://www.jainfancydresses.in/images/logo_r.png",
               telephone: "+918826163522",
               priceRange: "₹₹",
               areaServed: {
@@ -127,10 +127,10 @@ export default function RootLayout({
               "@context": "https://schema.org",
               "@type": "WebSite",
               name: "Jain Fancy Dresses",
-              url: "https://jainfancydresses.in/",
+              url: "https://www.jainfancydresses.in/",
               potentialAction: {
                 "@type": "SearchAction",
-                target: "https://jainfancydresses.in/?search={search_term_string}",
+                target: "https://www.jainfancydresses.in/?search={search_term_string}",
                 "query-input": "required name=search_term_string",
               },
             }),

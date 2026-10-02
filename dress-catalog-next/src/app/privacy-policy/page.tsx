@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   description:
     "Privacy Policy for Jain Fancy Dresses and its Google Business Profile integration.",
   alternates: {
-    canonical: "https://jainfancydresses.in/privacy-policy",
+    canonical: "https://www.jainfancydresses.in/privacy-policy",
   },
 };
 

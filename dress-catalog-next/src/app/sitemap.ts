@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { categorySlug } from "@/lib/category-slug";
 import { dressSlug } from "@/lib/dress-slug";
 
-const SITE_URL = "https://jainfancydresses.in";
+const SITE_URL = "https://www.jainfancydresses.in";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [categories, dresses] = await Promise.all([

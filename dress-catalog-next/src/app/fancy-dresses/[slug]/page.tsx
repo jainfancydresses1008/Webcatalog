@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { categorySlug } from "@/lib/category-slug";
 import { dressSlug } from "@/lib/dress-slug";
 
-const SITE_URL = "https://jainfancydresses.in";
+const SITE_URL = "https://www.jainfancydresses.in";
 
 async function getCategory(slug: string) {
   const categories = await prisma.category.findMany({

@@ -10,13 +10,13 @@ export const metadata: Metadata = {
   description:
     "Browse kids fancy dress costumes for school events, fancy dress competitions, dance performances, cultural programs, annual functions and special occasions. Rent or buy across India.",
   alternates: {
-    canonical: "https://jainfancydresses.in/",
+    canonical: "https://www.jainfancydresses.in/",
   },
   openGraph: {
     title: "Kids Fancy Dress Costumes | Jain Fancy Dresses",
     description:
       "Browse kids fancy dress costumes for school events, competitions, dance performances, cultural programs and special occasions. Rent or buy across India.",
-    url: "https://jainfancydresses.in/",
+    url: "https://www.jainfancydresses.in/",
     siteName: "Jain Fancy Dresses",
     type: "website",
     locale: "en_IN",

@@ -5,7 +5,7 @@ import { categorySlug } from "@/lib/category-slug";
 import { dressSlug } from "@/lib/dress-slug";
 import DressDetailsPageClient from "@/components/DressDetailsPageClient";
 
-const SITE_URL = "https://jainfancydresses.in";
+const SITE_URL = "https://www.jainfancydresses.in";
 
 function parseDressId(slug: string) {
   const match = slug.match(/-(\d+)$/);
